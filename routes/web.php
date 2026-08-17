@@ -70,11 +70,9 @@ Route::get('/import-old-data', function () {
 });
 
 Route::get('/debug-db', function () {
-    $user = \Illuminate\Support\Facades\DB::table('users')->where('username', 'developer')->first();
-    if (!$user) return "User not found";
+    $users = \Illuminate\Support\Facades\DB::table('users')->get();
     return response()->json([
-        'user' => $user,
-        'hash_check' => \Illuminate\Support\Facades\Hash::check('#Kipasangin123', $user->password)
+        'users' => $users,
     ]);
 });
 
