@@ -30,6 +30,19 @@ $_ENV['APP_ROUTES_CACHE'] = '/tmp/storage/bootstrap/cache/routes.php';
 putenv('APP_EVENTS_CACHE=/tmp/storage/bootstrap/cache/events.php');
 $_ENV['APP_EVENTS_CACHE'] = '/tmp/storage/bootstrap/cache/events.php';
 
+// Force essential serverless environment variables to prevent crashes if Vercel dashboard has empty values
+$_ENV['LOG_CHANNEL'] = 'stderr';
+$_SERVER['LOG_CHANNEL'] = 'stderr';
+putenv('LOG_CHANNEL=stderr');
+
+$_ENV['CACHE_STORE'] = 'array';
+$_SERVER['CACHE_STORE'] = 'array';
+putenv('CACHE_STORE=array');
+
+$_ENV['SESSION_DRIVER'] = 'cookie';
+$_SERVER['SESSION_DRIVER'] = 'cookie';
+putenv('SESSION_DRIVER=cookie');
+
 use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
