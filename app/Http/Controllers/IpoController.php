@@ -699,18 +699,52 @@ class IpoController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    /**
-     * AJAX: Fetch live ticker data using Python script
-     */
     public function tickerLive($ticker)
     {
-        $scriptPath = base_path('scripts/ticker_live.py');
-        $ticker = escapeshellarg($ticker);
-        $command = "python \"{$scriptPath}\" {$ticker}";
-        
-        $output = shell_exec($command);
-        $result = json_decode($output, true);
-        
-        return response()->json($result);
+        $cleanTicker = strtoupper(trim($ticker));
+        if (!str_ends_with($cleanTicker, '.JK') && $cleanTicker !== '^JKSE') {
+            $fullTicker = "{$cleanTicker}.JK";
+        } else {
+            $fullTicker = $cleanTicker;
+        }
+
+        try {
+            $url = "https://query1.finance.yahoo.com/v8/finance/chart/{$fullTicker}?interval=1m&range=2d";
+            $response = \Illuminate\Support\Facades\Http::get($url);
+            
+            if (!$response->successful()) {
+                return response()->json(["error" => "No data found for {$fullTicker}", "status" => "error"]);
+            }
+
+            $data = $response->json();
+            $result = $data['chart']['result'][0] ?? null;
+
+            if (!$result || empty($result['indicators']['quote'][0]['close'])) {
+                return response()->json(["error" => "No data found for {$fullTicker}", "status" => "error"]);
+            }
+
+            $closes = array_filter($result['indicators']['quote'][0]['close'], function($val) { return $val !== null; });
+            if (empty($closes)) {
+                return response()->json(["error" => "No data found for {$fullTicker}", "status" => "error"]);
+            }
+
+            $currentPrice = end($closes);
+            $prevClose = $result['meta']['chartPreviousClose'] ?? $currentPrice;
+            
+            $change = $currentPrice - $prevClose;
+            $changePct = $prevClose != 0 ? ($change / $prevClose) * 100 : 0;
+
+            return response()->json([
+                "symbol" => $fullTicker,
+                "current_price" => round($currentPrice, 2),
+                "change" => round($change, 2),
+                "change_pct" => round($changePct, 2),
+                "status" => "success",
+                "last_update" => date("H:M:S")
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(["error" => $e->getMessage(), "status" => "error"]);
+        }
     }
 }
