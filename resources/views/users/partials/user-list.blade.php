@@ -72,7 +72,7 @@
                         </td>
                         <td class="text-end pe-4">
                             <button class="btn btn-sm text-white border border-emerald-500 border-opacity-50 bg-transparent" 
-                                onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->username) }}', '{{ addslashes($user->email) }}', '{{ $user->role }}', '{{ $user->status ?? 'active' }}')">
+                                onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->username) }}', '{{ addslashes($user->email) }}', '{{ $user->role }}', '{{ $user->status ?? 'active' }}', '{{ $user->tenant_id }}')">
                                 <i class="fa-solid fa-edit"></i>
                             </button>
                             <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">
@@ -150,7 +150,7 @@
                         </td>
                         <td class="text-end pe-4">
                             <button class="btn btn-sm text-white border border-emerald-500 border-opacity-50 bg-transparent" 
-                                onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->username) }}', '{{ addslashes($user->email) }}', '{{ $user->role }}', '{{ $user->status ?? 'active' }}')">
+                                onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->username) }}', '{{ addslashes($user->email) }}', '{{ $user->role }}', '{{ $user->status ?? 'active' }}', '{{ $user->tenant_id }}')">
                                 <i class="fa-solid fa-edit"></i>
                             </button>
                             <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini?');">

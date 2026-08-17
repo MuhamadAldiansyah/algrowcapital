@@ -92,6 +92,17 @@
                             @endif
                         </select>
                     </div>
+                    @if(Auth::user()->role === 'developer')
+                    <div class="mb-3">
+                        <label class="form-label text-emerald-500 small fw-bold">PERUSAHAAN (TENANT)</label>
+                        <select name="tenant_id" id="add_tenant_id" class="form-select bg-black text-white border-emerald-900">
+                            <option value="">-- Tanpa Perusahaan (Developer/Independen) --</option>
+                            @foreach($tenants as $tenant)
+                                <option value="{{ $tenant->id }}">{{ $tenant->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     <div class="mb-3">
                         <label class="form-label text-emerald-500 small fw-bold">STATUS AKUN</label>
                         <select name="status" class="form-select bg-black text-white border-emerald-900" required>
@@ -156,6 +167,17 @@
                             @endif
                         </select>
                     </div>
+                    @if(Auth::user()->role === 'developer')
+                    <div class="mb-3">
+                        <label class="form-label text-emerald-500 small fw-bold">PERUSAHAAN (TENANT)</label>
+                        <select name="tenant_id" id="edit_tenant_id" class="form-select bg-black text-white border-emerald-900">
+                            <option value="">-- Tanpa Perusahaan (Developer/Independen) --</option>
+                            @foreach($tenants as $tenant)
+                                <option value="{{ $tenant->id }}">{{ $tenant->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     <div class="mb-3">
                         <label class="form-label text-emerald-500 small fw-bold">STATUS AKUN</label>
                         <select name="status" id="edit_status" class="form-select bg-black text-white border-emerald-900" required>
@@ -223,12 +245,15 @@
     // Start polling every 5 seconds
     setInterval(fetchActiveUsers, 5000);
 
-    function editUser(id, name, username, email, role, status) {
+    function editUser(id, name, username, email, role, status, tenantId) {
         document.getElementById('edit_name').value = name;
         document.getElementById('edit_username').value = username;
         document.getElementById('edit_email').value = email;
         document.getElementById('edit_role').value = role;
         document.getElementById('edit_status').value = status;
+        if(document.getElementById('edit_tenant_id')) {
+            document.getElementById('edit_tenant_id').value = tenantId || '';
+        }
         document.getElementById('edit_password').value = '';
         document.getElementById('editUserForm').action = '/users/' + id;
         

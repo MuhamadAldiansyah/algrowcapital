@@ -74,7 +74,9 @@ class UserController extends Controller
 
         $validated['password'] = bcrypt($validated['password']);
         
-        if (auth()->user()->role !== 'developer') {
+        if (auth()->user()->role === 'developer') {
+            $validated['tenant_id'] = $request->input('tenant_id') ?: null;
+        } else {
             $validated['tenant_id'] = auth()->user()->tenant_id;
         }
 
@@ -112,6 +114,10 @@ class UserController extends Controller
             $validated['password'] = bcrypt($validated['password']);
         } else {
             unset($validated['password']);
+        }
+
+        if (auth()->user()->role === 'developer') {
+            $validated['tenant_id'] = $request->input('tenant_id') ?: null;
         }
 
         $user->update($validated);
