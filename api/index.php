@@ -30,18 +30,31 @@ $_ENV['APP_ROUTES_CACHE'] = '/tmp/storage/bootstrap/cache/routes.php';
 putenv('APP_EVENTS_CACHE=/tmp/storage/bootstrap/cache/events.php');
 $_ENV['APP_EVENTS_CACHE'] = '/tmp/storage/bootstrap/cache/events.php';
 
-// Force essential serverless environment variables to prevent crashes if Vercel dashboard has empty values
+// Clean up any empty environment variables that Vercel might have passed
+// This prevents Laravel from trying to load drivers with empty string names ("")
+foreach ($_ENV as $key => $value) {
+    if (is_string($value) && trim($value) === '') {
+        unset($_ENV[$key]);
+    }
+}
+foreach ($_SERVER as $key => $value) {
+    if (is_string($value) && trim($value) === '') {
+        unset($_SERVER[$key]);
+    }
+}
+
+// Force essential serverless environment variables
+putenv('LOG_CHANNEL=stderr');
 $_ENV['LOG_CHANNEL'] = 'stderr';
 $_SERVER['LOG_CHANNEL'] = 'stderr';
-putenv('LOG_CHANNEL=stderr');
 
+putenv('CACHE_STORE=array');
 $_ENV['CACHE_STORE'] = 'array';
 $_SERVER['CACHE_STORE'] = 'array';
-putenv('CACHE_STORE=array');
 
+putenv('SESSION_DRIVER=cookie');
 $_ENV['SESSION_DRIVER'] = 'cookie';
 $_SERVER['SESSION_DRIVER'] = 'cookie';
-putenv('SESSION_DRIVER=cookie');
 
 use Illuminate\Http\Request;
 
@@ -58,26 +71,4 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 // Force Laravel to use the writable /tmp/storage directory
 $app->useStoragePath('/tmp/storage');
 
-try {
-    $app->handleRequest(Request::capture());
-} catch (\Throwable $e) {
-    if ($e instanceof \ArgumentCountError && str_contains($e->getMessage(), 'createDriver')) {
-        echo "<h1>Vercel Config Debugger</h1>";
-        echo "<h3>Manager crash detected. One of your Vercel Environment Variables is empty.</h3>";
-        echo "<b>Trace:</b> " . $e->getTraceAsString() . "<br><br>";
-        echo "<b>Current Config Values:</b><pre>";
-        print_r([
-            'LOG_CHANNEL' => config('logging.default'),
-            'CACHE_STORE' => config('cache.default'),
-            'SESSION_DRIVER' => config('session.driver'),
-            'MAIL_MAILER' => config('mail.default'),
-            'DB_CONNECTION' => config('database.default'),
-            'QUEUE_CONNECTION' => config('queue.default'),
-            'FILESYSTEM_DISK' => config('filesystems.default'),
-            'BROADCAST_CONNECTION' => config('broadcasting.default')
-        ]);
-        echo "</pre>";
-        exit;
-    }
-    throw $e;
-}
+$app->handleRequest(Request::capture());
