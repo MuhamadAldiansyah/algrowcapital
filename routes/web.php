@@ -13,6 +13,14 @@ use App\Http\Controllers\UserController;
 // Temporary route for Vercel database migration
 Route::get('/migrate-db', function () {
     try {
+        // Force Session Pooler (port 5432) for migrations to prevent Transaction Pooler DDL issues
+        $url = env('DATABASE_URL');
+        if ($url) {
+            $url = str_replace(':6543', ':5432', $url);
+            config(['database.connections.pgsql.url' => $url]);
+            \Illuminate\Support\Facades\DB::purge('pgsql');
+        }
+
         \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true]);
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
         return "Database migration and seeding completed successfully! You can now close this page.";
