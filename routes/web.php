@@ -35,8 +35,8 @@ Route::get('/import-old-data', function () {
 
         \Illuminate\Support\Facades\DB::table('users')->truncate();
         \Illuminate\Support\Facades\DB::table('users')->insert([
-            ['id' => 1, 'username' => 'developer', 'name' => 'Developer', 'email' => 'nunungnunungnurhaeni@gmail.com', 'password' => '$2y$12$QU2Mlr/kwz53Ggujx1KjDOINoo5b5wuM2cyUcVDZlgssbUw1V66KS', 'role' => 'developer', 'status' => 'active', 'tenant_id' => 1],
-            ['id' => 2, 'username' => 'Muhamad Aldiansyah', 'name' => 'Muhamad Aldiansyah', 'email' => 'Muhamad Aldiansyah@algrow.local', 'password' => '$2y$12$4Zg02VwypBkASgAvfGumPuki6USRbtFispyIy.s6CIRlUWK4x.7Si', 'role' => 'investor', 'status' => 'active', 'tenant_id' => null],
+            ['id' => 1, 'username' => 'developer', 'name' => 'Developer', 'email' => 'nunungnunungnurhaeni@gmail.com', 'password' => \Illuminate\Support\Facades\Hash::make('#Kipasangin123'), 'role' => 'developer', 'status' => 'active', 'tenant_id' => 1],
+            ['id' => 2, 'username' => 'Muhamad Aldiansyah', 'name' => 'Muhamad Aldiansyah', 'email' => 'Muhamad Aldiansyah@algrow.local', 'password' => \Illuminate\Support\Facades\Hash::make('#Kipasangin123'), 'role' => 'investor', 'status' => 'active', 'tenant_id' => null],
         ]);
 
         \Illuminate\Support\Facades\DB::table('tenants')->truncate();
