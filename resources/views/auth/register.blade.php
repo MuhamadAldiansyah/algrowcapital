@@ -601,7 +601,7 @@
         function fetchCompanies() {
             const tenantSelect = document.getElementById('tenant_id');
             if (tenantSelect.options.length <= 1) {
-                fetch('{{ route("register.companies") }}')
+                fetch('/register/companies')
                     .then(res => res.json())
                     .then(data => {
                         data.forEach(company => {
@@ -614,6 +614,9 @@
                         if('{{ old("tenant_id") }}') {
                             tenantSelect.value = '{{ old("tenant_id") }}';
                         }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching companies:', error);
                     });
             }
         }
