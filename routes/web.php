@@ -69,6 +69,15 @@ Route::get('/import-old-data', function () {
     }
 });
 
+Route::get('/debug-db', function () {
+    $user = \Illuminate\Support\Facades\DB::table('users')->where('username', 'developer')->first();
+    if (!$user) return "User not found";
+    return response()->json([
+        'user' => $user,
+        'hash_check' => \Illuminate\Support\Facades\Hash::check('#Kipasangin123', $user->password)
+    ]);
+});
+
 // Authentication Routes
 Route::get('login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('login', [AuthController::class, 'login']);
