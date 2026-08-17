@@ -31,27 +31,35 @@ Route::get('/migrate-db', function () {
 
 Route::get('/import-old-data', function () {
     try {
+        // Force Session Pooler (port 5432) to ensure session_replication_role persists
+        $url = env('DATABASE_URL');
+        if ($url) {
+            $url = str_replace(':6543', ':5432', $url);
+            config(['database.connections.pgsql.url' => $url]);
+            \Illuminate\Support\Facades\DB::purge('pgsql');
+        }
+
         \Illuminate\Support\Facades\DB::statement('SET session_replication_role = replica;');
 
-        \Illuminate\Support\Facades\DB::table('users')->truncate();
+        \Illuminate\Support\Facades\DB::table('users')->delete();
         \Illuminate\Support\Facades\DB::table('users')->insert([
             ['id' => 1, 'username' => 'developer', 'name' => 'Developer', 'email' => 'nunungnunungnurhaeni@gmail.com', 'password' => \Illuminate\Support\Facades\Hash::make('#Kipasangin123'), 'role' => 'developer', 'status' => 'active', 'tenant_id' => 1],
             ['id' => 2, 'username' => 'Muhamad Aldiansyah', 'name' => 'Muhamad Aldiansyah', 'email' => 'Muhamad Aldiansyah@algrow.local', 'password' => \Illuminate\Support\Facades\Hash::make('#Kipasangin123'), 'role' => 'investor', 'status' => 'active', 'tenant_id' => null],
         ]);
 
-        \Illuminate\Support\Facades\DB::table('tenants')->truncate();
+        \Illuminate\Support\Facades\DB::table('tenants')->delete();
         \Illuminate\Support\Facades\DB::table('tenants')->insert([
             ['id' => 1, 'name' => 'Algrow Capital', 'owner_id' => 1]
         ]);
 
-        \Illuminate\Support\Facades\DB::table('subscription_plans')->truncate();
+        \Illuminate\Support\Facades\DB::table('subscription_plans')->delete();
         \Illuminate\Support\Facades\DB::table('subscription_plans')->insert([
             ['id' => 1, 'name' => 'Paket Pro (6 Bulan)', 'price' => 150000, 'duration_months' => 6],
             ['id' => 2, 'name' => 'Paket Lifetime', 'price' => 5000000, 'duration_months' => 120],
             ['id' => 3, 'name' => 'Paket Basic (3 Bulan)', 'price' => 75000, 'duration_months' => 3],
         ]);
 
-        \Illuminate\Support\Facades\DB::table('subscriptions')->truncate();
+        \Illuminate\Support\Facades\DB::table('subscriptions')->delete();
         \Illuminate\Support\Facades\DB::table('subscriptions')->insert([
             ['id' => 1, 'tenant_id' => 1, 'subscription_plan_id' => 1, 'status' => 'expired']
         ]);
@@ -63,7 +71,7 @@ Route::get('/import-old-data', function () {
 
         \Illuminate\Support\Facades\DB::statement('SET session_replication_role = DEFAULT;');
 
-        return "Data SaaS Core (Users, Tenants, Subscriptions) berhasil di-import! Tabel IPO & Mitra telah dikosongkan. Anda sudah bisa Login.";
+        return "Data SaaS Core (Users, Tenants, Subscriptions) berhasil di-import menggunakan Session Pooler! Anda sudah bisa Login.";
     } catch (\Exception $e) {
         return "Import Error: " . $e->getMessage();
     }
