@@ -10,6 +10,17 @@ use App\Http\Controllers\IpoSaleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 
+// Temporary route for Vercel database migration
+Route::get('/migrate-db', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        return "Database migration and seeding completed successfully! You can now close this page.";
+    } catch (\Exception $e) {
+        return "Migration Error: " . $e->getMessage();
+    }
+});
+
 // Authentication Routes
 Route::get('login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('login', [AuthController::class, 'login']);
