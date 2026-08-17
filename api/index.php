@@ -35,11 +35,20 @@ $_ENV['APP_EVENTS_CACHE'] = '/tmp/storage/bootstrap/cache/events.php';
 foreach ($_ENV as $key => $value) {
     if (is_string($value) && trim($value) === '') {
         unset($_ENV[$key]);
+        putenv($key);
     }
 }
 foreach ($_SERVER as $key => $value) {
     if (is_string($value) && trim($value) === '') {
         unset($_SERVER[$key]);
+        putenv($key);
+    }
+}
+
+$managers = ['LOG_CHANNEL', 'CACHE_STORE', 'CACHE_DRIVER', 'SESSION_DRIVER', 'DB_CONNECTION', 'QUEUE_CONNECTION', 'FILESYSTEM_DISK', 'BROADCAST_CONNECTION', 'MAIL_MAILER'];
+foreach ($managers as $m) {
+    if (getenv($m) === '') {
+        putenv($m);
     }
 }
 
