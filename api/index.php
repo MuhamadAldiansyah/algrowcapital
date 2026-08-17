@@ -58,4 +58,26 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 // Force Laravel to use the writable /tmp/storage directory
 $app->useStoragePath('/tmp/storage');
 
-$app->handleRequest(Request::capture());
+try {
+    $app->handleRequest(Request::capture());
+} catch (\Throwable $e) {
+    if ($e instanceof \ArgumentCountError && str_contains($e->getMessage(), 'createDriver')) {
+        echo "<h1>Vercel Config Debugger</h1>";
+        echo "<h3>Manager crash detected. One of your Vercel Environment Variables is empty.</h3>";
+        echo "<b>Trace:</b> " . $e->getTraceAsString() . "<br><br>";
+        echo "<b>Current Config Values:</b><pre>";
+        print_r([
+            'LOG_CHANNEL' => config('logging.default'),
+            'CACHE_STORE' => config('cache.default'),
+            'SESSION_DRIVER' => config('session.driver'),
+            'MAIL_MAILER' => config('mail.default'),
+            'DB_CONNECTION' => config('database.default'),
+            'QUEUE_CONNECTION' => config('queue.default'),
+            'FILESYSTEM_DISK' => config('filesystems.default'),
+            'BROADCAST_CONNECTION' => config('broadcasting.default')
+        ]);
+        echo "</pre>";
+        exit;
+    }
+    throw $e;
+}
