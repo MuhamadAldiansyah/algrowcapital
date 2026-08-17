@@ -11,13 +11,9 @@
                 <form action="{{ route('ipos.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="row">
-                        <div class="col-md-8 mb-4">
+                        <div class="col-md-12 mb-4">
                             <label class="form-label text-white">NAMA PERUSAHAAN / SAHAM <span class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control" placeholder="CONTOH: PT BANK DIGITAL INDONESIA" required>
-                        </div>
-                        <div class="col-md-4 mb-4">
-                            <label class="form-label text-white">GAMBAR / LOGO EMITEN</label>
-                            <input type="file" name="image" class="form-control" accept="image/*">
                         </div>
                     </div>
 

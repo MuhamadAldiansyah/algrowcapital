@@ -13,19 +13,9 @@
                     @method('PUT')
                     
                     <div class="row">
-                        <div class="col-md-8 mb-4">
+                        <div class="col-md-12 mb-4">
                             <label class="form-label">NAMA PERUSAHAAN / SAHAM <span class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control" value="{{ $ipo->name }}" required>
-                        </div>
-                        <div class="col-md-4 mb-4">
-                            <label class="form-label">GAMBAR / LOGO EMITEN</label>
-                            <input type="file" name="image" class="form-control" accept="image/*">
-                            @if($ipo->image_path)
-                                <div class="mt-2">
-                                    <small class="text-emerald-500 d-block mb-1">Logo saat ini:</small>
-                                    <img src="{{ Storage::url($ipo->image_path) }}" alt="{{ $ipo->code }}" class="img-thumbnail bg-black border-emerald-900" style="max-height: 50px;">
-                                </div>
-                            @endif
                         </div>
                     </div>
 

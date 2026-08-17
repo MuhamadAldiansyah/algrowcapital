@@ -63,12 +63,7 @@ class IpoController extends Controller
             'code' => 'required|string|unique:ipos,code',
             'price' => 'required|numeric|min:0',
             'ipo_date' => 'required|date',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        if ($request->hasFile('image')) {
-            $validated['image_path'] = $request->file('image')->store('ipos', 'public');
-        }
 
         Ipo::create($validated);
 
@@ -123,15 +118,7 @@ class IpoController extends Controller
             'code' => 'required|string|unique:ipos,code,' . $ipo->id,
             'price' => 'required|numeric|min:0',
             'ipo_date' => 'required|date',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        if ($request->hasFile('image')) {
-            if ($ipo->image_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($ipo->image_path);
-            }
-            $validated['image_path'] = $request->file('image')->store('ipos', 'public');
-        }
 
         $ipo->update($validated);
 
@@ -701,6 +688,19 @@ class IpoController extends Controller
 
     public function tickerLive($ticker)
     {
+        /*
+        // ORIGINAL PYTHON SCRIPT LOGIC (KEPT FOR FUTURE REFERENCE)
+        // Note: Vercel Serverless PHP doesn't support Python out of the box.
+        $scriptPath = base_path('scripts/ticker_live.py');
+        $escapedTicker = escapeshellarg($ticker);
+        $command = "python \"{$scriptPath}\" {$escapedTicker}";
+        
+        $output = shell_exec($command);
+        $result = json_decode($output, true);
+        
+        return response()->json($result);
+        */
+
         $cleanTicker = strtoupper(trim($ticker));
         if (!str_ends_with($cleanTicker, '.JK') && $cleanTicker !== '^JKSE') {
             $fullTicker = "{$cleanTicker}.JK";

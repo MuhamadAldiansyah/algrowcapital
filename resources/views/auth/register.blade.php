@@ -315,7 +315,7 @@
                         <div id="step-tenant" class="step-section hidden space-y-4">
                             <h2 class="text-white text-lg font-bold text-center mb-4">Pilih Perusahaan Induk</h2>
                             <div class="float-group @error('tenant_id') has-error @enderror entrance" style="animation-delay:.1s">
-                                <select id="tenant_id" name="tenant_id" required class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[48px] pr-4 text-white text-base outline-none focus:border-accent/50 focus:bg-white/[.06] focus:shadow-[0_0_0_4px_rgba(52,211,153,.1)] transition-all appearance-none cursor-pointer">
+                                <select id="tenant_id" name="tenant_id" class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[48px] pr-4 text-white text-base outline-none focus:border-accent/50 focus:bg-white/[.06] focus:shadow-[0_0_0_4px_rgba(52,211,153,.1)] transition-all appearance-none cursor-pointer">
                                     <option value="" class="bg-surface text-white">-- Pilih Perusahaan --</option>
                                 </select>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-500 transition-colors pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
