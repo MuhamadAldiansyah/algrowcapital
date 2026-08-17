@@ -133,6 +133,16 @@
         if(hiddenInput.value) {
             displayInput.value = formatRupiah(hiddenInput.value);
         }
+
+        const form = document.querySelector('form');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        form.addEventListener('submit', function() {
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> MENYIMPAN...';
+            }
+        });
     });
 </script>
 @endsection
