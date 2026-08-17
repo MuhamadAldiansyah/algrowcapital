@@ -30,5 +30,19 @@ $_ENV['APP_ROUTES_CACHE'] = '/tmp/storage/bootstrap/cache/routes.php';
 putenv('APP_EVENTS_CACHE=/tmp/storage/bootstrap/cache/events.php');
 $_ENV['APP_EVENTS_CACHE'] = '/tmp/storage/bootstrap/cache/events.php';
 
-// Forward to the standard Laravel public index.php
-require __DIR__ . '/../public/index.php';
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+require __DIR__.'/../vendor/autoload.php';
+
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+// Force Laravel to use the writable /tmp/storage directory
+$app->useStoragePath('/tmp/storage');
+
+$app->handleRequest(Request::capture());
