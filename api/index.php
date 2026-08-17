@@ -65,6 +65,10 @@ putenv('SESSION_DRIVER=cookie');
 $_ENV['SESSION_DRIVER'] = 'cookie';
 $_SERVER['SESSION_DRIVER'] = 'cookie';
 
+putenv('DB_CONNECTION=pgsql');
+$_ENV['DB_CONNECTION'] = 'pgsql';
+$_SERVER['DB_CONNECTION'] = 'pgsql';
+
 use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
