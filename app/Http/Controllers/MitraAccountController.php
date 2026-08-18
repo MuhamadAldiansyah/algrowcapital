@@ -152,7 +152,12 @@ class MitraAccountController extends Controller
             'nonaktif' => (clone $countsQuery)->where('status', 'nonaktif')->count(),
         ];
 
-        return view('mitra-accounts.index', compact('status', 'counts'));
+        $tenants = [];
+        if ($user && $user->role === 'developer') {
+            $tenants = \App\Models\Tenant::orderBy('name')->get();
+        }
+
+        return view('mitra-accounts.index', compact('status', 'counts', 'tenants'));
     }
 
     public function grid(Request $request)
@@ -272,7 +277,8 @@ class MitraAccountController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:2048'
+            'file' => 'required|file|max:2048',
+            'tenant_id' => 'nullable|exists:tenants,id'
         ]);
 
         $file = $request->file('file');
@@ -376,7 +382,7 @@ class MitraAccountController extends Controller
                 }
 
                 // Otherwise, if password is different, update the existing record
-                $existingAccount->update([
+                $updateData = [
                     'owner_name' => $ownerName,
                     'platform' => $platform ?: $existingAccount->platform,
                     'password' => Crypt::encryptString($password),
@@ -386,11 +392,17 @@ class MitraAccountController extends Controller
                     'status' => (strtolower($status) == 'nonaktif' || strtolower($status) == 'non-aktif') ? 'nonaktif' : 'aktif',
                     'device' => $device ?: null,
                     'handler_name' => $handlerName ?: $existingAccount->handler_name,
-                ]);
+                ];
+
+                if (auth()->user()->role === 'developer' && $request->tenant_id) {
+                    $updateData['tenant_id'] = $request->tenant_id;
+                }
+
+                $existingAccount->update($updateData);
                 $updatedCount++;
             } else {
                 // If username does not exist, insert it
-                MitraAccount::create([
+                $insertData = [
                     'owner_name' => $ownerName,
                     'platform' => $platform ?: 'Stockbit',
                     'username' => $username,
@@ -401,7 +413,13 @@ class MitraAccountController extends Controller
                     'status' => (strtolower($status) == 'nonaktif' || strtolower($status) == 'non-aktif') ? 'nonaktif' : 'aktif',
                     'device' => $device ?: null,
                     'handler_name' => $handlerName ?: null,
-                ]);
+                ];
+
+                if (auth()->user()->role === 'developer' && $request->tenant_id) {
+                    $insertData['tenant_id'] = $request->tenant_id;
+                }
+
+                MitraAccount::create($insertData);
                 $count++;
             }
         }

@@ -156,7 +156,21 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <input type="file" name="file" class="form-control bg-black bg-opacity-20 border-emerald-900" accept=".csv,.xlsx,.xls" required>
+                    @if(Auth::user()->role === 'developer')
+                    <div class="mb-3">
+                        <label class="form-label text-emerald-500 small fw-bold">PERUSAHAAN (TENANT) TUJUAN</label>
+                        <select name="tenant_id" class="form-select bg-black text-white border-emerald-900">
+                            <option value="">-- Tanpa Perusahaan (Developer/Independen) --</option>
+                            @foreach($tenants as $tenant)
+                                <option value="{{ $tenant->id }}">{{ $tenant->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
+                    <div class="mb-2">
+                        <label class="form-label text-emerald-500 small fw-bold">FILE CSV / EXCEL</label>
+                        <input type="file" name="file" class="form-control bg-black bg-opacity-20 text-white border-emerald-900" accept=".csv,.xlsx,.xls" required>
+                    </div>
                     <small class="text-white-50 mt-2 d-block">Format kolom yang didukung: <strong>ID, PLATFORM, Nama Pemilik, Username, password, PIN, BANK RDN, Rekening RDN, Status, Device, HANDLER</strong></small>
                 </div>
                 <div class="modal-footer border-top border-emerald-900 pt-4 p-4 d-flex flex-column flex-sm-row justify-content-between gap-3">
