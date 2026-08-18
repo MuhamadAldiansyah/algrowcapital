@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="row g-4 mt-n3 mt-md-0">
+    @if(in_array(Auth::user()->role, ['owner', 'developer']))
     <div class="col-md-4 mb-3 mb-md-0">
         <div class="card stat-node border-0 shadow-sm sticky-md-top" style="top: 80px; z-index: 10;">
             <div class="card-header bg-transparent border-bottom border-emerald-900 pt-3 pb-2 px-4">
@@ -30,6 +31,9 @@
         </div>
     </div>
     <div class="col-md-8 mt-5 pt-4 pt-md-0 mt-md-0">
+    @else
+    <div class="col-md-12 mt-2">
+    @endif
         <h6 class="text-emerald-400 mb-2 fw-bold"><i class="fa-solid fa-boxes-stacked me-2"></i>DAFTAR HANDLER TERSEDIA</h6>
         <div class="row g-3">
             @forelse($groups as $group)
@@ -38,6 +42,7 @@
                     <div class="card-body p-4 position-relative overflow-hidden">
                         <div class="d-flex justify-content-between align-items-start mb-1">
                             <h5 class="fw-bold text-white mb-0" style="margin-right: 15px;">{{ $group->name }}</h5>
+                            @if(in_array(Auth::user()->role, ['owner', 'developer']))
                             <div class="dropdown" onclick="event.stopPropagation();">
                                 <button class="btn btn-sm btn-link text-emerald-500 opacity-50 hover-emerald p-0 border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fa-solid fa-ellipsis-vertical fs-5 px-2"></i>
@@ -53,6 +58,7 @@
                                     </li>
                                 </ul>
                             </div>
+                            @endif
                         </div>
                         <p class="text-emerald-400 small mb-3"><i class="fa-solid fa-user-tie me-1"></i> Handler: {{ $group->handler_name }}</p>
                         

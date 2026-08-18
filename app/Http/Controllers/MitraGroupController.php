@@ -16,6 +16,10 @@ class MitraGroupController extends Controller
 
     public function store(Request $request)
     {
+        if (auth()->user()->role === 'admin') {
+            abort(403, 'Akses ditolak.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'handler_name' => 'required|string|max:255',
@@ -27,6 +31,10 @@ class MitraGroupController extends Controller
 
     public function update(Request $request, MitraGroup $mitraGroup)
     {
+        if (auth()->user()->role === 'admin') {
+            abort(403, 'Akses ditolak.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'handler_name' => 'required|string|max:255',
@@ -42,6 +50,10 @@ class MitraGroupController extends Controller
 
     public function destroy(MitraGroup $mitraGroup)
     {
+        if (auth()->user()->role === 'admin') {
+            abort(403, 'Akses ditolak.');
+        }
+
         // Nullify the group_id on all accounts, and clear their handler_name
         MitraAccount::where('mitra_group_id', $mitraGroup->id)->update([
             'mitra_group_id' => null,

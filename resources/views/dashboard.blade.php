@@ -145,7 +145,7 @@
     <div class="row mt-2">
         <!-- MAIN CONTENT COLUMN -->
         <div class="col-12">
-            @if(Auth::user()->role !== 'user')
+            @if(in_array(Auth::user()->role, ['owner', 'developer']))
             <!-- Investor Stats (Admin Only) -->
             <div class="stat-node mb-4 overflow-hidden">
                 <div class="p-4 border-bottom border-white border-opacity-10 d-flex justify-content-between align-items-center">

@@ -71,6 +71,7 @@
                             </span>
                         </td>
                         <td class="text-end pe-4">
+                            @if(in_array(Auth::user()->role, ['owner', 'developer']))
                             <button class="btn btn-sm text-white border border-emerald-500 border-opacity-50 bg-transparent" 
                                 onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->username) }}', '{{ addslashes($user->email) }}', '{{ $user->role }}', '{{ $user->status ?? 'active' }}', '{{ $user->tenant_id }}')">
                                 <i class="fa-solid fa-edit"></i>
@@ -82,6 +83,9 @@
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </form>
+                            @else
+                            <span class="text-emerald-500 opacity-50 small"><i class="fa-solid fa-lock"></i> No Access</span>
+                            @endif
                         </td>
                     </tr>
                     @empty
@@ -149,6 +153,7 @@
                             @endif
                         </td>
                         <td class="text-end pe-4">
+                            @if(in_array(Auth::user()->role, ['owner', 'developer']))
                             <button class="btn btn-sm text-white border border-emerald-500 border-opacity-50 bg-transparent" 
                                 onclick="editUser({{ $user->id }}, '{{ addslashes($user->name) }}', '{{ addslashes($user->username) }}', '{{ addslashes($user->email) }}', '{{ $user->role }}', '{{ $user->status ?? 'active' }}', '{{ $user->tenant_id }}')">
                                 <i class="fa-solid fa-edit"></i>
@@ -160,6 +165,9 @@
                                     <i class="fa-solid fa-trash"></i>
                                 </button>
                             </form>
+                            @else
+                            <span class="text-emerald-500 opacity-50 small"><i class="fa-solid fa-lock"></i> No Access</span>
+                            @endif
                         </td>
                     </tr>
                     @endforeach

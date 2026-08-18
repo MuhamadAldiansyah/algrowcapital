@@ -95,6 +95,10 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        if (auth()->user()->role === 'admin') {
+            abort(403, 'Akses ditolak.');
+        }
+
         if (auth()->user()->role !== 'developer' && $user->tenant_id !== auth()->user()->tenant_id) {
             abort(403, 'Akses ditolak.');
         }
@@ -135,6 +139,10 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        if (auth()->user()->role === 'admin') {
+            abort(403, 'Akses ditolak.');
+        }
+
         if (auth()->user()->role !== 'developer' && $user->tenant_id !== auth()->user()->tenant_id) {
             abort(403, 'Akses ditolak.');
         }

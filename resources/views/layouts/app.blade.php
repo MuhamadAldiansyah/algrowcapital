@@ -358,9 +358,11 @@
 
             {{-- Fitur Administratif: Untuk Admin, Owner, dan Developer --}}
             @if(in_array(Auth::user()->role, ['admin', 'owner', 'developer']))
+            @if(in_array(Auth::user()->role, ['owner', 'developer']))
             <a href="{{ route('investors.index') }}" class="nav-link {{ request()->routeIs('investors.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users me-2"></i> Investor
             </a>
+            @endif
             <a href="{{ route('mitra-accounts.index') }}" class="nav-link {{ request()->routeIs('mitra-accounts.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-id-card me-2"></i> Daftar Akun
             </a>
@@ -373,12 +375,14 @@
             <a href="{{ route('ipos.index') }}" class="nav-link {{ request()->routeIs('ipos.*') && !request()->routeIs('ipos.report') ? 'active' : '' }}">
                 <i class="fa-solid fa-money-bill-trend-up me-2"></i> Manajemen IPO
             </a>
+            @if(in_array(Auth::user()->role, ['owner', 'developer']))
             <a href="{{ route('ipos.report') }}" class="nav-link {{ request()->routeIs('ipos.report') ? 'active' : '' }}">
                 <i class="fa-solid fa-file-invoice-dollar me-2"></i> Laporan Arus Dana
             </a>
             <a href="{{ route('profit-distribution.index') }}" class="nav-link {{ request()->routeIs('profit-distribution.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-hand-holding-dollar me-2"></i> Pembagian Profit
             </a>
+            @endif
             <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-fw fa-users-gear me-2"></i> Manajemen User
             </a>
