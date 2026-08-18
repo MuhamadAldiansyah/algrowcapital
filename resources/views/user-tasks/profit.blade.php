@@ -29,7 +29,7 @@
             <div class="card-body p-3 p-md-4 position-relative overflow-hidden">
                 <i class="fa-solid fa-wallet position-absolute opacity-10" style="font-size: 5rem; right: -10px; bottom: -10px; color: #3b82f6;"></i>
                 <div class="small text-primary fw-bold mb-1 opacity-75 d-flex align-items-center gap-2">
-                    TOTAL HAK PROFIT SAYA (50%)
+                    TOTAL HAK PROFIT SAYA
                 </div>
                 <h4 class="fw-bold text-white mb-0 ticker-font text-break">Rp {{ number_format($grandMitraProfit, 0, ',', '.') }}</h4>
             </div>
@@ -56,7 +56,7 @@
                         <th class="ps-4">EMITEN</th>
                         <th class="text-center">AKUN</th>
                         <th>PROFIT KOTOR (AKUN SAYA)</th>
-                        <th class="pe-4">HAK PROFIT SAYA (50%)</th>
+                        <th class="pe-4">HAK PROFIT SAYA</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,6 +85,7 @@
                         </td>
                         <td class="ticker-font fw-bold text-primary pe-4">
                             Rp {{ number_format($data['mitra_profit'], 0, ',', '.') }}
+                            <div class="small opacity-50 fw-normal">({{ $data['mitra_pct'] }}%)</div>
                         </td>
                     </tr>
                     @empty

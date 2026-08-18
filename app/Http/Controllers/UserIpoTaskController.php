@@ -307,14 +307,15 @@ class UserIpoTaskController extends Controller
         foreach ($ipos as $ipo) {
             $totalProfitKotorEvent = 0;
             $mitraProfitEvent = 0;
+            $mitraPct = $ipo->mitra_fee_pct ?? 50; // Fallback to 50% if not yet distributed/set
 
             foreach ($ipo->placements as $placement) {
                 if ($placement->sale) {
                     $netProfit = $placement->sale->net_profit;
                     $totalProfitKotorEvent += $netProfit;
                     
-                    // Joki / Mitra selalu dapat 50% dari profit bersih setiap akun yang dimainkannya
-                    $mitraProfitEvent += ($netProfit * 0.50);
+                    // Joki / Mitra profit berdasarkan setting IPO
+                    $mitraProfitEvent += ($netProfit * ($mitraPct / 100));
                 }
             }
 
@@ -324,6 +325,7 @@ class UserIpoTaskController extends Controller
                     'total_accounts' => $ipo->placements->count(),
                     'total_profit' => $totalProfitKotorEvent,
                     'mitra_profit' => $mitraProfitEvent,
+                    'mitra_pct' => $mitraPct,
                 ];
 
                 $grandTotalProfit += $totalProfitKotorEvent;
