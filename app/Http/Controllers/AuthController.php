@@ -111,7 +111,7 @@ class AuthController extends Controller
         
         $name = '';
         if ($request->role_type === 'owner') {
-            $name = "Admin " . $request->company_name;
+            $name = "Owner " . $request->company_name;
         } else {
             $mitraAccount = \App\Models\MitraAccount::find($request->mitra_account_id);
             $name = $mitraAccount ? $mitraAccount->owner_name : 'Mitra User';
