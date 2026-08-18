@@ -44,11 +44,16 @@ class UserController extends Controller
         
         $totalActiveCount = $onlineUsers->count();
 
-        if ($request->ajax()) {
-            return view('users.partials.user-list', compact('onlineUsers', 'offlineUsers', 'totalActiveCount'));
+        $tenants = [];
+        if (auth()->user() && auth()->user()->role === 'developer') {
+            $tenants = \App\Models\Tenant::orderBy('name')->get();
         }
 
-        return view('users.index', compact('onlineUsers', 'offlineUsers', 'totalActiveCount'));
+        if ($request->ajax()) {
+            return view('users.partials.user-list', compact('onlineUsers', 'offlineUsers', 'totalActiveCount', 'tenants'));
+        }
+
+        return view('users.index', compact('onlineUsers', 'offlineUsers', 'totalActiveCount', 'tenants'));
     }
 
     /**
