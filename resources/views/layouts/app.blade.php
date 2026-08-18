@@ -298,9 +298,14 @@
         <div class="fw-bold d-flex align-items-center">
             <img src="{{ asset('images/logo.png') }}" alt="Algrow Capital" height="30" onerror="this.outerHTML='<i class=\'fa-solid fa-chart-simple text-success-custom me-2\'></i> ALGROW CAPITAL'">
         </div>
-        <button class="btn text-white p-0 fs-4" id="sidebarToggle">
-            <i class="fa-solid fa-bars"></i>
-        </button>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn text-emerald-400 p-0 fs-5 d-lg-none" id="fullscreenToggle" onclick="toggleFullScreen()">
+                <i class="fa-solid fa-expand" id="fullscreenIcon"></i>
+            </button>
+            <button class="btn text-white p-0 fs-4" id="sidebarToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Overlay for Sidebar -->
@@ -515,6 +520,35 @@
                     console.log('SW registration failed: ', registrationError);
                 });
             });
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement &&    // alternative standard method
+                !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) {
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
+                document.getElementById('fullscreenIcon').classList.remove('fa-expand');
+                document.getElementById('fullscreenIcon').classList.add('fa-compress');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+                document.getElementById('fullscreenIcon').classList.remove('fa-compress');
+                document.getElementById('fullscreenIcon').classList.add('fa-expand');
+            }
         }
     </script>
     @yield('scripts')
