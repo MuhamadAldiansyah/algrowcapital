@@ -35,8 +35,7 @@ class CheckSubscription
 
             if (!$hasActiveSubscription) {
                 // If user is just a Mitra (role user), they don't pay. We allow them to use the system or at least not be blocked by this middleware.
-                // Or simply let them bypass.
-                if ($user->role === 'user') {
+                if (in_array($user->role, ['user', 'admin', 'investor'])) {
                     // Let them proceed to dashboard without being blocked by subscription
                     return $next($request);
                 }
