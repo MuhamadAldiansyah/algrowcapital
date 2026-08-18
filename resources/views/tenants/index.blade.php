@@ -118,17 +118,26 @@
                                             </form>
                                         </div>
                                     @else
-                                        <form id="form-sub-{{ $tenant->id }}" action="{{ route('tenants.activate-subscription', $tenant->id) }}" method="POST" class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-md-end gap-2" onsubmit="return confirm('Aktifkan langganan untuk perusahaan ini?')">
-                                            @csrf
-                                            <select name="plan_id" class="form-select form-select-sm bg-black text-white border-emerald-900" onchange="updateEndDate(this)">
-                                                @foreach($plans as $plan)
-                                                    <option value="{{ $plan->id }}" data-duration="{{ $plan->duration_months }}">{{ $plan->name }}</option>
-                                                @endforeach
-                                            </select>
-                                            <button type="submit" class="btn btn-primary-custom btn-sm rounded-pill fw-bold px-3 text-nowrap">
-                                                <i class="fa-solid fa-bolt me-1"></i> Aktifkan
-                                            </button>
-                                        </form>
+                                        <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-md-end gap-2">
+                                            <form id="form-sub-{{ $tenant->id }}" action="{{ route('tenants.activate-subscription', $tenant->id) }}" method="POST" class="d-flex flex-column flex-md-row gap-2 m-0" onsubmit="return confirm('Aktifkan langganan untuk perusahaan ini?')">
+                                                @csrf
+                                                <select name="plan_id" class="form-select form-select-sm bg-black text-white border-emerald-900" onchange="updateEndDate(this)">
+                                                    @foreach($plans as $plan)
+                                                        <option value="{{ $plan->id }}" data-duration="{{ $plan->duration_months }}">{{ $plan->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="submit" class="btn btn-primary-custom btn-sm rounded-pill fw-bold px-3 text-nowrap">
+                                                    <i class="fa-solid fa-bolt me-1"></i> Aktifkan
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('tenants.destroy', $tenant->id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('BAHAYA: Yakin ingin menolak dan menghapus pendaftaran perusahaan ini secara permanen?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill fw-bold px-3 text-nowrap w-100">
+                                                    <i class="fa-solid fa-ban me-1"></i> Tolak
+                                                </button>
+                                            </form>
+                                        </div>
                                     @endif
                                 @endif
                             </td>
