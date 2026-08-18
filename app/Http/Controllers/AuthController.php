@@ -41,7 +41,7 @@ class AuthController extends Controller
         $mitras = \App\Models\MitraAccount::where('status', 'aktif')
             ->whereNotIn('username', $registeredUsernames)
             ->whereNotIn('owner_name', $registeredNames)
-            ->where('owner_name', 'like', '%' . $query . '%')
+            ->where('owner_name', 'ilike', '%' . $query . '%')
             ->orderBy('owner_name')
             ->limit(10)
             ->get(['id', 'owner_name', 'username', 'platform']);
@@ -81,7 +81,7 @@ class AuthController extends Controller
         $mitras = \App\Models\MitraAccount::where('tenant_id', $tenant->id)
             ->where('status', 'aktif')
             ->whereNotIn('username', $registeredUsernames)
-            ->where('owner_name', 'like', '%' . $query . '%')
+            ->where('owner_name', 'ilike', '%' . $query . '%')
             ->orderBy('owner_name')
             ->limit(3)
             ->get(['id', 'owner_name', 'username', 'platform']);

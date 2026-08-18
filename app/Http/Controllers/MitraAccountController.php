@@ -45,10 +45,10 @@ class MitraAccountController extends Controller
             $searchValue = $request->input('search.value');
             if ($searchValue) {
                 $query->where(function ($q) use ($searchValue) {
-                    $q->where('owner_name', 'like', "%{$searchValue}%")
-                      ->orWhere('username', 'like', "%{$searchValue}%")
-                      ->orWhere('platform', 'like', "%{$searchValue}%")
-                      ->orWhere('investor_name', 'like', "%{$searchValue}%");
+                    $q->where('owner_name', 'ilike', "%{$searchValue}%")
+                      ->orWhere('username', 'ilike', "%{$searchValue}%")
+                      ->orWhere('platform', 'ilike', "%{$searchValue}%")
+                      ->orWhere('investor_name', 'ilike', "%{$searchValue}%");
                 });
             }
 
