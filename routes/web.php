@@ -157,6 +157,8 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
         // User Management & Activity Monitor
         Route::resource('users', UserController::class);
         Route::get('tenants', [\App\Http\Controllers\TenantController::class, 'index'])->name('tenants.index');
+        Route::put('tenants/{tenant}', [\App\Http\Controllers\TenantController::class, 'update'])->name('tenants.update');
+        Route::delete('tenants/{tenant}', [\App\Http\Controllers\TenantController::class, 'destroy'])->name('tenants.destroy');
         Route::post('tenants/{tenant}/activate-subscription', [\App\Http\Controllers\TenantController::class, 'activateSubscription'])->name('tenants.activate-subscription');
         Route::post('tenants/{tenant}/deactivate-subscription', [\App\Http\Controllers\TenantController::class, 'deactivateSubscription'])->name('tenants.deactivate-subscription');
         

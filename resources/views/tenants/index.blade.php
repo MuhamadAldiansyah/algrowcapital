@@ -59,7 +59,33 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3 text-md-end text-center">
-                                @if(!($tenant->owner && $tenant->owner->role === 'developer'))
+                                @if($tenant->owner && $tenant->owner->role === 'developer')
+                                    <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-end justify-content-md-end gap-2" id="action-btns-{{ $tenant->id }}">
+                                        <button type="button" class="btn btn-outline-warning btn-sm rounded-pill fw-bold px-3 text-nowrap w-100 w-md-auto" onclick="toggleEditTenant('{{ $tenant->id }}')" id="btn-edit-tenant-{{ $tenant->id }}">
+                                            <i class="fa-solid fa-pen-to-square me-1"></i> Edit Nama
+                                        </button>
+                                        
+                                        <form action="{{ route('tenants.destroy', $tenant->id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('BAHAYA: Yakin ingin menghapus perusahaan VIP ini? Seluruh data user dan transaksi di dalamnya akan ikut terhapus permanen!')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill fw-bold px-3 text-nowrap w-100 w-md-auto">
+                                                <i class="fa-solid fa-trash me-1"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <form id="form-edit-tenant-{{ $tenant->id }}" action="{{ route('tenants.update', $tenant->id) }}" method="POST" class="d-none flex-column flex-md-row align-items-stretch align-items-md-center justify-content-md-end gap-2 mt-2 mt-md-0" onsubmit="return confirm('Simpan perubahan nama perusahaan?')">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="text" name="name" class="form-control form-control-sm bg-black text-white border-emerald-900" value="{{ $tenant->name }}" required>
+                                        <div class="d-flex gap-1 justify-content-end">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2" onclick="toggleEditTenant('{{ $tenant->id }}')"><i class="fa-solid fa-times"></i></button>
+                                            <button type="submit" class="btn btn-success btn-sm rounded-pill fw-bold px-3 text-nowrap">
+                                                <i class="fa-solid fa-save me-1"></i> Simpan
+                                            </button>
+                                        </div>
+                                    </form>
+                                @else
                                     @if($activeSub)
                                         <div class="d-flex flex-column align-items-stretch align-items-md-end gap-2">
                                             <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-end justify-content-md-end gap-2" id="action-btns-{{ $tenant->id }}">
@@ -127,6 +153,23 @@
     function toggleEdit(id) {
         const actionBtns = document.getElementById('action-btns-' + id);
         const form = document.getElementById('form-sub-' + id);
+        
+        if(form.classList.contains('d-none')) {
+            form.classList.remove('d-none');
+            form.classList.add('d-flex');
+            actionBtns.classList.add('d-none');
+            actionBtns.classList.remove('d-flex');
+        } else {
+            form.classList.add('d-none');
+            form.classList.remove('d-flex');
+            actionBtns.classList.remove('d-none');
+            actionBtns.classList.add('d-flex');
+        }
+    }
+
+    function toggleEditTenant(id) {
+        const actionBtns = document.getElementById('action-btns-' + id);
+        const form = document.getElementById('form-edit-tenant-' + id);
         
         if(form.classList.contains('d-none')) {
             form.classList.remove('d-none');

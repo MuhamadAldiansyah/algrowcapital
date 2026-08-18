@@ -63,4 +63,26 @@ class TenantController extends Controller
         $tenant->subscriptions()->where('status', 'active')->update(['status' => 'expired']);
         return back()->with('success', 'Langganan perusahaan berhasil dinonaktifkan.');
     }
+
+    public function update(Request $request, \App\Models\Tenant $tenant)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255'
+        ]);
+
+        $tenant->update([
+            'name' => $request->name
+        ]);
+
+        return back()->with('success', 'Nama perusahaan berhasil diperbarui.');
+    }
+
+    public function destroy(\App\Models\Tenant $tenant)
+    {
+        // Delete all users associated with this tenant, which will cascade to other tables if set up
+        \App\Models\User::where('tenant_id', $tenant->id)->delete();
+        $tenant->delete();
+        
+        return back()->with('success', 'Perusahaan beserta seluruh datanya berhasil dihapus.');
+    }
 }
