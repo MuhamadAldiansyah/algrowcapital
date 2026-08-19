@@ -374,9 +374,11 @@
             <a href="{{ route('mitra-accounts.index') }}" class="nav-link {{ request()->routeIs('mitra-accounts.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-id-card me-2"></i> Daftar Akun
             </a>
+            {{--
             <a href="{{ route('mitra-accounts.grid') }}" class="nav-link {{ request()->routeIs('mitra-accounts.grid') ? 'active' : '' }}">
                 <i class="fa-solid fa-th-large me-2"></i> Katalog Mitra
             </a>
+            --}}
             <a href="{{ route('mitra-groups.index') }}" class="nav-link {{ request()->routeIs('mitra-groups.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users-viewfinder me-2"></i> Distribusi Handler
             </a>

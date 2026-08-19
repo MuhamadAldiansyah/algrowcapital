@@ -29,7 +29,7 @@
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table align-middle mb-0">
                 <thead>
                     <tr>
                         <th class="ps-4 py-3">USER</th>
@@ -42,7 +42,7 @@
                 </thead>
                 <tbody>
                     @forelse($onlineUsers as $user)
-                    <tr class="news-hover">
+                    <tr>
                         <td class="ps-4">
                             <div class="d-flex align-items-center">
                                 <div class="user-avatar me-3 bg-success bg-opacity-20 text-success border border-success border-opacity-25 fw-bold">
