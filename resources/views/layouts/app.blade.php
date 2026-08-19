@@ -293,10 +293,19 @@
 </head>
 <body>
 
+    @php
+        $appName = Auth::check() && Auth::user()->tenant ? strtoupper(Auth::user()->tenant->name) : 'ALGROW CAPITAL';
+        $showLogo = Auth::check() && Auth::user()->tenant ? false : true;
+    @endphp
+
     <!-- Mobile Header -->
     <div class="mobile-header">
         <div class="fw-bold d-flex align-items-center">
-            <img src="{{ asset('images/logo.png') }}" alt="Algrow Capital" height="30" onerror="this.outerHTML='<i class=\'fa-solid fa-chart-simple text-success-custom me-2\'></i> ALGROW CAPITAL'">
+            @if($showLogo)
+                <img src="{{ asset('images/logo.png') }}" alt="{{ $appName }}" height="30" onerror="this.outerHTML='<i class=\'fa-solid fa-chart-simple text-success-custom me-2\'></i> {{ $appName }}'">
+            @else
+                <div style="font-size: 1.1rem; letter-spacing: 1px;"><i class="fa-solid fa-building text-emerald-500 me-2"></i> {{ $appName }}</div>
+            @endif
         </div>
         <div class="d-flex align-items-center gap-3">
             <button class="btn text-emerald-400 p-0 fs-5 d-lg-none" id="fullscreenToggle" onclick="toggleFullScreen()">
@@ -315,7 +324,11 @@
     <div class="sidebar" id="sidebar">
         <!-- Logo Desktop Saja -->
         <div class="sidebar-brand text-center pt-4 pb-2 d-none d-lg-block">
-            <img src="{{ asset('images/logo.png') }}" alt="Algrow Capital" class="img-fluid" style="max-width: 180px; width: 80%;" onerror="this.outerHTML='<i class=\'fa-solid fa-chart-simple text-success-custom me-2\'></i> ALGROW CAPITAL'">
+            @if($showLogo)
+                <img src="{{ asset('images/logo.png') }}" alt="{{ $appName }}" class="img-fluid" style="max-width: 180px; width: 80%;" onerror="this.outerHTML='<i class=\'fa-solid fa-chart-simple text-success-custom me-2\'></i> {{ $appName }}'">
+            @else
+                <div style="font-size: 1.1rem; letter-spacing: 1px;"><i class="fa-solid fa-building text-emerald-500 me-2"></i> {{ $appName }}</div>
+            @endif
         </div>
         
         @auth
