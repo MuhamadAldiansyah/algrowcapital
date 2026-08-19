@@ -576,7 +576,13 @@
             let lastBroadcastId = localStorage.getItem('last_broadcast_id') || 0;
             
             setInterval(() => {
-                fetch('/api/check-broadcast')
+                fetch('{{ url("api/check-broadcast") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                })
                     .then(response => response.json())
                     .then(data => {
                         if (data && data.message && data.id > lastBroadcastId) {

@@ -163,7 +163,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
             return back()->with('success', 'Sapaan Sang Pencipta berhasil dikirim ke seluruh layar umat secara real-time!');
         })->name('broadcast.send');
         
-        Route::get('api/check-broadcast', function () {
+        Route::post('api/check-broadcast', function () {
             if (\Illuminate\Support\Facades\Cache::has('global_greeting')) {
                 return response()->json(\Illuminate\Support\Facades\Cache::get('global_greeting'));
             }
