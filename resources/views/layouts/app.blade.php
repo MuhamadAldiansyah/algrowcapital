@@ -570,44 +570,7 @@
             }
         }
     </script>
-    @if(Auth::check() && !in_array(Auth::user()->role, ['developer', 'owner']))
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let lastBroadcastId = localStorage.getItem('last_broadcast_id') || 0;
-            
-            setInterval(() => {
-                fetch('{{ url("api/check-broadcast") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data && data.message && data.id > lastBroadcastId) {
-                            lastBroadcastId = data.id;
-                            localStorage.setItem('last_broadcast_id', data.id);
-                            
-                            Swal.fire({
-                                title: 'Sapaan dari Pusat 👑',
-                                text: data.message,
-                                icon: 'info',
-                                toast: true,
-                                position: 'top',
-                                showConfirmButton: false,
-                                timer: 3000,
-                                timerProgressBar: true,
-                                background: '#0f172a',
-                                color: '#38bdf8'
-                            });
-                        }
-                    })
-                    .catch(e => {}); // Silent catch
-            }, 3000); // Check every 3 seconds
-        });
-    </script>
-    @endif
+
     @yield('scripts')
 </body>
 </html>

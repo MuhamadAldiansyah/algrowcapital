@@ -155,20 +155,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
         Route::post('ipos/{ipo}/sale', [IpoSaleController::class, 'store'])->name('ipo-sales.store');
         
         // User Management & Activity Monitor
-        Route::post('users/broadcast', function (Illuminate\Http\Request $request) {
-            \Illuminate\Support\Facades\Cache::put('global_greeting', [
-                'id' => time(),
-                'message' => $request->message
-            ], now()->addMinutes(10));
-            return back()->with('success', 'Sapaan Sang Pencipta berhasil dikirim ke seluruh layar umat secara real-time!');
-        })->name('broadcast.send');
-        
-        Route::post('api/check-broadcast', function () {
-            if (\Illuminate\Support\Facades\Cache::has('global_greeting')) {
-                return response()->json(\Illuminate\Support\Facades\Cache::get('global_greeting'));
-            }
-            return response()->json(['message' => null]);
-        })->name('broadcast.check');
+
         
         Route::resource('users', UserController::class);
         Route::get('tenants', [\App\Http\Controllers\TenantController::class, 'index'])->name('tenants.index');
