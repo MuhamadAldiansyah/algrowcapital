@@ -46,12 +46,7 @@
                         <div class="col-sm-4 text-emerald-500 small fw-bold opacity-75">PASSWORD SEKURITAS</div>
                         <div class="col-sm-8">
                             @if($user->password_sekuritas)
-                            <div class="input-group input-group-sm w-75 shadow-sm">
-                                <input type="password" readonly class="form-control bg-black bg-opacity-20 border-emerald-900 border-opacity-50 text-white ticker-font" id="pass_view" value="{{ $user->password_sekuritas }}">
-                                <button class="btn btn-outline-primary-custom" onclick="togglePassword('pass_view', 'pass_view_icon')">
-                                    <i id="pass_view_icon" class="fa-solid fa-eye"></i>
-                                </button>
-                            </div>
+                                <div class="p-2 bg-black bg-opacity-20 border border-emerald-900 border-opacity-50 rounded text-white ticker-font shadow-sm">{{ $user->password_sekuritas }}</div>
                             @else
                                 <span class="text-white opacity-50">-</span>
                             @endif
@@ -62,12 +57,7 @@
                         <div class="col-sm-4 text-emerald-500 small fw-bold opacity-75">PIN SEKURITAS</div>
                         <div class="col-sm-8">
                             @if($user->pin_sekuritas)
-                            <div class="input-group input-group-sm w-75 shadow-sm">
-                                <input type="password" readonly class="form-control bg-black bg-opacity-20 border-emerald-900 border-opacity-50 text-white ticker-font" id="pin_view" value="{{ $user->pin_sekuritas }}">
-                                <button class="btn btn-outline-primary-custom" onclick="togglePassword('pin_view', 'pin_view_icon')">
-                                    <i id="pin_view_icon" class="fa-solid fa-eye"></i>
-                                </button>
-                            </div>
+                                <div class="p-2 bg-black bg-opacity-20 border border-emerald-900 border-opacity-50 rounded text-white ticker-font shadow-sm">{{ $user->pin_sekuritas }}</div>
                             @else
                                 <span class="text-white opacity-50">-</span>
                             @endif
