@@ -11,22 +11,30 @@ class UserProfileController extends Controller
     {
         $user = Auth::user();
 
-        // Auto-sync from MitraAccount if User profile is empty
-        if (!$user->sekuritas) {
+        // Auto-sync from MitraAccount if User profile is missing key data
+        if (!$user->sekuritas || !$user->password_sekuritas) {
             $mitraAcc = \App\Models\MitraAccount::where('username', $user->username)->first();
             if ($mitraAcc) {
-                $user->sekuritas = $mitraAcc->platform;
+                if (!$user->sekuritas) $user->sekuritas = $mitraAcc->platform;
                 
-                try { 
-                    $user->password_sekuritas = $mitraAcc->password ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->password) : null; 
-                } catch(\Exception $e) {}
+                if (!$user->password_sekuritas) {
+                    try { 
+                        $user->password_sekuritas = $mitraAcc->password ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->password) : null; 
+                    } catch(\Exception $e) {
+                        $user->password_sekuritas = $mitraAcc->password; // Fallback to raw text if not encrypted
+                    }
+                }
                 
-                try { 
-                    $user->pin_sekuritas = $mitraAcc->pin ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->pin) : null; 
-                } catch(\Exception $e) {}
+                if (!$user->pin_sekuritas) {
+                    try { 
+                        $user->pin_sekuritas = $mitraAcc->pin ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->pin) : null; 
+                    } catch(\Exception $e) {
+                        $user->pin_sekuritas = $mitraAcc->pin; // Fallback to raw text if not encrypted
+                    }
+                }
                 
-                $user->bank = $mitraAcc->bank_rdn;
-                $user->no_rek = $mitraAcc->rdn_account;
+                if (!$user->bank) $user->bank = $mitraAcc->bank_rdn;
+                if (!$user->no_rek) $user->no_rek = $mitraAcc->rdn_account;
                 $user->save();
             }
         }
