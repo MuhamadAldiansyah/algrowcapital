@@ -93,47 +93,18 @@
         @else
         <!-- WELCOME CARD (User Only) -->
         <div class="col-12">
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="background: linear-gradient(145deg, #064e3b 0%, #022c22 100%);">
-                <!-- Top Emerald Line -->
-                <div class="w-100" style="height: 5px; background: linear-gradient(90deg, #10b981, #34d399, #059669);"></div>
-                
-                <div class="card-body p-4 p-md-5 position-relative">
-                    <!-- Subtle background mesh -->
-                    <div class="position-absolute top-0 end-0 h-100 w-50" style="background: radial-gradient(circle at right, rgba(52,211,153,0.2) 0%, transparent 60%); pointer-events: none;"></div>
-                    
-                    <div class="row align-items-center position-relative z-1">
-                        <div class="col-lg-8 animate__animated animate__fadeInLeft">
-                            <div class="d-inline-flex align-items-center bg-white rounded-pill px-3 py-1 mb-4 shadow-sm">
-                                <span class="bg-emerald-500 rounded-circle me-2" style="width: 10px; height: 10px; box-shadow: 0 0 10px #10b981;"></span>
-                                <span class="text-emerald-900 small fw-bold tracking-widest text-uppercase" style="letter-spacing: 1.5px;">Mitra Aktif</span>
-                            </div>
-                            
-                            <h1 class="fw-bolder text-white mb-3" style="letter-spacing: -1px; font-size: 2.8rem;">
-                                Halo, <span class="text-white border-bottom border-4 border-emerald-400">{{ Auth::user()->name }}</span>! 👋
-                            </h1>
-                            
-                            @if(Auth::user()->tenant)
-                                <div class="d-flex align-items-center bg-black bg-opacity-25 p-3 rounded-4 mb-4 border border-emerald-500 border-opacity-50 d-inline-flex shadow-sm">
-                                    <div class="bg-emerald-500 p-2 rounded-circle me-3 d-flex align-items-center justify-content-center shadow" style="width: 45px; height: 45px;">
-                                        <i class="fa-solid fa-building text-white fs-5"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-white fw-bolder fs-4" style="letter-spacing: 1px;">{{ Auth::user()->tenant->name }}</div>
-                                    </div>
-                                </div>
-                            @endif
-                            
-                            <p class="text-white fs-5 fw-medium mb-0" style="line-height: 1.6; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-                                Selamat datang di ruang kerja Anda. Segera pantau alokasi lot dan maksimalkan performa akun Anda hari ini!
-                            </p>
-                        </div>
-                        
-                        <div class="col-lg-4 d-none d-lg-flex justify-content-end animate__animated animate__fadeInRight">
-                            <div class="bg-white p-4 rounded-4 shadow-lg text-center" style="min-width: 220px; border: 2px solid #34d399; transform: rotate(3deg); transition: transform 0.3s ease;" onmouseover="this.style.transform='rotate(0deg)'" onmouseout="this.style.transform='rotate(3deg)'">
-                                <i class="fa-solid fa-bolt fa-4x text-emerald-500 mb-3"></i>
-                                <h4 class="text-emerald-950 fw-bolder mb-1">Sistem Online</h4>
-                                <p class="text-emerald-800 fw-bold small mb-0">100% Siap Digunakan</p>
-                            </div>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background-color: #071f11; border: 1px solid rgba(16, 185, 129, 0.2) !important;">
+                <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h4 class="fw-bold text-white mb-1">Halo, {{ Auth::user()->name }} 👋</h4>
+                        @if(Auth::user()->tenant)
+                            <div class="text-emerald-500 opacity-75 small fw-bold mt-2"><i class="fa-solid fa-building me-1"></i> {{ Auth::user()->tenant->name }}</div>
+                        @endif
+                    </div>
+                    <div>
+                        <div class="d-inline-flex align-items-center bg-black bg-opacity-40 rounded-pill px-3 py-2 border border-emerald-900 border-opacity-50">
+                            <span class="bg-emerald-500 rounded-circle me-2" style="width: 8px; height: 8px; box-shadow: 0 0 8px #10b981;"></span>
+                            <span class="text-emerald-400 small fw-bold">Sistem Online</span>
                         </div>
                     </div>
                 </div>
