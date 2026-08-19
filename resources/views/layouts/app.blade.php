@@ -570,19 +570,35 @@
             }
         }
     </script>
-    @if(Cache::has('global_greeting') && Auth::check() && !in_array(Auth::user()->role, ['developer', 'owner']))
+    @if(Auth::check() && !in_array(Auth::user()->role, ['developer', 'owner']))
     <script>
-        Swal.fire({
-            title: 'Sapaan dari Pusat 👑',
-            text: "{!! addslashes(Cache::get('global_greeting')) !!}",
-            icon: 'info',
-            toast: true,
-            position: 'top',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            background: '#0f172a',
-            color: '#38bdf8'
+        document.addEventListener("DOMContentLoaded", function() {
+            let lastBroadcastId = localStorage.getItem('last_broadcast_id') || 0;
+            
+            setInterval(() => {
+                fetch('/api/check-broadcast')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.message && data.id > lastBroadcastId) {
+                            lastBroadcastId = data.id;
+                            localStorage.setItem('last_broadcast_id', data.id);
+                            
+                            Swal.fire({
+                                title: 'Sapaan dari Pusat 👑',
+                                text: data.message,
+                                icon: 'info',
+                                toast: true,
+                                position: 'top',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true,
+                                background: '#0f172a',
+                                color: '#38bdf8'
+                            });
+                        }
+                    })
+                    .catch(e => {}); // Silent catch
+            }, 3000); // Check every 3 seconds
         });
     </script>
     @endif
