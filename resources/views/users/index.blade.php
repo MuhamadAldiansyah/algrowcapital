@@ -55,6 +55,33 @@
     </button>
 </div>
 
+@if(Auth::user()->role === 'developer')
+<!-- DEVELOPER GOD MODE BANNER (Easter Egg) -->
+<div class="card border-0 mb-4 rounded-4 overflow-hidden shadow-lg position-relative" style="background: linear-gradient(135deg, #0f172a 0%, #020617 100%); border: 1px solid rgba(56, 189, 248, 0.3) !important;">
+    <div class="position-absolute top-0 end-0 h-100 w-50" style="background: radial-gradient(circle at right, rgba(56, 189, 248, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
+    
+    <div class="card-body p-4 position-relative z-1 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-4">
+            <div class="bg-black bg-opacity-50 p-3 rounded-circle border border-info border-opacity-50 text-info shadow text-center" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-code fa-xl"></i>
+            </div>
+            <div>
+                <div class="d-inline-flex align-items-center bg-info bg-opacity-10 text-info rounded-pill px-2 py-1 mb-2 fw-bold tracking-widest" style="font-size: 0.65rem; border: 1px solid rgba(56, 189, 248, 0.3); letter-spacing: 1px;">
+                    <i class="fa-solid fa-bolt text-warning me-1"></i> DEVELOPER GOD MODE
+                </div>
+                <h4 class="fw-bolder text-white mb-1" style="letter-spacing: -0.5px;">Halo Sang Pencipta ({{ explode(' ', Auth::user()->name)[0] }})! 👑</h4>
+                <p class="text-white-50 mb-0 small fw-medium">Selamat datang di ruang kendali utama. Silakan pantau dan kendalikan semua umat (users) Anda hehehe 💻✨</p>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-info bg-gradient bg-opacity-10 border-info text-info rounded-pill fw-bold shadow-sm px-4" onclick="Swal.fire({title: 'God Mode Activated! ⚡', text: 'Halo bosku! Semangat terus ngodingnya, jangan lupa ngopi biar gak pusing ngurusin bug hehehe ☕🚀', icon: 'success', background: '#0f172a', color: '#fff', confirmButtonColor: '#38bdf8'})">
+                <i class="fa-solid fa-hand-spock me-2"></i>Sapa Umat
+            </button>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Modal Tambah User -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
