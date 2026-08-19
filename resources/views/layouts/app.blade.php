@@ -570,6 +570,22 @@
             }
         }
     </script>
+    @if(Cache::has('global_greeting') && Auth::check() && !in_array(Auth::user()->role, ['developer', 'owner']))
+    <script>
+        Swal.fire({
+            title: 'Sapaan dari Pusat 👑',
+            text: "{!! addslashes(Cache::get('global_greeting')) !!}",
+            icon: 'info',
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: '#0f172a',
+            color: '#38bdf8'
+        });
+    </script>
+    @endif
     @yield('scripts')
 </body>
 </html>

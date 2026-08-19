@@ -155,6 +155,10 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
         Route::post('ipos/{ipo}/sale', [IpoSaleController::class, 'store'])->name('ipo-sales.store');
         
         // User Management & Activity Monitor
+        Route::post('users/broadcast', function (Illuminate\Http\Request $request) {
+            \Illuminate\Support\Facades\Cache::put('global_greeting', $request->message, now()->addMinutes(10));
+            return back()->with('success', 'Sapaan Sang Pencipta berhasil dikirim ke seluruh layar umat!');
+        })->name('broadcast.send');
         Route::resource('users', UserController::class);
         Route::get('tenants', [\App\Http\Controllers\TenantController::class, 'index'])->name('tenants.index');
         Route::put('tenants/{tenant}', [\App\Http\Controllers\TenantController::class, 'update'])->name('tenants.update');

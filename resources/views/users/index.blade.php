@@ -55,7 +55,7 @@
     </button>
 </div>
 
-@if(Auth::user()->role === 'developer')
+@if(Auth::user()->role === 'developer' || Auth::user()->role === 'owner')
 <!-- DEVELOPER GOD MODE BANNER (Easter Egg) -->
 <div class="card border-0 mb-4 rounded-4 overflow-hidden shadow-lg position-relative" style="background: linear-gradient(135deg, #0f172a 0%, #020617 100%); border: 1px solid rgba(56, 189, 248, 0.3) !important;">
     <div class="position-absolute top-0 end-0 h-100 w-50" style="background: radial-gradient(circle at right, rgba(56, 189, 248, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
@@ -74,12 +74,36 @@
             </div>
         </div>
         <div>
-            <button class="btn btn-info bg-gradient bg-opacity-10 border-info text-info rounded-pill fw-bold shadow-sm px-4" onclick="Swal.fire({title: 'God Mode Activated! ⚡', text: 'Halo bosku! Semangat terus ngodingnya, jangan lupa ngopi biar gak pusing ngurusin bug hehehe ☕🚀', icon: 'success', background: '#0f172a', color: '#fff', confirmButtonColor: '#38bdf8'})">
+            <form action="{{ route('broadcast.send') }}" method="POST" id="broadcastForm" class="d-none">
+                @csrf
+                <input type="hidden" name="message" id="broadcastMessageInput">
+            </form>
+            <button class="btn btn-info bg-gradient bg-opacity-10 border-info text-info rounded-pill fw-bold shadow-sm px-4" onclick="sendGreeting()">
                 <i class="fa-solid fa-hand-spock me-2"></i>Sapa Umat
             </button>
         </div>
     </div>
 </div>
+<script>
+function sendGreeting() {
+    Swal.fire({
+        title: 'Kirim Sapaan ke Umat 👑',
+        input: 'text',
+        inputPlaceholder: 'Tulis pesan iseng untuk semua user...',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-paper-plane me-1"></i> Kirim Sekarang!',
+        cancelButtonText: 'Batal',
+        background: '#0f172a',
+        color: '#fff',
+        confirmButtonColor: '#38bdf8'
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            document.getElementById('broadcastMessageInput').value = result.value;
+            document.getElementById('broadcastForm').submit();
+        }
+    });
+}
+</script>
 @endif
 
 <!-- Modal Tambah User -->
