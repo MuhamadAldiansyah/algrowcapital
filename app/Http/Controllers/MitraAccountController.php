@@ -74,23 +74,38 @@ class MitraAccountController extends Controller
                 $query->offset($start)->limit($length);
             }
 
-            $accounts = $query->get();
+            $accounts = $query->with('user')->get();
 
             // Format Data
             $data = [];
             foreach ($accounts as $account) {
-                // Decrypt logic
+                // If linked to a user profile, use their profile data, otherwise fallback to MitraAccount data
+                $platform = $account->user && $account->user->sekuritas ? $account->user->sekuritas : $account->platform;
+                $rawPassword = $account->user && $account->user->password_sekuritas ? $account->user->password_sekuritas : null;
+                $rawPin = $account->user && $account->user->pin_sekuritas ? $account->user->pin_sekuritas : null;
+                $bankName = $account->user && $account->user->bank ? $account->user->bank : $account->bank_rdn;
+                $noRek = $account->user && $account->user->no_rek ? $account->user->no_rek : $account->rdn_account;
+
+                // Decrypt logic for MitraAccount fallback
                 $decryptedPassword = '';
                 $decryptedPin = '';
-                try {
-                    $decryptedPassword = $account->password ? Crypt::decryptString($account->password) : '';
-                } catch (\Exception $e) { $decryptedPassword = $account->password; }
+                if ($rawPassword) {
+                    $decryptedPassword = $rawPassword; // From user profile (plain text)
+                } else {
+                    try {
+                        $decryptedPassword = $account->password ? Crypt::decryptString($account->password) : '';
+                    } catch (\Exception $e) { $decryptedPassword = $account->password; }
+                }
                 
-                try {
-                    $decryptedPin = $account->pin ? Crypt::decryptString($account->pin) : '';
-                } catch (\Exception $e) { $decryptedPin = $account->pin; }
+                if ($rawPin) {
+                    $decryptedPin = $rawPin; // From user profile (plain text)
+                } else {
+                    try {
+                        $decryptedPin = $account->pin ? Crypt::decryptString($account->pin) : '';
+                    } catch (\Exception $e) { $decryptedPin = $account->pin; }
+                }
 
-                $platformBadge = '<span class="badge bg-black bg-opacity-40 text-emerald-500 border border-emerald-900 border-opacity-30 small fw-normal">' . strtoupper($account->platform) . '</span>';
+                $platformBadge = '<span class="badge bg-black bg-opacity-40 text-emerald-500 border border-emerald-900 border-opacity-30 small fw-normal">' . strtoupper($platform) . '</span>';
                 
                 $ownerText = '<a href="' . route('mitra-accounts.show', $account) . '" class="text-white text-decoration-none fw-bold hover-emerald d-block">' . strtoupper($account->owner_name) . '</a>';
                 if ($account->status === 'nonaktif') {
@@ -98,7 +113,7 @@ class MitraAccountController extends Controller
                 }
 
                 $editableClass = ($user && $user->role === 'investor') ? '' : 'editable-cell';
-                $bankText = '<div class="fw-bold ' . $editableClass . '" data-id="' . $account->id . '" data-field="bank_rdn">' . ($account->bank_rdn ?: '-') . '</div>';
+                $bankText = '<div class="fw-bold ' . $editableClass . '" data-id="' . $account->id . '" data-field="bank_rdn">' . ($bankName ?: '-') . '</div>';
                 
                 if ($user && $user->role === 'investor') {
                     $actionBtns = '<span class="text-muted small"><i class="fa-solid fa-lock"></i> Read Only</span>';
@@ -125,7 +140,7 @@ class MitraAccountController extends Controller
                     '<span class="ticker-font ' . $editableClass . '" data-id="' . $account->id . '" data-field="password">' . $decryptedPassword . '</span>',
                     '<span class="ticker-font ' . $editableClass . '" data-id="' . $account->id . '" data-field="pin">' . $decryptedPin . '</span>',
                     $bankText,
-                    '<span class="ticker-font ' . $editableClass . '" data-id="' . $account->id . '" data-field="rdn_account">' . ($account->rdn_account ?: '-') . '</span>',
+                    '<span class="ticker-font ' . $editableClass . '" data-id="' . $account->id . '" data-field="rdn_account">' . ($noRek ?: '-') . '</span>',
                     '<span class="' . $editableClass . '" data-id="' . $account->id . '" data-field="device">' . ($account->device ?: '-') . '</span>',
                     $actionBtns
                 ];

@@ -3,6 +3,27 @@
 @section('title', 'Detail Akun Mitra')
 
 @section('content')
+@php
+    $platform = $mitraAccount->user && $mitraAccount->user->sekuritas ? $mitraAccount->user->sekuritas : $mitraAccount->platform;
+    $rawPassword = $mitraAccount->user && $mitraAccount->user->password_sekuritas ? $mitraAccount->user->password_sekuritas : null;
+    $rawPin = $mitraAccount->user && $mitraAccount->user->pin_sekuritas ? $mitraAccount->user->pin_sekuritas : null;
+    $bankName = $mitraAccount->user && $mitraAccount->user->bank ? $mitraAccount->user->bank : $mitraAccount->bank_rdn;
+    $noRek = $mitraAccount->user && $mitraAccount->user->no_rek ? $mitraAccount->user->no_rek : $mitraAccount->rdn_account;
+    
+    $decryptedPassword = '';
+    if ($rawPassword) {
+        $decryptedPassword = $rawPassword;
+    } else {
+        try { $decryptedPassword = $mitraAccount->password ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->password) : ''; } catch (\Exception $e) { $decryptedPassword = $mitraAccount->password; }
+    }
+
+    $decryptedPin = '';
+    if ($rawPin) {
+        $decryptedPin = $rawPin;
+    } else {
+        try { $decryptedPin = $mitraAccount->pin ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->pin) : ''; } catch (\Exception $e) { $decryptedPin = $mitraAccount->pin; }
+    }
+@endphp
 <div class="row g-4 mb-5">
     <div class="col-md-8">
         <div class="card stat-node border-0 shadow-lg mb-4">
@@ -20,7 +41,7 @@
                 <div class="row mb-4">
                     <div class="col-sm-4 text-emerald-500 small fw-bold opacity-75">PLATFORM / USERNAME</div>
                     <div class="col-sm-8">
-                        <span class="badge bg-black bg-opacity-40 text-emerald-400 border border-emerald-900 border-opacity-50 px-3 py-2 me-2 shadow-sm">{{ strtoupper($mitraAccount->platform) }}</span>
+                        <span class="badge bg-black bg-opacity-40 text-emerald-400 border border-emerald-900 border-opacity-50 px-3 py-2 me-2 shadow-sm">{{ strtoupper($platform) }}</span>
                         <strong class="text-white ticker-font">{{ $mitraAccount->username }}</strong>
                     </div>
                 </div>
@@ -28,7 +49,7 @@
                     <div class="col-sm-4 text-emerald-500 small fw-bold opacity-75">PASSWORD</div>
                     <div class="col-sm-8">
                         <div class="input-group input-group-sm w-75 shadow-sm">
-                            <input type="password" readonly class="form-control bg-black bg-opacity-20 border-emerald-900 border-opacity-50 text-white ticker-font" id="pass_view" value="{{ \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->password) }}">
+                            <input type="password" readonly class="form-control bg-black bg-opacity-20 border-emerald-900 border-opacity-50 text-white ticker-font" id="pass_view" value="{{ $decryptedPassword }}">
                             <button class="btn btn-outline-primary-custom" onclick="togglePassword('pass_view', 'pass_view_icon')">
                                 <i id="pass_view_icon" class="fa-solid fa-eye"></i>
                             </button>
@@ -38,9 +59,9 @@
                 <div class="row mb-4 align-items-center">
                     <div class="col-sm-4 text-emerald-500 small fw-bold opacity-75">PIN</div>
                     <div class="col-sm-8">
-                        @if($mitraAccount->pin)
+                        @if($mitraAccount->pin || $rawPin)
                         <div class="input-group input-group-sm w-75 shadow-sm">
-                            <input type="password" readonly class="form-control bg-black bg-opacity-20 border-emerald-900 border-opacity-50 text-white ticker-font" id="pin_view" value="{{ \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->pin) }}">
+                            <input type="password" readonly class="form-control bg-black bg-opacity-20 border-emerald-900 border-opacity-50 text-white ticker-font" id="pin_view" value="{{ $decryptedPin }}">
                             <button class="btn btn-outline-primary-custom" onclick="togglePassword('pin_view', 'pin_view_icon')">
                                 <i id="pin_view_icon" class="fa-solid fa-eye"></i>
                             </button>
@@ -59,7 +80,7 @@
                     <div class="col-sm-4 text-emerald-500 small fw-bold opacity-75">NIK / RDN RECORD</div>
                     <div class="col-sm-8 text-white">
                         <div class="mb-1"><span class="text-emerald-500 opacity-50 small">NIK:</span> <span class="fw-bold ticker-font">{{ $mitraAccount->nik ?? '-' }}</span></div>
-                        <div><span class="text-emerald-500 opacity-50 small">RDN:</span> <span class="fw-bold ticker-font">{{ $mitraAccount->bank_rdn ?? '-' }} ({{ $mitraAccount->rdn_account ?? '-' }})</span></div>
+                        <div><span class="text-emerald-500 opacity-50 small">RDN:</span> <span class="fw-bold ticker-font">{{ $bankName ?? '-' }} ({{ $noRek ?? '-' }})</span></div>
                     </div>
                 </div>
             </div>
