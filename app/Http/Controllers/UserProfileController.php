@@ -11,23 +11,25 @@ class UserProfileController extends Controller
     {
         $user = Auth::user();
 
-        // Auto-sync from MitraAccount if User profile is missing key data
-        if (!$user->sekuritas || !$user->password_sekuritas) {
+        // Auto-sync from MitraAccount if User profile is missing key data or corrupted (encrypted string mistakenly saved)
+        if (!$user->sekuritas || !$user->password_sekuritas || str_starts_with($user->password_sekuritas, 'eyJ')) {
             $mitraAcc = \App\Models\MitraAccount::where('username', $user->username)->first();
             if ($mitraAcc) {
                 if (!$user->sekuritas) $user->sekuritas = $mitraAcc->platform;
                 
-                if (!$user->password_sekuritas) {
+                // If it's missing or corrupted (starts with eyJ)
+                if (!$user->password_sekuritas || str_starts_with($user->password_sekuritas, 'eyJ')) {
                     try { 
-                        $user->password_sekuritas = $mitraAcc->password ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->password) : null; 
+                        $user->password_sekuritas = $mitraAcc->password ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAcc->password) : null; 
                     } catch(\Exception $e) {
                         $user->password_sekuritas = $mitraAcc->password; // Fallback to raw text if not encrypted
                     }
                 }
                 
-                if (!$user->pin_sekuritas) {
+                // If it's missing or corrupted (starts with eyJ)
+                if (!$user->pin_sekuritas || str_starts_with($user->pin_sekuritas, 'eyJ')) {
                     try { 
-                        $user->pin_sekuritas = $mitraAcc->pin ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAccount->pin) : null; 
+                        $user->pin_sekuritas = $mitraAcc->pin ? \Illuminate\Support\Facades\Crypt::decryptString($mitraAcc->pin) : null; 
                     } catch(\Exception $e) {
                         $user->pin_sekuritas = $mitraAcc->pin; // Fallback to raw text if not encrypted
                     }
