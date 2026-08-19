@@ -343,6 +343,10 @@
                 <i class="fa-solid fa-gauge me-2"></i> Dashboard
             </a>
 
+            <a href="{{ route('my-profile.edit') }}" class="nav-link {{ request()->routeIs('my-profile.edit') ? 'active' : '' }}">
+                <i class="fa-solid fa-user-pen me-2"></i> Profil Saya
+            </a>
+
             @if(Auth::user()->role === 'user')
             <a href="{{ route('user-tasks.index') }}" class="nav-link {{ request()->routeIs('user-tasks.index') || request()->routeIs('user-tasks.allotment') || request()->routeIs('user-tasks.sale') ? 'active' : '' }}">
                 <i class="fa-solid fa-bolt me-2"></i> Eksekusi IPO

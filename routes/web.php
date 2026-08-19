@@ -187,4 +187,8 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
 
     // Live Ticker API
     Route::get('ticker-live/{ticker}', [IpoController::class, 'tickerLive'])->name('ticker.live');
+
+    // User Profile
+    Route::get('my-profile', [\App\Http\Controllers\UserProfileController::class, 'edit'])->name('my-profile.edit');
+    Route::put('my-profile', [\App\Http\Controllers\UserProfileController::class, 'update'])->name('my-profile.update');
 });
