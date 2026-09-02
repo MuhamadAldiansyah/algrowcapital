@@ -5,7 +5,7 @@
 @section('content')
 <div class="row justify-content-center">
     <div class="col-md-5">
-        <div class="card stat-node border-0 shadow-lg">
+        <div class="card stat-node border-0 shadow-lg position-relative z-3">
             <div class="card-header bg-black bg-opacity-20 pt-5 pb-4 border-bottom border-emerald-900 text-center">
                 <i class="fa-solid fa-money-bill-trend-up fs-1 text-emerald-400 mb-3 glow-text-emerald"></i>
                 <h4 class="fw-bold text-white ticker-font mb-0">REALISASI PENJUALAN {{ $ipo->code }}</h4>
@@ -38,7 +38,7 @@
                     <div class="mb-5">
                         <label class="form-label text-emerald-500 fw-bold small opacity-75">HARGA JUAL AKHIR (PER SAHAM)</label>
                         <div class="input-group input-group-lg shadow-sm">
-                            <input type="number" name="sell_price" class="form-control bg-black bg-opacity-10 border-emerald-900 text-white ticker-font fs-2 fw-bold" placeholder="0" required autofocus>
+                            <input type="text" name="sell_price" id="sell_price" class="form-control bg-black bg-opacity-10 border-emerald-900 text-white ticker-font fs-2 fw-bold" placeholder="0" required autofocus>
                         </div>
                         <div class="form-text mt-3 text-center text-emerald-500 opacity-50 px-3">
                             Sistem akan otomatis menghitung <strong class="text-white">Total Return</strong> dan <strong class="text-white">Net Profit</strong> untuk seluruh akun yang terlibat.
@@ -56,4 +56,39 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        // Auto format Rupiah
+        function formatRupiah(value) {
+            let number_string = value.toString().replace(/[^,\d]/g, ''),
+                split = number_string.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+            return split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+        }
+
+        $('#sell_price').on('keyup input', function() {
+            $(this).val(formatRupiah($(this).val()));
+        });
+
+        // Hapus titik sebelum disubmit agar masuk ke database sebagai integer/float yang benar
+        $('form').on('submit', function() {
+            let priceInput = $('#sell_price');
+            let val = priceInput.val().replace(/\./g, '');
+            priceInput.val(val);
+            
+            // Disable button to prevent double submit and give feedback
+            $(this).find('button[type="submit"]').prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-2"></i>MENGHITUNG...');
+        });
+    });
+</script>
 @endsection
