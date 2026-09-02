@@ -11,7 +11,18 @@ class MitraGroupController extends Controller
     public function index()
     {
         $groups = MitraGroup::withCount('accounts')->get();
-        return view('mitra-groups.index', compact('groups'));
+        
+        $user = auth()->user();
+        $adminQuery = \App\Models\User::where('role', 'admin');
+        
+        // Jika bukan developer, batasi admin hanya dari tenant (perusahaan) yang sama
+        if ($user && $user->role !== 'developer') {
+            $adminQuery->where('tenant_id', $user->tenant_id);
+        }
+        
+        $admins = $adminQuery->orderBy('name')->get();
+
+        return view('mitra-groups.index', compact('groups', 'admins'));
     }
 
     public function store(Request $request)

@@ -19,8 +19,15 @@
                         <input type="text" id="group_name" name="name" class="form-control border-emerald-900 bg-black bg-opacity-25 text-white" required placeholder="Contoh: Tim Alpha">
                     </div>
                     <div class="mb-4">
-                        <label class="form-label text-white small fw-bold">NAMA HANDLER</label>
-                        <input type="text" id="group_handler" name="handler_name" class="form-control border-emerald-900 bg-black bg-opacity-25 text-white" required placeholder="Contoh: Budi Susanto">
+                        <label class="form-label text-white small fw-bold">NAMA HANDLER (Pilih Admin)</label>
+                        <select id="group_handler" name="handler_name" class="form-select border-emerald-900 bg-black bg-opacity-25 text-white" required>
+                            <option value="">-- Pilih Admin --</option>
+                            @forelse($admins as $admin)
+                                <option value="{{ $admin->name }}">{{ $admin->name }}</option>
+                            @empty
+                                <option value="" disabled>Belum ada user dengan role Admin</option>
+                            @endforelse
+                        </select>
                     </div>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary-custom flex-grow-1 fw-bold py-2"><i class="fa-solid fa-save me-2"></i><span id="text-submit">SIMPAN Handler</span></button>
@@ -94,7 +101,15 @@
         form.action = `/mitra-groups/${id}`;
         methodContainer.innerHTML = '<input type="hidden" name="_method" value="PUT">';
         inputName.value = name;
-        inputHandler.value = handler;
+        
+        // Cek apakah opsi sudah ada, jika belum tambahkan sementara agar tidak kosong
+        let optionExists = Array.from(inputHandler.options).some(option => option.value === handler);
+        if (!optionExists && handler) {
+            let newOption = new Option(handler + " (Tidak Aktif/Manual)", handler, true, true);
+            inputHandler.add(newOption);
+        } else {
+            inputHandler.value = handler;
+        }
         
         formTitle.innerHTML = '<i class="fa-solid fa-pen-to-square me-2"></i>Edit Handler';
         textSubmit.innerText = 'UPDATE Handler';
