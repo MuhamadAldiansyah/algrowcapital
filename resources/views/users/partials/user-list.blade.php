@@ -34,6 +34,7 @@
                     <tr>
                         <th class="ps-4 py-3">USER</th>
                         <th>ROLE</th>
+                        <th>NO. TELEPON</th>
                         <th>IP ADDRESS</th>
                         <th>AKTIVITAS TERAKHIR</th>
                         <th class="text-center">STATUS</th>
@@ -58,6 +59,9 @@
                             <span class="badge @if($user->role === 'developer') text-primary border-primary @elseif($user->role === 'admin') text-danger border-danger @else text-secondary border-secondary @endif bg-black bg-opacity-40 border border-opacity-25 px-3 py-2 text-uppercase" style="font-size: 0.65rem;">
                                 {{ $user->role }}
                             </span>
+                        </td>
+                        <td>
+                            <div class="text-white small">{{ $user->phone ?? '-' }}</div>
                         </td>
                         <td><code class="text-emerald-400 bg-black bg-opacity-20 px-2 py-1 rounded small">{{ $user->ip_address }}</code></td>
                         <td>
@@ -114,6 +118,7 @@
                     <tr>
                         <th class="ps-4 py-3">NAMA</th>
                         <th>ROLE</th>
+                        <th>NO. TELEPON</th>
                         <th>AKTIVITAS TERAKHIR</th>
                         <th class="text-center">STATUS</th>
                         <th class="text-end pe-4">AKSI</th>
@@ -137,6 +142,9 @@
                             <span class="badge bg-black bg-opacity-40 text-emerald-400 border border-emerald-900 border-opacity-30 px-2 py-1 text-uppercase" style="font-size: 0.6rem;">
                                 {{ $user->role }}
                             </span>
+                        </td>
+                        <td>
+                            <div class="text-white small">{{ $user->phone ?? '-' }}</div>
                         </td>
                         <td class="text-emerald-500 opacity-50 small ticker-font">
                             {{ $user->last_activity_time ? $user->last_activity_time->translatedFormat('d M Y, H:i') : 'OFFLINE' }}

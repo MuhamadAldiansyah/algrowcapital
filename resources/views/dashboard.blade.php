@@ -240,6 +240,50 @@
 </div>
 </div>
 
+@if(Auth::user()->role === 'user' && empty(Auth::user()->phone))
+<div class="modal fade" id="mandatoryPhoneModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="mandatoryPhoneModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 overflow-hidden" style="background: rgba(5, 22, 12, 0.95); backdrop-filter: blur(16px); box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(16, 185, 129, 0.2), 0 0 30px rgba(16, 185, 129, 0.1); border-radius: 20px;">
+            <div class="modal-header border-0 pb-0 position-relative" style="background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.15) 0%, transparent 70%);">
+                <div>
+                    <h5 class="modal-title text-white fw-bold ticker-font mb-1" id="mandatoryPhoneModalLabel">
+                        <i class="fa-solid fa-phone text-emerald-400 me-2"></i>LENGKAPI PROFIL ANDA
+                    </h5>
+                    <p class="small text-emerald-500 opacity-75 mb-0">Nomor WhatsApp diperlukan untuk keperluan komunikasi.</p>
+                </div>
+            </div>
+            <form action="{{ route('my-profile.update-phone') }}" method="POST">
+                @csrf
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label text-emerald-500 fw-bold small text-uppercase tracking-wide">Nomor Telepon / WhatsApp</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-black bg-opacity-40 border-emerald-900 border-end-0 text-emerald-500 border-opacity-50">
+                                <i class="fa-solid fa-address-book"></i>
+                            </span>
+                            <input type="text" name="phone" class="form-control bg-black bg-opacity-40 border-emerald-900 border-start-0 text-white shadow-none px-3 py-2 ticker-font fs-6" required placeholder="Contoh: 081234567890">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="submit" class="btn btn-primary-custom px-4 rounded-pill shadow-lg w-100">
+                        <i class="fa-solid fa-save me-2"></i> SIMPAN NOMOR
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var myModal = new bootstrap.Modal(document.getElementById('mandatoryPhoneModal'));
+        myModal.show();
+    });
+</script>
+@endif
+
+
 @endsection
 
 @if(Auth::user()->role !== 'user')

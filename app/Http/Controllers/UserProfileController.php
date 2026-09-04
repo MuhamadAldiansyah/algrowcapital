@@ -62,4 +62,19 @@ class UserProfileController extends Controller
 
         return redirect()->route('my-profile.edit')->with('success', 'Profil berhasil diperbarui.');
     }
+
+    public function updatePhone(Request $request)
+    {
+        $user = Auth::user();
+        
+        $validated = $request->validate([
+            'phone' => 'required|string|max:20',
+        ], [
+            'phone.required' => 'Nomor telepon wajib diisi.'
+        ]);
+
+        $user->update(['phone' => $validated['phone']]);
+
+        return redirect()->back()->with('success', 'Nomor telepon berhasil disimpan.');
+    }
 }

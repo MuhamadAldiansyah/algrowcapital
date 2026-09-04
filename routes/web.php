@@ -202,4 +202,5 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
     // User Profile
     Route::get('my-profile', [\App\Http\Controllers\UserProfileController::class, 'edit'])->name('my-profile.edit');
     Route::put('my-profile', [\App\Http\Controllers\UserProfileController::class, 'update'])->name('my-profile.update');
+    Route::post('update-phone', [\App\Http\Controllers\UserProfileController::class, 'updatePhone'])->name('my-profile.update-phone');
 });
