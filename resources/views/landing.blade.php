@@ -144,9 +144,15 @@
 
     <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 glass-nav transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 h-20 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 h-20 flex items-center justify-between relative">
             <div class="flex items-center gap-3">
-                <span class="text-xl font-bold tracking-tight text-white">Algrow Capital</span>
+                <a href="{{ route('landing') }}" class="text-xl font-bold tracking-tight text-white hover:text-emerald-400 transition-colors">Algrow Capital</a>
+            </div>
+
+            <!-- Role Switcher -->
+            <div class="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+                <a href="{{ route('landing') }}" class="text-emerald-400 font-semibold text-sm relative after:absolute after:bottom-[-6px] after:left-0 after:w-full after:h-0.5 after:bg-emerald-400 after:rounded-full">Untuk Mitra</a>
+                <a href="{{ route('asset-manager') }}" class="text-slate-400 hover:text-white transition-colors text-sm font-medium">Untuk Asset Manager</a>
             </div>
             <div class="flex items-center gap-4">
                 @auth

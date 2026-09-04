@@ -88,6 +88,10 @@ Route::get('/', function () {
     return view('landing');
 })->name('landing');
 
+Route::get('/asset-manager', function () {
+    return view('asset-manager');
+})->name('asset-manager');
+
 // Authentication Routes
 Route::get('login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('login', [AuthController::class, 'login']);
