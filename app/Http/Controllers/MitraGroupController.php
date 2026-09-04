@@ -39,7 +39,7 @@ class MitraGroupController extends Controller
         ]);
 
         MitraGroup::create($validated);
-        return redirect()->route('mitra-groups.index')->with('success', 'Wadah baru berhasil dibuat.');
+        return redirect()->route('mitra-groups.index')->with('success', 'Grup baru berhasil dibuat.');
     }
 
     public function update(Request $request, MitraGroup $mitraGroup)
@@ -58,7 +58,7 @@ class MitraGroupController extends Controller
         // Also update handler_name on all accounts within this group
         MitraAccount::where('mitra_group_id', $mitraGroup->id)->update(['handler_name' => $validated['handler_name']]);
 
-        return redirect()->back()->with('success', 'Wadah berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Grup berhasil diperbarui.');
     }
 
     public function destroy(MitraGroup $mitraGroup)
@@ -74,7 +74,7 @@ class MitraGroupController extends Controller
         ]);
         
         $mitraGroup->delete();
-        return redirect()->route('mitra-groups.index')->with('success', 'Wadah berhasil dihapus.');
+        return redirect()->route('mitra-groups.index')->with('success', 'Grup berhasil dihapus.');
     }
 
     public function show(Request $request, MitraGroup $mitraGroup)
@@ -112,7 +112,7 @@ class MitraGroupController extends Controller
             'handler_name' => $mitraGroup->handler_name
         ]);
 
-        return redirect()->back()->with('success', count($request->account_ids) . ' akun berhasil ditambahkan ke wadah.');
+        return redirect()->back()->with('success', count($request->account_ids) . ' akun berhasil ditambahkan ke Grup.');
     }
 
     public function removeAccounts(Request $request, MitraGroup $mitraGroup)
@@ -130,6 +130,6 @@ class MitraGroupController extends Controller
                 'handler_name' => null
             ]);
 
-        return redirect()->back()->with('success', count($request->account_ids) . ' akun berhasil dikeluarkan dari wadah.');
+        return redirect()->back()->with('success', count($request->account_ids) . ' akun berhasil dikeluarkan dari Grup.');
     }
 }

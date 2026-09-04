@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Detail Wadah: ' . $mitraGroup->name)
+@section('title', 'Detail Grup: ' . $mitraGroup->name)
 
 @section('content')
 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center border-bottom border-emerald-900 border-opacity-50 pb-3 mb-4 gap-3">
@@ -14,7 +14,7 @@
             <i class="fa-solid fa-arrow-left me-2"></i>Kembali
         </a>
         <button type="button" class="btn btn-outline-light rounded-pill px-4 shadow-sm w-100 w-sm-auto text-center" data-bs-toggle="modal" data-bs-target="#editGroupModal">
-            <i class="fa-solid fa-pen-nib me-2"></i>Edit Wadah
+            <i class="fa-solid fa-pen-nib me-2"></i>Edit Grup
         </button>
     </div>
 </div>
@@ -31,7 +31,7 @@
                 <div class="modal-header border-0 pb-0 position-relative" style="background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.15) 0%, transparent 70%);">
                     <div>
                         <h4 class="modal-title text-white fw-bold ticker-font mb-1" style="text-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);">
-                            <i class="fa-solid fa-pen-nib text-emerald-400 me-2"></i>EDIT WADAH
+                            <i class="fa-solid fa-pen-nib text-emerald-400 me-2"></i>EDIT GRUP
                         </h4>
                         <p class="small text-emerald-500 opacity-75 mb-0">Konfigurasi nama dan handler grup.</p>
                     </div>
@@ -40,12 +40,12 @@
 
                 <div class="modal-body p-4">
                     <div class="mb-4">
-                        <label class="form-label text-emerald-500 fw-bold small text-uppercase tracking-wide mb-2">Nama Wadah</label>
+                        <label class="form-label text-emerald-500 fw-bold small text-uppercase tracking-wide mb-2">Nama Grup</label>
                         <div class="input-group">
                             <span class="input-group-text bg-black bg-opacity-40 border-emerald-900 border-end-0 text-emerald-500 border-opacity-50">
                                 <i class="fa-solid fa-layer-group"></i>
                             </span>
-                            <input type="text" name="name" class="form-control bg-black bg-opacity-40 border-emerald-900 border-start-0 text-white shadow-none px-3 py-2 ticker-font fs-6" required value="{{ $mitraGroup->name }}" placeholder="Contoh: WADAH ALPHA">
+                            <input type="text" name="name" class="form-control bg-black bg-opacity-40 border-emerald-900 border-start-0 text-white shadow-none px-3 py-2 ticker-font fs-6" required value="{{ $mitraGroup->name }}" placeholder="Contoh: GRUP ALPHA">
                         </div>
                     </div>
                     
@@ -61,7 +61,7 @@
                         <div class="d-flex align-items-start p-3 rounded-3 border border-warning border-opacity-25" style="background: rgba(255, 193, 7, 0.05);">
                             <i class="fa-solid fa-circle-info text-warning mt-1 me-3 fs-5"></i>
                             <p class="mb-0 small text-warning opacity-75 lh-sm" style="font-size: 0.8rem;">
-                                <strong>Perhatian:</strong> Jika Anda mengubah nama handler, maka nama handler di <u>seluruh akun</u> yang berada di dalam wadah ini akan ikut tersinkronisasi secara otomatis.
+                                <strong>Perhatian:</strong> Jika Anda mengubah nama handler, maka nama handler di <u>seluruh akun</u> yang berada di dalam Grup ini akan ikut tersinkronisasi secara otomatis.
                             </p>
                         </div>
                     </div>
@@ -83,7 +83,7 @@
     <div class="col-xl-6">
         <div class="card stat-node border-0 shadow-lg h-100">
             <div class="card-header border-bottom border-emerald-900 p-4 bg-emerald-900 bg-opacity-10 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
-                <h6 class="text-white fw-bold mb-0 text-center text-sm-start"><i class="fa-solid fa-users me-2 text-emerald-400"></i>ANGGOTA WADAH ({{ $groupAccounts->count() }})</h6>
+                <h6 class="text-white fw-bold mb-0 text-center text-sm-start"><i class="fa-solid fa-users me-2 text-emerald-400"></i>ANGGOTA GRUP ({{ $groupAccounts->count() }})</h6>
                 <button type="button" class="btn btn-outline-danger w-100 w-sm-auto rounded-pill" id="btnRemoveSelected" disabled onclick="document.getElementById('formRemoveAccounts').submit();">
                     Keluarkan (<span id="removeCount">0</span>)
                 </button>
@@ -126,7 +126,7 @@
                                 <tr>
                                     <td colspan="3" class="text-center py-5">
                                         <i class="fa-solid fa-box-open fs-1 mb-3 text-white opacity-20 d-block"></i>
-                                        <span class="text-white opacity-75">Wadah ini masih kosong.</span>
+                                        <span class="text-white opacity-75">Grup ini masih kosong.</span>
                                     </td>
                                 </tr>
                                 @endforelse
@@ -173,7 +173,7 @@
                                         </div>
                                     </th>
                                     <th>NAMA & ID</th>
-                                    <th>STATUS WADAH</th>
+                                    <th>STATUS GRUP</th>
                                 </tr>
                             </thead>
                             <tbody>
