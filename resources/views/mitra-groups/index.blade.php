@@ -8,7 +8,7 @@
     <div class="col-md-4 mb-3 mb-md-0">
         <div class="card stat-node border-0 shadow-sm sticky-md-top" style="top: 80px; z-index: 10;">
             <div class="card-header bg-transparent border-bottom border-emerald-900 pt-3 pb-2 px-4">
-                <h5 class="fw-bold text-emerald-400 mb-0" id="form-title"><i class="fa-solid fa-plus-circle me-2"></i>Buat Handler Baru</h5>
+                <h5 class="fw-bold text-white mb-0" id="form-title"><i class="fa-solid fa-plus-circle me-2"></i>Buat Handler Baru</h5>
             </div>
             <div class="card-body px-4 pt-2 pb-4">
                 <form id="groupForm" action="{{ route('mitra-groups.store') }}" method="POST">
@@ -41,7 +41,7 @@
     @else
     <div class="col-md-12 mt-2">
     @endif
-        <h6 class="text-emerald-400 mb-2 fw-bold"><i class="fa-solid fa-boxes-stacked me-2"></i>DAFTAR HANDLER TERSEDIA</h6>
+        <h6 class="text-white mb-2 fw-bold"><i class="fa-solid fa-boxes-stacked me-2"></i>DAFTAR HANDLER TERSEDIA</h6>
         <div class="row g-3">
             @forelse($groups as $group)
             <div class="col-sm-6">
@@ -67,10 +67,10 @@
                             </div>
                             @endif
                         </div>
-                        <p class="text-emerald-400 small mb-3"><i class="fa-solid fa-user-tie me-1"></i> Handler: {{ $group->handler_name }}</p>
+                        <p class="text-white small mb-3"><i class="fa-solid fa-user-tie me-1"></i> Handler: {{ $group->handler_name }}</p>
                         
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <span class="badge bg-emerald-900 text-emerald-400 px-3 py-2 rounded-pill"><i class="fa-solid fa-users me-1"></i> {{ $group->accounts_count }} Akun Terdaftar</span>
+                            <span class="badge bg-emerald-900 text-white px-3 py-2 rounded-pill"><i class="fa-solid fa-users me-1"></i> {{ $group->accounts_count }} Akun Terdaftar</span>
                         </div>
                     </div>
                 </div>
