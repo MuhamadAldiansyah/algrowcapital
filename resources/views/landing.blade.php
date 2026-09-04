@@ -178,7 +178,7 @@
 
             <!-- Headline - DIHAPUS reveal agar langsung muncul -->
             <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6">
-                Investasi Saham Saham <br class="hidden sm:block" />
+                Investasi Saham Indonesia <br class="hidden sm:block" />
                 <span class="text-gradient">Tanpa Keluar Modal</span>
             </h1>
 
@@ -204,7 +204,7 @@
                         <path d="M0,100 L0,80 Q20,70 40,85 T80,60 T100,20 L100,100 Z" fill="#34d399"></path>
                     </svg>
                     <div class="relative z-10 text-center">
-                        <div class="text-emerald-400 font-mono text-4xl mb-2">+24.8%</div>
+                        <div class="text-emerald-400 font-mono text-4xl mb-2">+126.8%</div>
                         <div class="text-slate-400 text-sm uppercase tracking-widest">Avg. Saham Return</div>
                     </div>
                 </div>
@@ -228,8 +228,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Partner Siapkan Akun</h3>
-                        <p class="text-sm text-slate-400 leading-relaxed">Partner menyediakan akun sekuritas yang sudah disepakati (Stockbit, Ajaib, dll) untuk dikelola.</p>
+                        <h3 class="text-xl font-bold text-white mb-2">Mitra Siapkan Akun</h3>
+                        <p class="text-sm text-slate-400 leading-relaxed">Mitra menyediakan akun sekuritas yang sudah disepakati (Stockbit, Ajaib, dll) untuk dikelola.</p>
                     </div>
 
                     <!-- Step 2 -->
@@ -241,7 +241,7 @@
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-white mb-2">Algrow Sediakan Modal</h3>
-                        <p class="text-sm text-slate-400 leading-relaxed">Modal investasi 100% berasal dari Algrow Capital. Partner tidak perlu setor sepeserpun.</p>
+                        <p class="text-sm text-slate-400 leading-relaxed">Modal investasi 100% berasal dari Algrow Capital. Mitra tidak perlu setor sepeserpun.</p>
                     </div>
 
                     <!-- Step 3 -->
@@ -280,7 +280,7 @@
                     <div class="lg:w-1/2 reveal">
                         <h2 class="text-3xl sm:text-4xl font-bold mb-6">Saling Menguntungkan & <span class="text-gradient">Transparan</span></h2>
                         <p class="text-slate-400 mb-8 leading-relaxed">
-                            Konsep ini dirancang untuk memecah masalah alokasi saham yang seringkali sulit didapatkan oleh individu, sekaligus memberikan kesempatan bagi partner untuk mendapatkan passive income.
+                            Konsep ini dirancang untuk memecah masalah alokasi saham yang seringkali sulit didapatkan oleh individu, sekaligus memberikan kesempatan bagi Mitra untuk mendapatkan passive income.
                         </p>
 
                         <ul class="space-y-6">
@@ -292,7 +292,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white font-semibold mb-1">Zero Risk Modal</h4>
-                                    <p class="text-sm text-slate-400">Partner tidak mengeluarkan uang sama sekali, sehingga risiko kerugian modal ada di pihak Algrow.</p>
+                                    <p class="text-sm text-slate-400">Mitra tidak mengeluarkan uang sama sekali, sehingga risiko kerugian modal ada di pihak Algrow.</p>
                                 </div>
                             </li>
                             <li class="flex items-start gap-4">
@@ -347,7 +347,7 @@
                             </div>
                             <div class="mt-6 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
                                 <p class="text-xs text-emerald-200 leading-relaxed text-center">
-                                    *Akun tetap dalam kendali penuh Partner (Nama & Data Diri Partner). Hanya dana yang dikelola bersama.
+                                    *Akun tetap dalam kendali penuh Mitra (Nama & Data Diri Mitra). Hanya dana yang dikelola bersama.
                                 </p>
                             </div>
                         </div>
@@ -380,12 +380,12 @@
                             Transparansi & Profit Sharing
                         </h4>
                         <p class="text-sm text-slate-400">
-                            Apabila investasi menghasilkan keuntungan, profit akan dibagikan antara Algrow Capital dan partner sesuai dengan perjanjian kerja sama yang telah disepakati bersama di awal.
+                            Apabila investasi menghasilkan keuntungan, profit akan dibagikan antara Algrow Capital dan Mitra sesuai dengan perjanjian kerja sama yang telah disepakati bersama di awal.
                         </p>
                     </div>
 
                     <p>
-                        Konsep ini bertujuan menciptakan hubungan kerja sama <strong>saling menguntungkan</strong>. Partner memperoleh peluang mendapatkan penghasilan dari akun yang dimilikinya tanpa harus menyediakan modal investasi. Di sisi lain, Algrow Capital dapat meningkatkan peluang memperoleh alokasi saham Indonesia yang lebih besar melalui pengelolaan portofolio beberapa akun terverifikasi.
+                        Konsep ini bertujuan menciptakan hubungan kerja sama <strong>saling menguntungkan</strong>. Mitra memperoleh peluang mendapatkan penghasilan dari akun yang dimilikinya tanpa harus menyediakan modal investasi. Di sisi lain, Algrow Capital dapat meningkatkan peluang memperoleh alokasi saham Indonesia yang lebih besar melalui pengelolaan portofolio beberapa akun terverifikasi.
                     </p>
                     <p>
                         Dengan pengelolaan yang terstruktur, transparansi pembagian keuntungan, serta strategi investasi yang telah ditentukan, Algrow Capital menawarkan konsep investasi yang berorientasi pada <strong>pertumbuhan dan keuntungan bersama</strong>.
@@ -408,9 +408,6 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center">
-                            <span class="text-sm font-extrabold text-white">A</span>
-                        </div>
                         <span class="text-lg font-bold text-white">Algrow Capital</span>
                     </div>
                     <p class="text-slate-500 text-sm max-w-sm">
