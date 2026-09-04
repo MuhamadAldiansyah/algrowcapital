@@ -171,6 +171,12 @@
         <!-- Hero Section -->
         <section class="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 sm:px-12 lg:px-20 max-w-7xl mx-auto text-center">
             
+            <!-- Mobile Role Switcher -->
+            <div class="md:hidden flex bg-white/5 p-1 rounded-xl mx-auto mb-8 max-w-[280px] border border-white/10 backdrop-blur-md">
+                <a href="{{ route('landing') }}" class="flex-1 py-2.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition-colors">Untuk Mitra</a>
+                <a href="{{ route('asset-manager') }}" class="flex-1 py-2.5 text-xs font-bold rounded-lg bg-teal-500 text-white shadow-lg shadow-teal-500/30">Asset Manager</a>
+            </div>
+
             <!-- Badge -->
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 border-teal-500/20">
                 <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
