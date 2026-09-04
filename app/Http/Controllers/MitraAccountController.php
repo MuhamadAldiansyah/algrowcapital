@@ -178,7 +178,7 @@ class MitraAccountController extends Controller
     public function grid(Request $request)
     {
         $search = $request->input('search');
-        $query = MitraAccount::when($search, function($q, $search) {
+        $query = MitraAccount::where('status', 'aktif')->when($search, function($q, $search) {
             return $q->where(function($subQ) use ($search) {
                 $subQ->where('owner_name', 'like', "%{$search}%")
                      ->orWhere('username', 'like', "%{$search}%")
@@ -501,7 +501,7 @@ class MitraAccountController extends Controller
 
     public function export()
     {
-        $accounts = MitraAccount::orderBy('id', 'asc')->get();
+        $accounts = MitraAccount::where('status', 'aktif')->orderBy('id', 'asc')->get();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
