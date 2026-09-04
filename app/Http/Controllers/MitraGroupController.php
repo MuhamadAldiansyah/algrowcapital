@@ -10,7 +10,9 @@ class MitraGroupController extends Controller
 {
     public function index()
     {
-        $groups = MitraGroup::withCount('accounts')->get();
+        $groups = MitraGroup::withCount(['accounts' => function($q) {
+            $q->where('status', 'aktif');
+        }])->get();
         
         $user = auth()->user();
         $adminQuery = \App\Models\User::where('role', 'admin');
