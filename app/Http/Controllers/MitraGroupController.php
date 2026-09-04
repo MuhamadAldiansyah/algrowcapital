@@ -80,10 +80,10 @@ class MitraGroupController extends Controller
         $search = $request->input('search');
         
         // Accounts already in this group
-        $groupAccounts = $mitraGroup->accounts()->get();
+        $groupAccounts = $mitraGroup->accounts()->where('status', 'aktif')->get();
         
         // Available accounts (not in ANY group)
-        $query = MitraAccount::whereNull('mitra_group_id')->orderBy('id', 'asc');
+        $query = MitraAccount::whereNull('mitra_group_id')->where('status', 'aktif')->orderBy('id', 'asc');
         
         if ($search) {
             $query->where(function($q) use ($search) {
