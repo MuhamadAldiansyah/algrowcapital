@@ -163,7 +163,7 @@
                     <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] text-white font-medium text-sm transition-all hidden sm:block">
                         Sign In
                     </a>
-                    <a href="https://wa.me/6287822421207" target="_blank" class="btn-shimmer px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-105 transition-all">
+                    <a href="https://wa.me/6287822421207?text=Halo%20Tim%20Algrow%20Capital%2C%20saya%20tertarik%20untuk%20bergabung%20dan%20bekerja%20sama%20sebagai%20Mitra%20penyedia%20akun%20sekuritas.%20Mohon%20informasi%20lebih%20lanjut%20mengenai%20syarat%20dan%20prosedur%20pendaftarannya.%20Terima%20kasih." target="_blank" class="btn-shimmer px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:scale-105 transition-all">
                         Gabung Sekarang
                     </a>
                 @endauth
@@ -201,7 +201,7 @@
 
             <!-- CTA Button - DIHAPUS reveal agar langsung muncul -->
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
-                <a href="https://wa.me/6287822421207" target="_blank" class="btn-shimmer w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-lg shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+                <a href="https://wa.me/6287822421207?text=Halo%20Tim%20Algrow%20Capital%2C%20saya%20tertarik%20untuk%20bergabung%20dan%20bekerja%20sama%20sebagai%20Mitra%20penyedia%20akun%20sekuritas.%20Mohon%20informasi%20lebih%20lanjut%20mengenai%20syarat%20dan%20prosedur%20pendaftarannya.%20Terima%20kasih." target="_blank" class="btn-shimmer w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold text-lg shadow-xl shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
                     Bergabung Sekarang
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -406,7 +406,7 @@
 
                 <div class="mt-12 text-center">
                     <!-- Tombol Static -->
-                    <a href="https://wa.me/6287822421207" target="_blank" class="inline-block btn-shimmer px-10 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all">
+                    <a href="https://wa.me/6287822421207?text=Halo%20Tim%20Algrow%20Capital%2C%20saya%20tertarik%20untuk%20bergabung%20dan%20bekerja%20sama%20sebagai%20Mitra%20penyedia%20akun%20sekuritas.%20Mohon%20informasi%20lebih%20lanjut%20mengenai%20syarat%20dan%20prosedur%20pendaftarannya.%20Terima%20kasih." target="_blank" class="inline-block btn-shimmer px-10 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all">
                         Bergabung Sekarang
                     </a>
                 </div>
