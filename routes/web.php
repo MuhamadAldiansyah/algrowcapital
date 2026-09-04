@@ -84,6 +84,10 @@ Route::get('/debug-db', function () {
     ]);
 });
 
+Route::get('/', function () {
+    return view('landing');
+})->name('landing');
+
 // Authentication Routes
 Route::get('login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('login', [AuthController::class, 'login']);
@@ -112,7 +116,7 @@ Route::middleware(['auth'])->group(function () {
 
 // Protected Routes (Require Active Subscription)
 Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
     // Administrative Routes (Only for Admin & Developer role)
     Route::middleware('admin')->group(function () {
@@ -143,6 +147,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
         Route::post('ipos/{ipo}/bulk-placement', [IpoController::class, 'storeBulkPlacement'])->name('ipos.bulk-placement');
         Route::delete('ipos/{ipo}/placement-row/{account}', [IpoController::class, 'destroyRowPlacement'])->name('ipos.destroy-row-placement');
         Route::delete('ipos/{ipo}/reset-placements', [IpoController::class, 'resetAllPlacements'])->name('ipos.reset-placements');
+        Route::delete('ipos/{ipo}/reset-capitals', [IpoController::class, 'resetAllCapitals'])->name('ipos.reset-capitals');
         Route::delete('ipos/{ipo}/reset-allotments', [IpoController::class, 'resetAllAllotments'])->name('ipos.reset-allotments');
         Route::delete('ipos/{ipo}/reset-sales', [IpoController::class, 'resetAllSales'])->name('ipos.reset-sales');
         Route::delete('ipos/{ipo}/reset-all', [IpoController::class, 'resetAllData'])->name('ipos.reset-all');

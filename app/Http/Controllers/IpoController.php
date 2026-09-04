@@ -217,6 +217,36 @@ class IpoController extends Controller
             'allocations.*.investors.*.share_pct' => 'nullable|numeric|min:0|max:100',
         ]);
 
+        // --- PRE-VALIDATION: Check Total Requested vs Total Available for Each Investor ---
+        $requestedPerInvestor = [];
+        foreach ($request->allocations as $data) {
+            $validInvestors = collect($data['investors'] ?? [])->filter(function($inv) {
+                return !empty($inv['investor_id']) && !empty($inv['capital']) && $inv['capital'] > 0;
+            });
+            foreach ($validInvestors as $inv) {
+                $invId = $inv['investor_id'];
+                if (!isset($requestedPerInvestor[$invId])) {
+                    $requestedPerInvestor[$invId] = 0;
+                }
+                $requestedPerInvestor[$invId] += $inv['capital'];
+            }
+        }
+
+        foreach ($requestedPerInvestor as $invId => $totalRequested) {
+            $investor = \App\Models\Investor::find($invId);
+            $alreadyInThisIpoForThisInvestor = \App\Models\InvestorFunding::where('investor_id', $investor->id)
+                ->whereHas('placement', function($q) use ($ipo) {
+                    $q->where('ipo_id', $ipo->id);
+                })->sum('amount_funded');
+
+            $maxAvailable = $investor->available_balance + $alreadyInThisIpoForThisInvestor;
+
+            if ($totalRequested > $maxAvailable) {
+                return back()->withErrors(['error' => "Total alokasi yang Anda minta untuk {$investor->name} (Rp " . number_format($totalRequested, 0, ',', '.') . ") melebihi batas saldo maksimal (Rp " . number_format($maxAvailable, 0, ',', '.') . ")."])->withInput();
+            }
+        }
+        // --- END PRE-VALIDATION ---
+
         foreach ($request->allocations as $data) {
             $validInvestors = collect($data['investors'] ?? [])->filter(function($inv) {
                 return !empty($inv['investor_id']) && !empty($inv['capital']) && $inv['capital'] > 0;
@@ -245,21 +275,6 @@ class IpoController extends Controller
                 // Re-sync fundings
                 $placement->fundings()->delete();
                 foreach ($validInvestors as $invData) {
-                    $investor = \App\Models\Investor::find($invData['investor_id']);
-                    
-                    // True Available Pool = Current available balance + what was previously in THIS Ipo
-                    // (Since current funding is part of active_deployment)
-                    $alreadyInThisIpoForThisInvestor = \App\Models\InvestorFunding::where('investor_id', $investor->id)
-                        ->whereHas('placement', function($q) use ($ipo) {
-                            $q->where('ipo_id', $ipo->id);
-                        })->sum('amount_funded');
-
-                    $maxAvailable = $investor->available_balance + $alreadyInThisIpoForThisInvestor;
-
-                    if ($invData['capital'] > $maxAvailable) {
-                        return back()->withErrors(['error' => "Saldo {$investor->name} tidak mencukupi untuk alokasi baru. (Maksimal tersedia: Rp " . number_format($maxAvailable, 0, ',', '.') . ")"])->withInput();
-                    }
-
                     $placement->fundings()->create([
                         'investor_id' => $invData['investor_id'],
                         'amount_funded' => $invData['capital'],
@@ -458,6 +473,32 @@ class IpoController extends Controller
             });
 
             return response()->json(['success' => true, 'message' => 'Semua alokasi pada IPO ini berhasil direset. Dana telah dikembalikan.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * AJAX: Reset (Delete) ONLY the capital (fundings) for all placements in this IPO
+     */
+    public function resetAllCapitals(Ipo $ipo)
+    {
+        try {
+            DB::transaction(function() use ($ipo) {
+                \App\Models\InvestorTransaction::where('type', 'REFUND')
+                    ->where('description', 'like', "Refund Sisa Modal IPO {$ipo->code}%")
+                    ->delete();
+
+                foreach ($ipo->placements as $placement) {
+                    $placement->fundings()->delete();
+                    $placement->update([
+                        'capital_allocated' => 0,
+                        'est_lot' => 0
+                    ]);
+                }
+            });
+
+            return response()->json(['success' => true, 'message' => 'Semua input modal berhasil dikosongkan. Daftar Mitra tetap dipertahankan.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }

@@ -191,6 +191,15 @@
                         <i class="fa-solid fa-file-excel me-1"></i> EKSPOR
                     </a>
                     @if($ipo->canEdit())
+                        @if($ipo->step == 1)
+                            <button type="button" class="btn btn-sm btn-outline-warning px-3 rounded-pill shadow-sm btn-reset-action" 
+                                    data-url="{{ route('ipos.reset-capitals', $ipo) }}" 
+                                    data-title="RESET INPUT MODAL?" 
+                                    data-text="Semua input modal (kapital dan lot) pada daftar di bawah ini akan di-nol-kan, tetapi daftar akun mitra tetap dipertahankan."
+                                    title="Kosongkan Semua Input Modal">
+                                <i class="fa-solid fa-eraser me-1"></i> RESET MODAL
+                            </button>
+                        @endif
                         <button type="button" class="btn btn-sm btn-primary-custom px-3 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#selectMitrasModal">
                             <i class="fa-solid fa-pen-to-square me-1"></i> UBAH / TAMBAH MITRA
                         </button>
@@ -688,14 +697,17 @@
             calculateMitraRow(index);
         });
 
-        $(document).on('input', '.lot-input', function() {
-            const index = $(this).closest('.mitra-row').data('index');
+        $(document).on('input', '.lot-modal-input', function() {
             const lot = parseFloat($(this).val()) || 0;
             const newTotalCapital = lot * ipoPrice * 100;
             
-            const firstCapitalInput = $(this).closest('.mitra-row').find('.capital-input').first();
-            firstCapitalInput.val(newTotalCapital);
-            calculateMitraRow(index);
+            const tr = $(this).closest('tr');
+            const capitalInput = tr.find('.capital-input');
+            const capitalDisplay = tr.find('.capital-display');
+            
+            capitalInput.val(newTotalCapital);
+            capitalDisplay.text('Rp ' + newTotalCapital.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0}));
+            
             checkAllBalances();
         });
 
