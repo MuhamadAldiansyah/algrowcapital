@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <meta name="theme-color" content="#021a14">
-    <title>Algrow Capital - Investasi Saham IPO Tanpa Modal</title>
+    <title>Algrow Capital - Investasi Saham Tanpa Modal</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -146,9 +146,6 @@
     <nav class="fixed top-0 w-full z-50 glass-nav transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                    <span class="text-xl font-extrabold text-white">A</span>
-                </div>
                 <span class="text-xl font-bold tracking-tight text-white">Algrow Capital</span>
             </div>
             <div class="flex items-center gap-4">
@@ -176,18 +173,18 @@
             <!-- Badge -->
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 border-emerald-500/20">
                 <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-                <span class="text-sm font-medium text-emerald-200">Mitra Investasi IPO #1</span>
+                <span class="text-sm font-medium text-emerald-200">Mitra Investasi Saham #1</span>
             </div>
 
             <!-- Headline - DIHAPUS reveal agar langsung muncul -->
             <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6">
-                Investasi Saham IPO <br class="hidden sm:block" />
+                Investasi Saham Saham <br class="hidden sm:block" />
                 <span class="text-gradient">Tanpa Keluar Modal</span>
             </h1>
 
             <!-- Subheadline - DIHAPUS reveal agar langsung muncul -->
             <p class="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Platform kolaborasi investasi modern. Kami menyediakan modal, Anda menyediakan akun. Kita bagi keuntungan bersama dari setiap kenaikan saham IPO.
+                Platform kolaborasi investasi modern. Kami menyediakan modal, Anda menyediakan akun. Kita bagi keuntungan bersama dari setiap kenaikan saham.
             </p>
 
             <!-- CTA Button - DIHAPUS reveal agar langsung muncul -->
@@ -208,7 +205,7 @@
                     </svg>
                     <div class="relative z-10 text-center">
                         <div class="text-emerald-400 font-mono text-4xl mb-2">+24.8%</div>
-                        <div class="text-slate-400 text-sm uppercase tracking-widest">Avg. IPO Return</div>
+                        <div class="text-slate-400 text-sm uppercase tracking-widest">Avg. Saham Return</div>
                     </div>
                 </div>
             </div>
@@ -255,8 +252,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                             </svg>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2">Eksekusi Saham IPO</h3>
-                        <p class="text-sm text-slate-400 leading-relaxed">Dana digunakan untuk membeli saham IPO baru dengan potensi keuntungan tinggi.</p>
+                        <h3 class="text-xl font-bold text-white mb-2">Eksekusi Saham</h3>
+                        <p class="text-sm text-slate-400 leading-relaxed">Dana digunakan untuk membeli saham baru dengan potensi keuntungan tinggi.</p>
                     </div>
 
                     <!-- Step 4 -->
@@ -283,7 +280,7 @@
                     <div class="lg:w-1/2 reveal">
                         <h2 class="text-3xl sm:text-4xl font-bold mb-6">Saling Menguntungkan & <span class="text-gradient">Transparan</span></h2>
                         <p class="text-slate-400 mb-8 leading-relaxed">
-                            Konsep ini dirancang untuk memecah masalah alokasi saham IPO yang seringkali sulit didapatkan oleh individu, sekaligus memberikan kesempatan bagi partner untuk mendapatkan passive income.
+                            Konsep ini dirancang untuk memecah masalah alokasi saham yang seringkali sulit didapatkan oleh individu, sekaligus memberikan kesempatan bagi partner untuk mendapatkan passive income.
                         </p>
 
                         <ul class="space-y-6">
@@ -306,7 +303,7 @@
                                 </div>
                                 <div>
                                     <h4 class="text-white font-semibold mb-1">Peluang Alokasi Lebih Besar</h4>
-                                    <p class="text-sm text-slate-400">Dengan mengelola banyak akun, probabilitas mendapatkan jatah saham IPO (allotment) meningkat drastis.</p>
+                                    <p class="text-sm text-slate-400">Dengan mengelola banyak akun, probabilitas mendapatkan jatah saham (allotment) meningkat drastis.</p>
                                 </div>
                             </li>
                             <li class="flex items-start gap-4">
@@ -370,7 +367,7 @@
 
                 <div class="prose prose-invert prose-lg mx-auto text-slate-300">
                     <p class="first-letter:text-5xl first-letter:font-bold first-letter:text-accent first-letter:float-left first-letter:mr-2">
-                        <strong class="text-white">Algrow Capital</strong> merupakan konsep kerja sama investasi yang berfokus pada saham-saham baru listing atau IPO. Kami menghadirkan inovasi di mana Mitra tidak perlu menyediakan modal investasi, melainkan menyediakan akun sekuritas yang telah disepakati untuk dikelola.
+                        <strong class="text-white">Algrow Capital</strong> merupakan konsep kerja sama investasi yang berfokus pada saham-saham yang ada di Indonesia. Kami menghadirkan inovasi di mana Mitra tidak perlu menyediakan modal investasi, melainkan menyediakan akun sekuritas yang telah disepakati untuk dikelola.
                     </p>
                     
                     <p>
@@ -388,7 +385,7 @@
                     </div>
 
                     <p>
-                        Konsep ini bertujuan menciptakan hubungan kerja sama <strong>saling menguntungkan</strong>. Partner memperoleh peluang mendapatkan penghasilan dari akun yang dimilikinya tanpa harus menyediakan modal investasi. Di sisi lain, Algrow Capital dapat meningkatkan peluang memperoleh alokasi saham IPO yang lebih besar melalui pengelolaan portofolio beberapa akun terverifikasi.
+                        Konsep ini bertujuan menciptakan hubungan kerja sama <strong>saling menguntungkan</strong>. Partner memperoleh peluang mendapatkan penghasilan dari akun yang dimilikinya tanpa harus menyediakan modal investasi. Di sisi lain, Algrow Capital dapat meningkatkan peluang memperoleh alokasi saham Indonesia yang lebih besar melalui pengelolaan portofolio beberapa akun terverifikasi.
                     </p>
                     <p>
                         Dengan pengelolaan yang terstruktur, transparansi pembagian keuntungan, serta strategi investasi yang telah ditentukan, Algrow Capital menawarkan konsep investasi yang berorientasi pada <strong>pertumbuhan dan keuntungan bersama</strong>.
@@ -417,7 +414,7 @@
                         <span class="text-lg font-bold text-white">Algrow Capital</span>
                     </div>
                     <p class="text-slate-500 text-sm max-w-sm">
-                        Mitra terpercaya investasi saham IPO. Kolaborasi modal dan akun untuk pertumbuhan finansial bersama.
+                        Mitra terpercaya investasi saham Indonesia. Kolaborasi modal dan akun untuk pertumbuhan finansial bersama.
                     </p>
                 </div>
                 <div>
