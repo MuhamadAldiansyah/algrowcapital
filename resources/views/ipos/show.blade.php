@@ -784,7 +784,7 @@
                 if (totalSpent > maxAllowed) {
                     input.addClass('is-invalid');
                     const shortfall = totalSpent - maxAllowed;
-                    msg.html(`<i class="fa-solid fa-circle-xmark me-1"></i>SALDO TIDAK CUKUP! (Kekurangan: Rp ${shortfall.toLocaleString('id-ID')})`).show();
+                    msg.html(`<i class="fa-solid fa-circle-xmark me-1"></i>SALDO GLOBAL TIDAK CUKUP! (Total Pesanan Semua Akun: Rp ${totalSpent.toLocaleString('id-ID')} | Kekurangan: Rp ${shortfall.toLocaleString('id-ID')})`).show();
                 } else {
                     input.removeClass('is-invalid');
                     msg.hide();
