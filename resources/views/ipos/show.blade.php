@@ -294,7 +294,7 @@
                                                         <input type="hidden" name="allocations[{{ $loop->parent->index }}][investors][{{ $fIndex }}][share_pct]" class="investor-share-input" value="50">
                                                     </div>
                                                     <div class="balance-label small mt-1 opacity-75" style="font-size: 0.65rem;"></div>
-                                                    <div class="validation-msg small text-danger fw-bold mt-1" style="display:none; font-size: 0.65rem;"></div>
+                                                    <div class="validation-msg small text-danger fw-bold mt-1" style="display:none; font-size: 0.65rem; white-space: normal; line-height: 1.2;"></div>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -784,7 +784,7 @@
                 if (totalSpent > maxAllowed) {
                     input.addClass('is-invalid');
                     const shortfall = totalSpent - maxAllowed;
-                    msg.html(`<i class="fa-solid fa-circle-xmark me-1"></i>SALDO GLOBAL TIDAK CUKUP! (Total Pesanan Semua Akun: Rp ${totalSpent.toLocaleString('id-ID')} | Kekurangan: Rp ${shortfall.toLocaleString('id-ID')})`).show();
+                    msg.html(`<i class="fa-solid fa-circle-xmark me-1"></i>SALDO GLOBAL KURANG!<br><span class="opacity-75 font-monospace">Tagihan: Rp ${totalSpent.toLocaleString('id-ID')}<br>Kurang: Rp ${shortfall.toLocaleString('id-ID')}</span>`).show();
                 } else {
                     input.removeClass('is-invalid');
                     msg.hide();
