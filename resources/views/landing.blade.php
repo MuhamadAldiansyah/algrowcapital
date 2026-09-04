@@ -396,7 +396,7 @@
                 </div>
 
                 <div class="mt-12 text-center">
-                    <!-- Tombol Static (Tanpa @auth) -->
+                    <!-- Tombol Static -->
                     <a href="{{ route('login') }}" class="inline-block btn-shimmer px-10 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg hover:shadow-emerald-500/40 hover:-translate-y-1 transition-all">
                         Bergabung Sekarang
                     </a>
