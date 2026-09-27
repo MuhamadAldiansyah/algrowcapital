@@ -101,7 +101,7 @@ class MitraAccountController extends Controller
             // Sorting
             $orderColumnIndex = $request->input('order.0.column', 0);
             $orderDir = $request->input('order.0.dir', 'asc');
-            $columns = ['platform', 'owner_name', 'username', 'password', 'pin', 'bank_rdn', 'rdn_account', 'device'];
+            $columns = ['platform', 'owner_name', 'username', 'password', 'pin', 'bank_rdn', 'rdn_account', 'device', 'phone'];
             
             if (isset($columns[$orderColumnIndex])) {
                 $query->orderBy($columns[$orderColumnIndex], $orderDir);
@@ -127,6 +127,7 @@ class MitraAccountController extends Controller
                 $rawPin = $account->user && $account->user->pin_sekuritas ? $account->user->pin_sekuritas : null;
                 $bankName = $account->user && $account->user->bank ? $account->user->bank : $account->bank_rdn;
                 $noRek = $account->user && $account->user->no_rek ? $account->user->no_rek : $account->rdn_account;
+                $phone = $account->user && $account->user->phone ? $account->user->phone : '';
 
                 // Decrypt logic for MitraAccount fallback
                 $decryptedPassword = '';
@@ -175,6 +176,10 @@ class MitraAccountController extends Controller
                     ';
                 }
 
+                $phoneDisplay = $phone
+                    ? '<a href="https://wa.me/62' . ltrim($phone, '0') . '" target="_blank" class="text-emerald-400 text-decoration-none"><i class="fa-brands fa-whatsapp me-1"></i>' . $phone . '</a>'
+                    : '<span class="text-muted small">-</span>';
+
                 $data[] = [
                     $platformBadge,
                     $ownerText,
@@ -184,6 +189,7 @@ class MitraAccountController extends Controller
                     $bankText,
                     '<span class="ticker-font ' . $editableClass . '" data-id="' . $account->id . '" data-field="rdn_account">' . ($noRek ?: '-') . '</span>',
                     '<span class="' . $editableClass . '" data-id="' . $account->id . '" data-field="device">' . ($account->device ?: '-') . '</span>',
+                    $phoneDisplay,
                     $actionBtns
                 ];
             }

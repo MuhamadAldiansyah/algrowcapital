@@ -134,6 +134,7 @@
                         <th>BANK RDN</th>
                         <th>NO. REKENING</th>
                         <th>DEVICE</th>
+                        <th>NO. HP</th>
                         <th>AKSI</th>
                     </tr>
                 </thead>
@@ -228,7 +229,7 @@ $(document).ready(function() {
         order: [[1, 'asc']], // Default sort by Owner
         // removed scrollX: true to let native bootstrap .table-responsive handle it perfectly
         columnDefs: [
-            { targets: [8], orderable: false } // Disable sorting on Action column
+            { targets: [9], orderable: false } // Disable sorting on Action column
         ]
     });
 
