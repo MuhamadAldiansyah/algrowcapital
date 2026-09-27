@@ -16,6 +16,21 @@ foreach ($dirs as $dir) {
     }
 }
 
+// Cache-busting: clear all /tmp cache files on every new deployment
+// so stale route/config cache never causes errors.
+$cacheFiles = [
+    '/tmp/storage/bootstrap/cache/routes.php',
+    '/tmp/storage/bootstrap/cache/config.php',
+    '/tmp/storage/bootstrap/cache/services.php',
+    '/tmp/storage/bootstrap/cache/packages.php',
+    '/tmp/storage/bootstrap/cache/events.php',
+];
+foreach ($cacheFiles as $cacheFile) {
+    if (file_exists($cacheFile)) {
+        @unlink($cacheFile);
+    }
+}
+
 // Override Laravel caching paths to use /tmp
 putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
 $_ENV['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
