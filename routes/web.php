@@ -228,12 +228,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
         
         Route::resource('users', UserController::class);
         // Tenant Management (Developer only — Owner cannot access)
-        Route::middleware(function ($request, $next) {
-            if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->role === 'developer') {
-                return $next($request);
-            }
-            abort(403, 'Akses ditolak. Hanya Developer yang dapat mengelola data tenant.');
-        })->group(function () {
+        Route::middleware('developer')->group(function () {
             Route::get('tenants', [\App\Http\Controllers\TenantController::class, 'index'])->name('tenants.index');
             Route::put('tenants/{tenant}', [\App\Http\Controllers\TenantController::class, 'update'])->name('tenants.update');
             Route::delete('tenants/{tenant}', [\App\Http\Controllers\TenantController::class, 'destroy'])->name('tenants.destroy');
