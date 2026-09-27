@@ -227,11 +227,19 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
 
         
         Route::resource('users', UserController::class);
-        Route::get('tenants', [\App\Http\Controllers\TenantController::class, 'index'])->name('tenants.index');
-        Route::put('tenants/{tenant}', [\App\Http\Controllers\TenantController::class, 'update'])->name('tenants.update');
-        Route::delete('tenants/{tenant}', [\App\Http\Controllers\TenantController::class, 'destroy'])->name('tenants.destroy');
-        Route::post('tenants/{tenant}/activate-subscription', [\App\Http\Controllers\TenantController::class, 'activateSubscription'])->name('tenants.activate-subscription');
-        Route::post('tenants/{tenant}/deactivate-subscription', [\App\Http\Controllers\TenantController::class, 'deactivateSubscription'])->name('tenants.deactivate-subscription');
+        // Tenant Management (Developer only — Owner cannot access)
+        Route::middleware(function ($request, $next) {
+            if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->role === 'developer') {
+                return $next($request);
+            }
+            abort(403, 'Akses ditolak. Hanya Developer yang dapat mengelola data tenant.');
+        })->group(function () {
+            Route::get('tenants', [\App\Http\Controllers\TenantController::class, 'index'])->name('tenants.index');
+            Route::put('tenants/{tenant}', [\App\Http\Controllers\TenantController::class, 'update'])->name('tenants.update');
+            Route::delete('tenants/{tenant}', [\App\Http\Controllers\TenantController::class, 'destroy'])->name('tenants.destroy');
+            Route::post('tenants/{tenant}/activate-subscription', [\App\Http\Controllers\TenantController::class, 'activateSubscription'])->name('tenants.activate-subscription');
+            Route::post('tenants/{tenant}/deactivate-subscription', [\App\Http\Controllers\TenantController::class, 'deactivateSubscription'])->name('tenants.deactivate-subscription');
+        });
         
         // Profit Distribution
         Route::get('/profit-distribution', [App\Http\Controllers\ProfitDistributionController::class, 'index'])->name('profit-distribution.index');
