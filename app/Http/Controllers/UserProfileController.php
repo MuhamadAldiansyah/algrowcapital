@@ -44,6 +44,36 @@ class UserProfileController extends Controller
         return view('profile.edit', compact('user'));
     }
 
+    private function ensureUserColumns()
+    {
+        try {
+            $url = env('DATABASE_URL');
+            if ($url && str_contains($url, ':6543')) {
+                $sessionUrl = str_replace(':6543', ':5432', $url);
+                config(['database.connections.pgsql.url' => $sessionUrl]);
+                \Illuminate\Support\Facades\DB::purge('pgsql');
+            }
+
+            if (\Illuminate\Support\Facades\DB::getDriverName() === 'pgsql') {
+                \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(255) NULL;');
+                \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS sekuritas VARCHAR(255) NULL;');
+                \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS password_sekuritas VARCHAR(255) NULL;');
+                \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS pin_sekuritas VARCHAR(255) NULL;');
+                \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS bank VARCHAR(255) NULL;');
+                \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS no_rek VARCHAR(255) NULL;');
+            } elseif (\Illuminate\Support\Facades\DB::getDriverName() === 'mysql') {
+                $columns = ['phone', 'sekuritas', 'password_sekuritas', 'pin_sekuritas', 'bank', 'no_rek'];
+                foreach ($columns as $col) {
+                    if (!\Illuminate\Support\Facades\Schema::hasColumn('users', $col)) {
+                        \Illuminate\Support\Facades\DB::statement("ALTER TABLE users ADD COLUMN `{$col}` VARCHAR(255) NULL;");
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('ensureUserColumns failed: ' . $e->getMessage());
+        }
+    }
+
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -58,7 +88,16 @@ class UserProfileController extends Controller
             'no_rek' => 'nullable|string|max:255',
         ]);
 
-        $user->update($validated);
+        try {
+            $user->update($validated);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (str_contains($e->getMessage(), '42703') || str_contains($e->getMessage(), 'Unknown column')) {
+                $this->ensureUserColumns();
+                $user->update($validated);
+            } else {
+                throw $e;
+            }
+        }
 
         return redirect()->route('my-profile.edit')->with('success', 'Profil berhasil diperbarui.');
     }
@@ -73,7 +112,16 @@ class UserProfileController extends Controller
             'phone.required' => 'Nomor telepon wajib diisi.'
         ]);
 
-        $user->update(['phone' => $validated['phone']]);
+        try {
+            $user->update(['phone' => $validated['phone']]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if (str_contains($e->getMessage(), 'phone') && (str_contains($e->getMessage(), '42703') || str_contains($e->getMessage(), 'Unknown column'))) {
+                $this->ensureUserColumns();
+                $user->update(['phone' => $validated['phone']]);
+            } else {
+                throw $e;
+            }
+        }
 
         return redirect()->back()->with('success', 'Nomor telepon berhasil disimpan.');
     }

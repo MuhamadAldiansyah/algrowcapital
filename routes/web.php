@@ -54,6 +54,41 @@ Route::get('/fix-type-constraint', function () {
     }
 });
 
+Route::get('/fix-phone-column', function () {
+    try {
+        $url = env('DATABASE_URL');
+        if ($url) {
+            $url = str_replace(':6543', ':5432', $url);
+            config(['database.connections.pgsql.url' => $url]);
+            \Illuminate\Support\Facades\DB::purge('pgsql');
+        }
+
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'pgsql') {
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(255) NULL;');
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS sekuritas VARCHAR(255) NULL;');
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS password_sekuritas VARCHAR(255) NULL;');
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS pin_sekuritas VARCHAR(255) NULL;');
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS bank VARCHAR(255) NULL;');
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS no_rek VARCHAR(255) NULL;');
+        }
+
+        // Run pending migrations safely (non-destructive)
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $artisanOutput = \Illuminate\Support\Facades\Artisan::output();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Kolom phone dan profil user berhasil ditambahkan ke tabel users!',
+            'artisan_output' => trim($artisanOutput)
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
 Route::get('/import-old-data', function () {
     try {
         // Force Session Pooler (port 5432) to ensure session_replication_role persists
