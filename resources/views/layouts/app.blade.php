@@ -361,9 +361,6 @@
             </a>
 
             @if(Auth::user()->role === 'user')
-            <a href="{{ route('user-tasks.index') }}" class="nav-link {{ request()->routeIs('user-tasks.index') || request()->routeIs('user-tasks.allotment') || request()->routeIs('user-tasks.sale') ? 'active' : '' }}">
-                <i class="fa-solid fa-bolt me-2"></i> Eksekusi IPO
-            </a>
             <a href="{{ route('user-tasks.profit') }}" class="nav-link {{ request()->routeIs('user-tasks.profit') ? 'active' : '' }}">
                 <i class="fa-solid fa-hand-holding-dollar me-2"></i> Pembagian Profit
             </a>
