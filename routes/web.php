@@ -42,12 +42,9 @@ Route::get('/fix-type-constraint', function () {
             \Illuminate\Support\Facades\DB::statement('ALTER TABLE investor_transactions DROP CONSTRAINT IF EXISTS investor_transactions_type_check;');
         }
 
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-
         return response()->json([
             'status' => 'success',
-            'message' => 'Constraint investor_transactions_type_check berhasil dihapus dan migration telah dijalankan!',
-            'artisan_output' => \Illuminate\Support\Facades\Artisan::output()
+            'message' => 'Constraint investor_transactions_type_check berhasil dihapus!'
         ]);
     } catch (\Exception $e) {
         return response()->json([

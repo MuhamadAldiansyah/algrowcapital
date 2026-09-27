@@ -25,7 +25,7 @@
                 ['icon' => 'fa-plus-circle', 'label' => 'Modal', 'desc' => 'Pesan Saham', 'url' => '#', 'modal' => $ipo->placements()->count() === 0 ? '#selectMitrasModal' : null, 'min_step' => 1],
                 ['icon' => 'fa-hand-holding-dollar', 'label' => 'Jatah', 'desc' => 'Allotment', 'url' => route('ipos.allotment-bulk', $ipo), 'min_step' => 2],
                 ['icon' => 'fa-money-bill-trend-up', 'label' => 'Jual', 'desc' => 'Realisasi', 'url' => route('ipo-sales.create', $ipo), 'min_step' => 3],
-                ['icon' => 'fa-check-double', 'label' => 'Selesai', 'desc' => 'Refund/Profit', 'url' => '#', 'min_step' => 4]
+                ['icon' => 'fa-coins', 'label' => 'Profit', 'desc' => 'Bagi Hasil', 'url' => route('profit-distribution.index'), 'min_step' => 4]
             ]; @endphp
 
             @foreach($steps as $index => $s)
@@ -168,10 +168,24 @@
                         </button>
                     </div>
                 @elseif($ipo->step == 4)
-                    <p class="small text-white opacity-75 mb-4">Seluruh proses selesai! Dana sisa dan profit telah dikembalikan ke investor.</p>
+                    <p class="small text-white opacity-75 mb-3">Penjualan selesai! Total Keuntungan Kotor: <strong class="text-success">Rp {{ number_format($ipo->sales->sum('net_profit'), 0, ',', '.') }}</strong>. Silakan bagikan profit agar saldo dompet investor dan dashboard terakumulasi.</p>
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        <a href="{{ route('profit-distribution.index') }}" class="btn btn-warning text-dark py-3 fw-bold rounded-pill shadow-lg hover-scale">
+                            <i class="fa-solid fa-coins me-2"></i>BAGIKAN PROFIT KE INVESTOR
+                        </a>
+                    </div>
+                    <div class="text-center p-3 bg-black bg-opacity-40 rounded-3 border border-emerald-900 shadow-sm">
+                        <small class="text-white d-block mb-1 opacity-75">TOTAL NET PROFIT IPO</small>
+                        <h4 class="fw-bold text-success ticker-font mb-0">Rp {{ number_format($ipo->sales->sum('net_profit'), 0, ',', '.') }}</h4>
+                    </div>
+                @elseif($ipo->step == 5)
+                    <p class="small text-white opacity-75 mb-4">Seluruh proses selesai! Profit dan modal telah berhasil didistribusikan ke saldo seluruh investor.</p>
                     <div class="text-center p-4 bg-black bg-opacity-40 rounded-3 border border-success border-opacity-30 shadow-sm mt-3">
-                        <small class="text-white d-block mb-1 opacity-75">TOTAL NET PROFIT GABUNGAN</small>
+                        <small class="text-white d-block mb-1 opacity-75">TOTAL NET PROFIT TERDISTRIBUSI</small>
                         <h3 class="fw-bold text-success ticker-font mb-0 shadow-sm">Rp {{ number_format($ipo->sales->sum('net_profit'), 0, ',', '.') }}</h3>
+                        <div class="badge bg-success bg-opacity-25 text-success border border-success mt-2 px-3 py-1">
+                            <i class="fa-solid fa-check-double me-1"></i> Telah Didistribusikan
+                        </div>
                     </div>
                 @endif
             </div>
