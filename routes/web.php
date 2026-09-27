@@ -29,6 +29,34 @@ Route::get('/migrate-db', function () {
     }
 });
 
+Route::get('/fix-type-constraint', function () {
+    try {
+        $url = env('DATABASE_URL');
+        if ($url) {
+            $url = str_replace(':6543', ':5432', $url);
+            config(['database.connections.pgsql.url' => $url]);
+            \Illuminate\Support\Facades\DB::purge('pgsql');
+        }
+
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'pgsql') {
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE investor_transactions DROP CONSTRAINT IF EXISTS investor_transactions_type_check;');
+        }
+
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Constraint investor_transactions_type_check berhasil dihapus dan migration telah dijalankan!',
+            'artisan_output' => \Illuminate\Support\Facades\Artisan::output()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
 Route::get('/import-old-data', function () {
     try {
         // Force Session Pooler (port 5432) to ensure session_replication_role persists

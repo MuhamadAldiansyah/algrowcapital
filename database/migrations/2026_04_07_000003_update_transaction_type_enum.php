@@ -16,6 +16,10 @@ return new class extends Migration
         Schema::table('investor_transactions', function (Blueprint $table) {
             $table->string('type')->change(); // Temporary change to string to allow any value
         });
+
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'pgsql') {
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE investor_transactions DROP CONSTRAINT IF EXISTS investor_transactions_type_check;');
+        }
     }
 
     /**
