@@ -13,9 +13,11 @@
         <a href="{{ route('mitra-groups.index') }}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm w-100 w-sm-auto text-center">
             <i class="fa-solid fa-arrow-left me-2"></i>Kembali
         </a>
+        @if(in_array(Auth::user()->role, ['owner', 'developer']))
         <button type="button" class="btn btn-outline-light rounded-pill px-4 shadow-sm w-100 w-sm-auto text-center" data-bs-toggle="modal" data-bs-target="#editGroupModal">
             <i class="fa-solid fa-pen-nib me-2"></i>Edit Grup
         </button>
+        @endif
     </div>
 </div>
 

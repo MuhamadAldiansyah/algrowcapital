@@ -78,8 +78,14 @@
             @empty
             <div class="col-12 text-center py-5">
                 <i class="fa-solid fa-folder-open fs-1 mb-3 text-emerald-500 opacity-20 d-block"></i>
-                <span class="text-white fw-bold">Belum ada Handler yang dibuat</span>
-                <p class="text-white opacity-50 small mb-0 mt-1">Silakan buat Handler baru di panel sebelah kiri.</p>
+                <span class="text-white fw-bold">Belum ada Handler yang tersedia</span>
+                <p class="text-white opacity-50 small mb-0 mt-1">
+                    @if(in_array(Auth::user()->role, ['owner', 'developer']))
+                        Silakan buat Handler baru di panel sebelah kiri.
+                    @else
+                        Belum ada grup akun yang ditugaskan ke Anda.
+                    @endif
+                </p>
             </div>
             @endforelse
         </div>

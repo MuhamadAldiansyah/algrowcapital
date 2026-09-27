@@ -11,6 +11,53 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class MitraAccountController extends Controller
 {
+    /**
+     * Scope query based on authenticated user's role
+     */
+    private function applyRoleScope($query, $user)
+    {
+        if (!$user) return $query;
+
+        if ($user->role === 'investor') {
+            $query->whereHas('placements.fundings.investor', function($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        } elseif ($user->role === 'user') {
+            $query->where(function($q) use ($user) {
+                $q->where('username', $user->username)
+                  ->orWhere('owner_name', $user->name);
+            });
+        } elseif ($user->role === 'admin') {
+            $userName = $user->name;
+            $query->where(function($q) use ($userName) {
+                $q->where('handler_name', $userName)
+                  ->orWhereHas('group', function($gq) use ($userName) {
+                      $gq->where('handler_name', $userName);
+                  });
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Check if authenticated admin user has access to a specific account
+     */
+    private function checkAccountAccess(MitraAccount $mitraAccount)
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user) return;
+
+        if ($user->role === 'admin') {
+            $userName = strtolower(trim($user->name));
+            $isHandler = (strtolower(trim($mitraAccount->handler_name ?? '')) === $userName) || 
+                         ($mitraAccount->group && strtolower(trim($mitraAccount->group->handler_name ?? '')) === $userName);
+            if (!$isHandler) {
+                abort(403, 'Akses ditolak. Anda hanya dapat mengelola akun yang Anda ampuh.');
+            }
+        }
+    }
+
     public function index(Request $request)
     {
         $status = $request->input('status', 'semua');
@@ -23,16 +70,8 @@ class MitraAccountController extends Controller
         if ($request->ajax()) {
             $query = MitraAccount::query();
 
-            if ($user && $user->role === 'investor') {
-                $query->whereHas('placements.fundings.investor', function($q) use ($user) {
-                    $q->where('user_id', $user->id);
-                });
-            } elseif ($user && $user->role === 'user') {
-                $query->where(function($q) use ($user) {
-                    $q->where('username', $user->username)
-                      ->orWhere('owner_name', $user->name);
-                });
-            }
+            // Apply role-based filtering (admin only sees handled accounts, investor only sees funded accounts)
+            $this->applyRoleScope($query, $user);
 
             // Status Filter
             if ($status === 'aktif') {
@@ -52,7 +91,10 @@ class MitraAccountController extends Controller
                 });
             }
 
-            $recordsTotal = MitraAccount::count();
+            $baseCountQuery = MitraAccount::query();
+            $this->applyRoleScope($baseCountQuery, $user);
+            $recordsTotal = $baseCountQuery->count();
+
             $recordsFiltered = clone $query;
             $recordsFilteredCount = $recordsFiltered->count();
 
@@ -156,11 +198,8 @@ class MitraAccountController extends Controller
         
         // Count for the status buttons
         $countsQuery = MitraAccount::query();
-        if ($user && $user->role === 'investor') {
-            $countsQuery->whereHas('placements.fundings.investor', function($q) use ($user) {
-                $q->where('user_id', $user->id);
-            });
-        }
+        $this->applyRoleScope($countsQuery, $user);
+
         $counts = [
             'semua' => (clone $countsQuery)->count(),
             'aktif' => (clone $countsQuery)->where('status', 'aktif')->count(),
@@ -177,8 +216,12 @@ class MitraAccountController extends Controller
 
     public function grid(Request $request)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
         $search = $request->input('search');
-        $query = MitraAccount::where('status', 'aktif')->when($search, function($q, $search) {
+        $query = MitraAccount::where('status', 'aktif');
+        $this->applyRoleScope($query, $user);
+
+        $query->when($search, function($q, $search) {
             return $q->where(function($subQ) use ($search) {
                 $subQ->where('owner_name', 'like', "%{$search}%")
                      ->orWhere('username', 'like', "%{$search}%")
@@ -203,6 +246,8 @@ class MitraAccountController extends Controller
 
     public function store(Request $request)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
         $validated = $request->validate([
             'owner_name' => 'required|string|max:255',
             'platform' => 'required|string',
@@ -215,6 +260,10 @@ class MitraAccountController extends Controller
             'status' => 'required|in:aktif,nonaktif',
             'device' => 'nullable|string',
         ]);
+
+        if ($user && $user->role === 'admin') {
+            $validated['handler_name'] = $user->name;
+        }
 
         // Encrypt sensitive data
         $validated['password'] = Crypt::encryptString($request->password);
@@ -229,6 +278,8 @@ class MitraAccountController extends Controller
 
     public function show(MitraAccount $mitraAccount)
     {
+        $this->checkAccountAccess($mitraAccount);
+
         $mitraAccount->load(['placements.ipo', 'placements.allocation', 'placements.sale']);
         
         $chartDataRaw = [];
@@ -255,11 +306,15 @@ class MitraAccountController extends Controller
 
     public function edit(MitraAccount $mitraAccount)
     {
+        $this->checkAccountAccess($mitraAccount);
+
         return view('mitra-accounts.edit', compact('mitraAccount'));
     }
 
     public function update(Request $request, MitraAccount $mitraAccount)
     {
+        $this->checkAccountAccess($mitraAccount);
+
         $validated = $request->validate([
             'owner_name' => 'required|string|max:255',
             'platform' => 'required|string',
@@ -282,6 +337,8 @@ class MitraAccountController extends Controller
 
     public function destroy(MitraAccount $mitraAccount)
     {
+        $this->checkAccountAccess($mitraAccount);
+
         $mitraAccount->delete();
         return redirect()->route('mitra-accounts.index')->with('success', 'Akun Mitra berhasil dihapus.');
     }
@@ -334,6 +391,9 @@ class MitraAccountController extends Controller
             return redirect()->back()->with('error', 'File tidak memiliki data atau kosong.');
         }
 
+        $user = auth()->user();
+        $adminHandler = ($user && $user->role === 'admin') ? $user->name : null;
+
         $count = 0;
         $updatedCount = 0;
         $skippedCount = 0;
@@ -381,6 +441,17 @@ class MitraAccountController extends Controller
             $existingAccount = MitraAccount::where('username', $username)->first();
 
             if ($existingAccount) {
+                // If user is admin, cannot overwrite accounts handled by another admin
+                if ($user && $user->role === 'admin') {
+                    $userName = strtolower(trim($user->name));
+                    $isHandler = (strtolower(trim($existingAccount->handler_name ?? '')) === $userName) || 
+                                 ($existingAccount->group && strtolower(trim($existingAccount->group->handler_name ?? '')) === $userName);
+                    if (!$isHandler && $existingAccount->handler_name) {
+                        $skippedCount++;
+                        continue;
+                    }
+                }
+
                 // Decrypt existing password to compare
                 $existingPassword = '';
                 try {
@@ -406,7 +477,7 @@ class MitraAccountController extends Controller
                     'rdn_account' => $rdnAccount ?: null,
                     'status' => (strtolower($status) == 'nonaktif' || strtolower($status) == 'non-aktif') ? 'nonaktif' : 'aktif',
                     'device' => $device ?: null,
-                    'handler_name' => $handlerName ?: $existingAccount->handler_name,
+                    'handler_name' => $handlerName ?: ($existingAccount->handler_name ?: $adminHandler),
                 ];
 
                 if (auth()->user()->role === 'developer' && $request->tenant_id) {
@@ -427,7 +498,7 @@ class MitraAccountController extends Controller
                     'rdn_account' => $rdnAccount ?: null,
                     'status' => (strtolower($status) == 'nonaktif' || strtolower($status) == 'non-aktif') ? 'nonaktif' : 'aktif',
                     'device' => $device ?: null,
-                    'handler_name' => $handlerName ?: null,
+                    'handler_name' => $handlerName ?: $adminHandler,
                 ];
 
                 if (auth()->user()->role === 'developer' && $request->tenant_id) {
@@ -501,7 +572,10 @@ class MitraAccountController extends Controller
 
     public function export()
     {
-        $accounts = MitraAccount::where('status', 'aktif')->orderBy('id', 'asc')->get();
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $query = MitraAccount::where('status', 'aktif')->orderBy('id', 'asc');
+        $this->applyRoleScope($query, $user);
+        $accounts = $query->get();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -578,6 +652,8 @@ class MitraAccountController extends Controller
 
     public function updateField(Request $request, MitraAccount $mitraAccount)
     {
+        $this->checkAccountAccess($mitraAccount);
+
         $request->validate([
             'field' => 'required|string',
             'value' => 'required|string|max:255'

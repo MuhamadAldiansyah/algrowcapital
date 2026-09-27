@@ -10,11 +10,19 @@ class MitraGroupController extends Controller
 {
     public function index()
     {
-        $groups = MitraGroup::withCount(['accounts' => function($q) {
-            $q->where('status', 'aktif');
-        }])->get();
-        
         $user = auth()->user();
+
+        $groupQuery = MitraGroup::withCount(['accounts' => function($q) {
+            $q->where('status', 'aktif');
+        }]);
+
+        // Jika user adalah admin, hanya tampilkan grup handler miliknya sendiri
+        if ($user && $user->role === 'admin') {
+            $groupQuery->where('handler_name', $user->name);
+        }
+
+        $groups = $groupQuery->get();
+        
         $adminQuery = \App\Models\User::where('role', 'admin');
         
         // Jika bukan developer, batasi admin hanya dari tenant (perusahaan) yang sama
@@ -79,6 +87,11 @@ class MitraGroupController extends Controller
 
     public function show(Request $request, MitraGroup $mitraGroup)
     {
+        $user = auth()->user();
+        if ($user && $user->role === 'admin' && strtolower(trim($mitraGroup->handler_name)) !== strtolower(trim($user->name))) {
+            abort(403, 'Akses ditolak. Anda hanya dapat melihat grup handler milik Anda sendiri.');
+        }
+
         $search = $request->input('search');
         
         // Accounts already in this group
@@ -87,6 +100,14 @@ class MitraGroupController extends Controller
         // Available accounts (not in ANY group)
         $query = MitraAccount::whereNull('mitra_group_id')->where('status', 'aktif')->orderBy('id', 'asc');
         
+        if ($user && $user->role === 'admin') {
+            $query->where(function($q) use ($user) {
+                $q->whereNull('handler_name')
+                  ->orWhere('handler_name', '')
+                  ->orWhere('handler_name', $user->name);
+            });
+        }
+
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('owner_name', 'like', "%{$search}%")
@@ -101,6 +122,11 @@ class MitraGroupController extends Controller
 
     public function assignAccounts(Request $request, MitraGroup $mitraGroup)
     {
+        $user = auth()->user();
+        if ($user && $user->role === 'admin' && strtolower(trim($mitraGroup->handler_name)) !== strtolower(trim($user->name))) {
+            abort(403, 'Akses ditolak.');
+        }
+
         $request->validate([
             'account_ids' => 'required|array',
             'account_ids.*' => 'exists:mitra_accounts,id'
@@ -117,6 +143,11 @@ class MitraGroupController extends Controller
 
     public function removeAccounts(Request $request, MitraGroup $mitraGroup)
     {
+        $user = auth()->user();
+        if ($user && $user->role === 'admin' && strtolower(trim($mitraGroup->handler_name)) !== strtolower(trim($user->name))) {
+            abort(403, 'Akses ditolak.');
+        }
+
         $request->validate([
             'account_ids' => 'required|array',
             'account_ids.*' => 'exists:mitra_accounts,id'

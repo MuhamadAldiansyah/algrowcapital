@@ -40,6 +40,16 @@ class DashboardController extends Controller
                 });
             }
 
+            if ($user->role === 'admin') {
+                $userName = $user->name;
+                $mitraQuery->where(function($q) use ($userName) {
+                    $q->where('handler_name', $userName)
+                      ->orWhereHas('group', function($gq) use ($userName) {
+                          $gq->where('handler_name', $userName);
+                      });
+                });
+            }
+
             $investors = $investorsQuery->get();
             $totalAkun = $mitraQuery->count();
             $recentTransactions = $recentTransactionsQuery->take(8)->get();
