@@ -12,11 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('sekuritas')->nullable();
-            $table->string('password_sekuritas')->nullable();
-            $table->string('pin_sekuritas')->nullable();
-            $table->string('bank')->nullable();
-            $table->string('no_rek')->nullable();
+            if (!Schema::hasColumn('users', 'sekuritas')) {
+                $table->string('sekuritas')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'password_sekuritas')) {
+                $table->string('password_sekuritas')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'pin_sekuritas')) {
+                $table->string('pin_sekuritas')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'bank')) {
+                $table->string('bank')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'no_rek')) {
+                $table->string('no_rek')->nullable();
+            }
         });
     }
 
