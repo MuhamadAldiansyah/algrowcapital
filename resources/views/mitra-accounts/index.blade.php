@@ -267,12 +267,12 @@ $(document).ready(function() {
             
             const newValue = $(this).val().trim();
             
-            if (newValue === currentText || newValue === '') {
+            if (newValue === currentText) {
                 cell.html(currentText === '' ? '-' : currentText);
                 return;
             }
 
-            if (newValue !== currentText) {
+            {
                 cell.html('<i class="fa-solid fa-spinner fa-spin text-emerald-500"></i>');
 
                 $.ajax({
@@ -284,7 +284,22 @@ $(document).ready(function() {
                         _token: $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
-                        cell.html(newValue);
+                        if (field === 'phone' && newValue) {
+                            cell.html(newValue);
+                            // Also update the WA icon link next to the cell
+                            const cleanNum = newValue.replace(/\D/g, '').replace(/^0/, '');
+                            const waLink = cell.closest('div').find('a[title="Chat WhatsApp"]');
+                            if (waLink.length) {
+                                waLink.attr('href', 'https://wa.me/62' + cleanNum);
+                            } else {
+                                cell.after('<a href="https://wa.me/62' + cleanNum + '" target="_blank" class="text-emerald-400 text-decoration-none ms-2" title="Chat WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>');
+                            }
+                        } else if (field === 'phone' && !newValue) {
+                            cell.html('-');
+                            cell.closest('div').find('a[title="Chat WhatsApp"]').remove();
+                        } else {
+                            cell.html(newValue || '-');
+                        }
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
