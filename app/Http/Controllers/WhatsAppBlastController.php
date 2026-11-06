@@ -54,10 +54,40 @@ class WhatsAppBlastController extends Controller
      */
     public function index()
     {
-        $usersWithPhone = User::whereNotNull('phone')
+        // Get recipients from mitra_accounts (primary source of phone numbers)
+        $mitraWithPhone = \App\Models\MitraAccount::whereNotNull('phone')
+            ->where('phone', '!=', '')
+            ->orderBy('owner_name', 'asc')
+            ->get()
+            ->map(function ($m) {
+                return (object) [
+                    'name' => $m->owner_name,
+                    'phone' => $m->phone,
+                    'role' => 'Mitra',
+                    'source' => 'mitra',
+                ];
+            });
+
+        // Also get from users table (for users who have phone but no mitra account)
+        $usersWithPhoneRaw = User::whereNotNull('phone')
             ->where('phone', '!=', '')
             ->orderBy('name', 'asc')
             ->get();
+
+        $mitraPhones = $mitraWithPhone->pluck('phone')->toArray();
+        $usersOnly = $usersWithPhoneRaw->filter(function ($u) use ($mitraPhones) {
+            return !in_array($u->phone, $mitraPhones);
+        })->map(function ($u) use ($mitraPhones) {
+            return (object) [
+                'name' => $u->name,
+                'phone' => $u->phone,
+                'role' => $u->role ?? 'User',
+                'source' => 'user',
+            ];
+        });
+
+        // Merge: mitra first, then users not already in mitra
+        $usersWithPhone = $mitraWithPhone->merge($usersOnly)->unique('phone')->values();
 
         $allUsers = User::orderBy('name', 'asc')->get();
         $currentGatewayUrl = $this->getServiceUrl();

@@ -54,15 +54,6 @@ Route::get('/fix-type-constraint', function () {
     }
 });
 
-Route::get('/check-phone-data', function () {
-    $accounts = \App\Models\MitraAccount::select('id', 'owner_name', 'username', 'phone')->get();
-    $users = \App\Models\User::select('id', 'name', 'username', 'phone')->get();
-    return response()->json([
-        'mitra_accounts' => $accounts,
-        'users' => $users,
-    ]);
-});
-
 Route::get('/fix-phone-column', function () {
     try {
         $url = env('DATABASE_URL');

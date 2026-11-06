@@ -176,7 +176,7 @@
                     <ul class="nav nav-pills mb-3 p-1 rounded-3 bg-black bg-opacity-40 border border-emerald-900 border-opacity-30" id="recipientTabs">
                         <li class="nav-item flex-fill text-center">
                             <button class="nav-link active w-100 py-2 small fw-bold" id="tab-db" data-bs-toggle="pill" data-bs-target="#content-db" type="button">
-                                <i class="fa-solid fa-database me-1"></i> Database User ({{ $usersWithPhone->count() }})
+                                <i class="fa-solid fa-database me-1"></i> Database Mitra & User ({{ $usersWithPhone->count() }})
                             </button>
                         </li>
                         <li class="nav-item flex-fill text-center">
@@ -197,7 +197,7 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="checkAllDb" onchange="toggleSelectAllDb(this)">
-                                    <label class="form-check-label text-white small" for="checkAllDb">Pilih Semua User</label>
+                                    <label class="form-check-label text-white small" for="checkAllDb">Pilih Semua Penerima ({{ $usersWithPhone->count() }})</label>
                                 </div>
                                 <span class="small text-white opacity-50">Hanya user dengan no telepon valid</span>
                             </div>
@@ -224,7 +224,7 @@
                                             <td class="ticker-font text-emerald-400">{{ $u->phone }}</td>
                                             <td>
                                                 <span class="badge bg-black bg-opacity-50 text-white border border-emerald-900 border-opacity-40 small">
-                                                    {{ strtoupper($u->role) }}
+                                                    {{ strtoupper($u->role ?? 'MITRA') }}
                                                 </span>
                                             </td>
                                         </tr>
