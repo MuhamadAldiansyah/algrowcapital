@@ -54,42 +54,73 @@ class WhatsAppBlastController extends Controller
      */
     public function index()
     {
-        // Get recipients from mitra_accounts (primary source of phone numbers)
-        $mitraWithPhone = \App\Models\MitraAccount::whereNotNull('phone')
-            ->where('phone', '!=', '')
+        // 1. Get recipients from mitra_accounts (bypass global tenant scopes so all contacts appear)
+        $allMitra = \App\Models\MitraAccount::withoutGlobalScopes()
+            ->with(['user' => function($q) {
+                $q->withoutGlobalScopes();
+            }])
             ->orderBy('owner_name', 'asc')
-            ->get()
-            ->map(function ($m) {
-                return (object) [
-                    'name' => $m->owner_name,
-                    'phone' => $m->phone,
-                    'role' => 'Mitra',
-                    'source' => 'mitra',
-                ];
-            });
+            ->get();
 
-        // Also get from users table (for users who have phone but no mitra account)
-        $usersWithPhoneRaw = User::whereNotNull('phone')
+        $recipientsList = collect();
+
+        foreach ($allMitra as $m) {
+            // Check direct phone on mitra_account or fallback to user profile
+            $rawPhone = $m->getRawOriginal('phone') ?: ($m->user ? $m->user->phone : null);
+            if ($rawPhone) {
+                $cleanPhone = trim($rawPhone);
+                $digits = preg_replace('/[^0-9]/', '', $cleanPhone);
+                if ($cleanPhone !== '' && $cleanPhone !== '-' && strlen($digits) >= 8) {
+                    $recipientsList->push((object) [
+                        'name' => $m->owner_name ?: ($m->user ? $m->user->name : $m->username),
+                        'phone' => $cleanPhone,
+                        'role' => 'Mitra',
+                        'source' => 'mitra',
+                    ]);
+                }
+            }
+        }
+
+        // 2. Also get standalone users (without global scopes)
+        $usersWithPhoneRaw = User::withoutGlobalScopes()
+            ->whereNotNull('phone')
             ->where('phone', '!=', '')
+            ->where('phone', '!=', '-')
             ->orderBy('name', 'asc')
             ->get();
 
-        $mitraPhones = $mitraWithPhone->pluck('phone')->toArray();
-        $usersOnly = $usersWithPhoneRaw->filter(function ($u) use ($mitraPhones) {
-            return !in_array($u->phone, $mitraPhones);
-        })->map(function ($u) use ($mitraPhones) {
-            return (object) [
-                'name' => $u->name,
-                'phone' => $u->phone,
-                'role' => $u->role ?? 'User',
-                'source' => 'user',
-            ];
-        });
+        foreach ($usersWithPhoneRaw as $u) {
+            $cleanPhone = trim($u->phone);
+            $digits = preg_replace('/[^0-9]/', '', $cleanPhone);
+            if ($cleanPhone !== '' && $cleanPhone !== '-' && strlen($digits) >= 8) {
+                $recipientsList->push((object) [
+                    'name' => $u->name ?: $u->username,
+                    'phone' => $cleanPhone,
+                    'role' => $u->role ? ucfirst($u->role) : 'User',
+                    'source' => 'user',
+                ]);
+            }
+        }
 
-        // Merge: mitra first, then users not already in mitra
-        $usersWithPhone = $mitraWithPhone->merge($usersOnly)->unique('phone')->values();
+        // 3. Normalize & Deduplicate by phone number
+        $seenNumbers = [];
+        $usersWithPhone = $recipientsList->filter(function ($item) use (&$seenNumbers) {
+            $numeric = preg_replace('/[^0-9]/', '', $item->phone);
+            if (str_starts_with($numeric, '0')) {
+                $normalized = '62' . substr($numeric, 1);
+            } elseif (str_starts_with($numeric, '62')) {
+                $normalized = $numeric;
+            } else {
+                $normalized = '62' . $numeric;
+            }
+            if (isset($seenNumbers[$normalized])) {
+                return false;
+            }
+            $seenNumbers[$normalized] = true;
+            return true;
+        })->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
 
-        $allUsers = User::orderBy('name', 'asc')->get();
+        $allUsers = User::withoutGlobalScopes()->orderBy('name', 'asc')->get();
         $currentGatewayUrl = $this->getServiceUrl();
 
         return view('whatsapp.index', compact('usersWithPhone', 'allUsers', 'currentGatewayUrl'));
