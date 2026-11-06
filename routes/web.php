@@ -70,6 +70,7 @@ Route::get('/fix-phone-column', function () {
             \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS pin_sekuritas VARCHAR(255) NULL;');
             \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS bank VARCHAR(255) NULL;');
             \Illuminate\Support\Facades\DB::statement('ALTER TABLE users ADD COLUMN IF NOT EXISTS no_rek VARCHAR(255) NULL;');
+            \Illuminate\Support\Facades\DB::statement('ALTER TABLE mitra_accounts ADD COLUMN IF NOT EXISTS phone VARCHAR(255) NULL;');
         }
 
         // Run pending migrations safely (non-destructive)

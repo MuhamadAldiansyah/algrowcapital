@@ -82,3 +82,4 @@ async function tryAutoRegister(url) {
         console.log('[AUTO-SYNC] Vercel auto-register notice: Silakan simpan manual di web Vercel.');
     }
 }
+

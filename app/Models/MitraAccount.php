@@ -23,7 +23,16 @@ class MitraAccount extends Model
         'status',
         'ticker_saham',
         'device',
+        'phone',
     ];
+
+    public function getPhoneAttribute($value)
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+        return $this->user ? $this->user->phone : null;
+    }
 
     protected $hidden = ['password', 'pin'];
 

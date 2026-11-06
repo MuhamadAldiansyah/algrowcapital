@@ -83,6 +83,21 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <label class="form-label text-white">NO. HP / WHATSAPP <span class="opacity-50">(OPSIONAL)</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-black bg-opacity-50 text-success border-secondary">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </span>
+                        <input type="text" name="phone" class="form-control ticker-font"
+                               value="{{ $mitraAccount->getRawOriginal('phone') ?? '' }}"
+                               placeholder="Contoh: 087822421207">
+                    </div>
+                    <small class="text-white opacity-50">Nomor ini digunakan untuk WhatsApp Blast.</small>
+                </div>
+            </div>
+
             <div class="row mb-5">
                 <div class="col-md-12">
                     <label class="form-label text-white">STATUS <span class="text-danger">*</span></label>

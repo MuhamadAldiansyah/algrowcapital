@@ -127,7 +127,7 @@ class MitraAccountController extends Controller
                 $rawPin = $account->user && $account->user->pin_sekuritas ? $account->user->pin_sekuritas : null;
                 $bankName = $account->user && $account->user->bank ? $account->user->bank : $account->bank_rdn;
                 $noRek = $account->user && $account->user->no_rek ? $account->user->no_rek : $account->rdn_account;
-                $phone = $account->user && $account->user->phone ? $account->user->phone : '';
+                $phone = $account->phone ?: ($account->user && $account->user->phone ? $account->user->phone : '');
 
                 // Decrypt logic for MitraAccount fallback
                 $decryptedPassword = '';
@@ -176,9 +176,14 @@ class MitraAccountController extends Controller
                     ';
                 }
 
-                $phoneDisplay = $phone
-                    ? '<a href="https://wa.me/62' . ltrim($phone, '0') . '" target="_blank" class="text-emerald-400 text-decoration-none"><i class="fa-brands fa-whatsapp me-1"></i>' . $phone . '</a>'
-                    : '<span class="text-muted small">-</span>';
+                $phoneVal = $phone ?: '-';
+                $waLink = $phone
+                    ? '<a href="https://wa.me/62' . ltrim(preg_replace('/[^0-9]/', '', $phone), '0') . '" target="_blank" class="text-emerald-400 text-decoration-none ms-2" title="Chat WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>'
+                    : '';
+                $phoneDisplay = '<div class="d-flex align-items-center justify-content-between">'
+                    . '<span class="ticker-font ' . $editableClass . '" data-id="' . $account->id . '" data-field="phone">' . $phoneVal . '</span>'
+                    . $waLink
+                    . '</div>';
 
                 $data[] = [
                     $platformBadge,
@@ -265,6 +270,7 @@ class MitraAccountController extends Controller
             'rdn_account' => 'nullable|string',
             'status' => 'required|in:aktif,nonaktif',
             'device' => 'nullable|string',
+            'phone' => 'nullable|string|max:30',
         ]);
 
         if ($user && $user->role === 'admin') {
@@ -277,7 +283,10 @@ class MitraAccountController extends Controller
             $validated['pin'] = Crypt::encryptString($request->pin);
         }
 
-        MitraAccount::create($validated);
+        $account = MitraAccount::create($validated);
+        if (!empty($validated['phone']) && $account->user) {
+            $account->user->update(['phone' => $validated['phone']]);
+        }
 
         return redirect()->route('mitra-accounts.index')->with('success', 'Akun Mitra berhasil ditambahkan.');
     }
@@ -327,6 +336,7 @@ class MitraAccountController extends Controller
             'username' => 'required|string|unique:mitra_accounts,username,' . $mitraAccount->id,
             'status' => 'required|in:aktif,nonaktif',
             'device' => 'nullable|string',
+            'phone' => 'nullable|string|max:30',
         ]);
 
         if ($request->password) {
@@ -662,13 +672,13 @@ class MitraAccountController extends Controller
 
         $request->validate([
             'field' => 'required|string',
-            'value' => 'required|string|max:255'
+            'value' => 'nullable|string|max:255'
         ]);
 
         $field = $request->field;
         $value = $request->value;
 
-        $allowedFields = ['owner_name', 'handler_name', 'username', 'bank_rdn', 'rdn_account', 'device', 'password', 'pin'];
+        $allowedFields = ['owner_name', 'handler_name', 'username', 'bank_rdn', 'rdn_account', 'device', 'password', 'pin', 'phone'];
         if (!in_array($field, $allowedFields)) {
             return response()->json(['success' => false, 'message' => 'Field not allowed.'], 403);
         }

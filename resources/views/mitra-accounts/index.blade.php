@@ -64,7 +64,8 @@
     th:nth-child(6), td:nth-child(6) { width: 100px; } /* Bank */
     th:nth-child(7), td:nth-child(7) { width: 150px; } /* RDN */
     th:nth-child(8), td:nth-child(8) { width: 150px; } /* Device */
-    th:nth-child(9), td:nth-child(9) { width: 120px; } /* Aksi */
+    th:nth-child(9), td:nth-child(9) { width: 130px; } /* NO. HP */
+    th:nth-child(10), td:nth-child(10) { width: 90px; } /* Aksi */
 
     @media (max-width: 1200px) {
         table { table-layout: auto; }
@@ -229,7 +230,7 @@ $(document).ready(function() {
         order: [[1, 'asc']], // Default sort by Owner
         // removed scrollX: true to let native bootstrap .table-responsive handle it perfectly
         columnDefs: [
-            { targets: [9], orderable: false } // Disable sorting on Action column
+            { targets: [8, 9], orderable: false } // Disable sorting on NO.HP (8) and Aksi (9) columns
         ]
     });
 
