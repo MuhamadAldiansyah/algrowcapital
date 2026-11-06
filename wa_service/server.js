@@ -369,10 +369,15 @@ async function runBlastJob(recipients, templateMessage, minDelay, maxDelay, batc
         const dateStr = now.toLocaleDateString('id-ID', { dateStyle: 'long' });
         const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
+        const recipientCompany = recipient.company || 'Algrow Capital';
+        const recipientSaham = recipient.saham || 'IPO';
+
         let personalized = templateMessage
             .replace(/\{nama\}/gi, name)
             .replace(/\{name\}/gi, name)
             .replace(/\{phone\}/gi, rawPhone)
+            .replace(/\{perusahaan\}/gi, recipientCompany)
+            .replace(/\{saham\}/gi, recipientSaham)
             .replace(/\{tanggal\}/gi, dateStr)
             .replace(/\{jam\}/gi, timeStr);
 

@@ -282,6 +282,7 @@
                                                 <input type="checkbox" class="form-check-input db-recipient-check" 
                                                        value="{{ $u->phone }}" 
                                                        data-name="{{ $u->name }}" 
+                                                       data-company="{{ $u->company }}"
                                                        onchange="recalculateRecipients()">
                                             </td>
                                             <td>
@@ -359,12 +360,52 @@
                     </span>
                 </div>
                 <div class="card-body p-4">
+                    <!-- PRESET TEMPLATE BUTTONS (TOMBOL CEPAT SIAP PAKAI) -->
+                    <div class="mb-3 p-3 rounded-3 bg-black bg-opacity-40 border border-emerald-900 border-opacity-50">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-2">
+                            <span class="small text-emerald-400 fw-bold">
+                                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Template Siap Pakai:
+                            </span>
+                            <div class="d-flex align-items-center gap-1 w-100 w-sm-auto">
+                                <span class="small text-white opacity-50 text-nowrap" style="font-size: 0.72rem;">Saham:</span>
+                                <select id="selectedIpoTicker" class="form-select form-select-sm text-white border-emerald-900 border-opacity-50 bg-black bg-opacity-50 ticker-font py-0 px-2" style="font-size: 0.78rem;" onchange="onIpoSelectionChange(this.value)">
+                                    <option value="IPO">-- Pilih Saham IPO --</option>
+                                    @if(isset($ipos))
+                                        @foreach($ipos as $ipo)
+                                        <option value="{{ $ipo->code }}">{{ $ipo->code }} ({{ Str::limit($ipo->name, 18) }})</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            <button type="button" class="btn btn-sm btn-primary-custom py-1 px-2 fw-bold" onclick="applyQuickTemplate('konfirmasi_saham')" style="font-size: 0.78rem;" title="Blast konfirmasi YA/TIDAK keikutsertaan saham">
+                                <i class="fa-solid fa-circle-question me-1"></i> Konfirmasi Saham (YA / TIDAK)
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary-custom py-1 px-2" onclick="applyQuickTemplate('info_ipo')" style="font-size: 0.78rem;">
+                                <i class="fa-solid fa-bullhorn me-1"></i> Info Saham Baru
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary-custom py-1 px-2" onclick="applyQuickTemplate('profit_dividen')" style="font-size: 0.78rem;">
+                                <i class="fa-solid fa-hand-holding-dollar me-1"></i> Profit & Dividen
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 text-white opacity-75" onclick="applyQuickTemplate('sapaan_umum')" style="font-size: 0.78rem;">
+                                <i class="fa-solid fa-rotate-left me-1"></i> Sapaan Umum
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- TAG CHIPS -->
                     <div class="mb-2">
                         <label class="form-label small text-emerald-400 fw-bold mb-1">Sisipkan Tag Dinamis:</label>
                         <div class="d-flex flex-wrap gap-1">
                             <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{nama}')">
                                 + {nama}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{saham}')">
+                                + {saham}
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{perusahaan}')">
+                                + {perusahaan}
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{phone}')">
                                 + {phone}
@@ -816,13 +857,16 @@ Tim Algrow Capital</textarea>
 
     function getSelectedRecipients() {
         const activeTab = document.querySelector('#recipientTabs .nav-link.active')?.id;
+        const selectedSaham = document.getElementById('selectedIpoTicker')?.value || 'IPO';
         const recipients = [];
 
         if (activeTab === 'tab-db') {
             document.querySelectorAll('.db-recipient-check:checked').forEach(cb => {
                 recipients.push({
                     phone: cb.value,
-                    name: cb.dataset.name || 'Pelanggan'
+                    name: cb.dataset.name || 'Pelanggan',
+                    company: cb.dataset.company || 'Algrow Capital',
+                    saham: selectedSaham !== 'IPO' ? selectedSaham : 'IPO'
                 });
             });
         } else if (activeTab === 'tab-manual') {
@@ -834,11 +878,20 @@ Tim Algrow Capital</textarea>
                 const p = parts[0]?.trim();
                 const n = parts[1]?.trim() || 'Pelanggan';
                 if (p && p.length >= 8) {
-                    recipients.push({ phone: p, name: n });
+                    recipients.push({
+                        phone: p,
+                        name: n,
+                        company: 'Algrow Capital',
+                        saham: selectedSaham !== 'IPO' ? selectedSaham : 'IPO'
+                    });
                 }
             });
         } else if (activeTab === 'tab-file') {
-            return uploadedFileRecipients;
+            return uploadedFileRecipients.map(r => ({
+                ...r,
+                company: r.company || 'Algrow Capital',
+                saham: selectedSaham !== 'IPO' ? selectedSaham : 'IPO'
+            }));
         }
 
         return recipients;
@@ -894,6 +947,77 @@ Tim Algrow Capital</textarea>
         textarea.value = text.substring(0, start) + tag + text.substring(end);
         textarea.focus();
         textarea.selectionEnd = start + tag.length;
+    }
+
+    // Quick Template Manager
+    function applyQuickTemplate(type) {
+        const textarea = document.getElementById('messageTemplate');
+        const ticker = document.getElementById('selectedIpoTicker')?.value;
+        const sahamDisplay = ticker && ticker !== 'IPO' ? ticker : '{saham}';
+
+        if (type === 'konfirmasi_saham') {
+            textarea.value = `{Halo|Hai|Selamat siang} {nama},
+
+Kami dari {perusahaan} ingin mengonfirmasi terkait keikutsertaan Anda pada alokasi saham IPO *${sahamDisplay}*.
+
+*Apakah Anda masih ingin melanjutkan keikutsertaan saham ini?*
+
+Mohon balas pesan ini dengan:
+👉 Balas *YA* (jika ingin lanjut)
+👉 Balas *TIDAK* (jika tidak lanjut / batal)
+
+Batas konfirmasi adalah hari ini sebelum pukul 17:00 WIB. Terima kasih atas perhatian dan kerja samanya.
+
+Salam sukses,
+Tim {perusahaan}`;
+        } else if (type === 'info_ipo') {
+            textarea.value = `{Halo|Hai|Selamat siang} {nama},
+
+Kami informasikan bahwa penawaran awal saham IPO baru *${sahamDisplay}* telah resmi dibuka.
+
+Bagi Anda yang berminat mengamankan alokasi atau menambah kepemilikan, silakan hubungi tim kami atau pantau portofolio Anda di aplikasi.
+
+Terima kasih,
+Tim {perusahaan}`;
+        } else if (type === 'profit_dividen') {
+            textarea.value = `{Halo|Hai|Selamat siang} {nama},
+
+Kabar gembira! Distribusi profit dan pencairan alokasi saham IPO *${sahamDisplay}* Anda telah selesai diproses oleh tim kami.
+
+Silakan periksa saldo dan mutasi rekening RDN Anda. Laporan transaksi dapat Anda unduh langsung di dashboard aplikasi.
+
+Terima kasih atas kerja sama dan kepercayaan Anda bersama {perusahaan}.
+
+Salam sukses,
+Tim {perusahaan}`;
+        } else if (type === 'sapaan_umum') {
+            textarea.value = `{Halo|Hai|Selamat siang} {nama},
+
+Terima kasih telah bergabung bersama {perusahaan}. Portofolio & transaksi Anda dapat dipantau langsung melalui dashboard kami.
+
+Salam sukses,
+Tim {perusahaan}`;
+        }
+
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Template berhasil dimuat',
+            showConfirmButton: false,
+            timer: 1500,
+            background: '#05160c',
+            color: '#ffffff'
+        });
+    }
+
+    function onIpoSelectionChange(ticker) {
+        if (!ticker || ticker === 'IPO') return;
+        const textarea = document.getElementById('messageTemplate');
+        if (textarea.value.includes('saham IPO *') || textarea.value.includes('*{saham}*')) {
+            textarea.value = textarea.value.replace(/saham IPO \*[^*]+\*/gi, `saham IPO *${ticker}*`);
+            textarea.value = textarea.value.replace(/\*\{saham\}\*/gi, `*${ticker}*`);
+        }
     }
 
     // 9. Send Test Message

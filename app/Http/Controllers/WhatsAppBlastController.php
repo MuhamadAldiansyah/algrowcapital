@@ -145,9 +145,10 @@ class WhatsAppBlastController extends Controller
         })->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
 
         $allUsers = User::withoutGlobalScopes()->orderBy('name', 'asc')->get();
+        $ipos = \App\Models\Ipo::withoutGlobalScopes()->orderBy('id', 'desc')->take(25)->get();
         $currentGatewayUrl = $this->getServiceUrl();
 
-        return view('whatsapp.index', compact('usersWithPhone', 'allUsers', 'currentGatewayUrl', 'tenants', 'selectedTenantId', 'isDeveloper'));
+        return view('whatsapp.index', compact('usersWithPhone', 'allUsers', 'currentGatewayUrl', 'tenants', 'selectedTenantId', 'isDeveloper', 'ipos'));
     }
 
     /**
