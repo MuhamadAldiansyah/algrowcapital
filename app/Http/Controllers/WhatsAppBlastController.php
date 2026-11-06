@@ -4,57 +4,138 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use App\Models\User;
-use App\Models\MitraAccount;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class WhatsAppBlastController extends Controller
 {
-    private string $serviceUrl = 'http://127.0.0.1:5050';
+    /**
+     * Resolve the active WA Service URL dynamically
+     * Supports: Database setting, Cache, Session, .env, or localhost
+     */
+    public function getServiceUrl(): string
+    {
+        // 1. Session check
+        if (session()->has('wa_service_url') && !empty(session('wa_service_url'))) {
+            return rtrim(session('wa_service_url'), '/');
+        }
+
+        // 2. Database check
+        try {
+            if (Schema::hasTable('app_settings')) {
+                $dbVal = DB::table('app_settings')->where('key', 'wa_service_url')->value('value');
+                if (!empty($dbVal)) {
+                    return rtrim($dbVal, '/');
+                }
+            }
+        } catch (\Exception $e) {}
+
+        // 3. Cache check
+        $cacheVal = Cache::get('wa_service_url');
+        if (!empty($cacheVal)) {
+            return rtrim($cacheVal, '/');
+        }
+
+        // 4. Environment variable check
+        $envVal = env('WA_SERVICE_URL');
+        if (!empty($envVal)) {
+            return rtrim($envVal, '/');
+        }
+
+        // 5. Default local fallback
+        return 'http://127.0.0.1:5050';
+    }
 
     /**
      * Display the WhatsApp Blast Dashboard
      */
     public function index()
     {
-        // Get registered users with phone numbers
         $usersWithPhone = User::whereNotNull('phone')
             ->where('phone', '!=', '')
             ->orderBy('name', 'asc')
             ->get();
 
-        // All users for reference
         $allUsers = User::orderBy('name', 'asc')->get();
+        $currentGatewayUrl = $this->getServiceUrl();
 
-        return view('whatsapp.index', compact('usersWithPhone', 'allUsers'));
+        return view('whatsapp.index', compact('usersWithPhone', 'allUsers', 'currentGatewayUrl'));
     }
 
     /**
-     * Check Baileys Microservice Status
+     * Save/Update the WA Gateway URL (e.g. Cloudflare Tunnel URL when hosted on Vercel)
+     */
+    public function setGateway(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|url'
+        ]);
+
+        $url = rtrim($request->input('url'), '/');
+
+        // Save to Session
+        session(['wa_service_url' => $url]);
+
+        // Save to Cache
+        try {
+            Cache::put('wa_service_url', $url, now()->addDays(30));
+        } catch (\Exception $e) {}
+
+        // Save to Database
+        try {
+            if (!Schema::hasTable('app_settings')) {
+                Schema::create('app_settings', function ($table) {
+                    $table->string('key')->primary();
+                    $table->text('value')->nullable();
+                    $table->timestamps();
+                });
+            }
+            DB::table('app_settings')->updateOrInsert(
+                ['key' => 'wa_service_url'],
+                ['value' => $url, 'updated_at' => now()]
+            );
+        } catch (\Exception $e) {}
+
+        return response()->json([
+            'success' => true,
+            'url' => $url,
+            'message' => 'URL Gateway WhatsApp berhasil disimpan!'
+        ]);
+    }
+
+    /**
+     * Check Baileys Microservice Status via the active Gateway
      */
     public function getStatus()
     {
+        $gatewayUrl = $this->getServiceUrl();
+
         try {
-            $response = Http::timeout(4)->get("{$this->serviceUrl}/api/status");
+            $response = Http::timeout(6)->get("{$gatewayUrl}/api/status");
             if ($response->successful()) {
-                return response()->json($response->json());
+                $data = $response->json();
+                $data['gateway_url'] = $gatewayUrl;
+                return response()->json($data);
             }
             return response()->json([
                 'success' => false,
-                'message' => 'Layanan WA Service merespons dengan kesalahan.',
-                'data' => ['status' => 'service_down']
+                'message' => "Layanan WA Gateway merespons dengan kesalahan (HTTP {$response->status()}).",
+                'data' => ['status' => 'service_down', 'gateway_url' => $gatewayUrl]
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Layanan WA Service offline (port 5050). Silakan jalankan start_wa.bat di wa_service.',
-                'data' => ['status' => 'service_down', 'error' => $e->getMessage()]
+                'message' => "Gagal terhubung ke Gateway ({$gatewayUrl}): " . $e->getMessage(),
+                'data' => ['status' => 'service_down', 'gateway_url' => $gatewayUrl, 'error' => $e->getMessage()]
             ]);
         }
     }
 
     /**
-     * Request Pairing Code with specified phone (default 087822421207)
+     * Request Pairing Code with specified phone (e.g. 087822421207)
      */
     public function pair(Request $request)
     {
@@ -62,15 +143,17 @@ class WhatsAppBlastController extends Controller
             'phone' => 'required|string'
         ]);
 
+        $gatewayUrl = $this->getServiceUrl();
+
         try {
-            $response = Http::timeout(15)->post("{$this->serviceUrl}/api/pair", [
+            $response = Http::timeout(18)->post("{$gatewayUrl}/api/pair", [
                 'phone' => $request->phone
             ]);
             return response()->json($response->json(), $response->status());
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghubungi WA Service: ' . $e->getMessage()
+                'message' => "Gagal menghubungi WA Gateway ({$gatewayUrl}): " . $e->getMessage()
             ], 500);
         }
     }
@@ -80,13 +163,15 @@ class WhatsAppBlastController extends Controller
      */
     public function connectQr()
     {
+        $gatewayUrl = $this->getServiceUrl();
+
         try {
-            $response = Http::timeout(10)->post("{$this->serviceUrl}/api/connect-qr");
+            $response = Http::timeout(10)->post("{$gatewayUrl}/api/connect-qr");
             return response()->json($response->json(), $response->status());
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menghubungi WA Service: ' . $e->getMessage()
+                'message' => "Gagal menghubungi WA Gateway ({$gatewayUrl}): " . $e->getMessage()
             ], 500);
         }
     }
@@ -96,8 +181,10 @@ class WhatsAppBlastController extends Controller
      */
     public function logout()
     {
+        $gatewayUrl = $this->getServiceUrl();
+
         try {
-            $response = Http::timeout(10)->post("{$this->serviceUrl}/api/logout");
+            $response = Http::timeout(10)->post("{$gatewayUrl}/api/logout");
             return response()->json($response->json(), $response->status());
         } catch (\Exception $e) {
             return response()->json([
@@ -117,8 +204,10 @@ class WhatsAppBlastController extends Controller
             'message' => 'required|string'
         ]);
 
+        $gatewayUrl = $this->getServiceUrl();
+
         try {
-            $response = Http::timeout(15)->post("{$this->serviceUrl}/api/test-send", [
+            $response = Http::timeout(18)->post("{$gatewayUrl}/api/test-send", [
                 'phone' => $request->phone,
                 'message' => $request->message
             ]);
@@ -146,8 +235,10 @@ class WhatsAppBlastController extends Controller
             'batchDelay' => 'nullable|numeric|min:5'
         ]);
 
+        $gatewayUrl = $this->getServiceUrl();
+
         try {
-            $response = Http::timeout(10)->post("{$this->serviceUrl}/api/blast/start", [
+            $response = Http::timeout(15)->post("{$gatewayUrl}/api/blast/start", [
                 'recipients' => $request->recipients,
                 'message' => $request->message,
                 'minDelay' => $request->input('minDelay', 10),
@@ -169,8 +260,10 @@ class WhatsAppBlastController extends Controller
      */
     public function getBlastProgress()
     {
+        $gatewayUrl = $this->getServiceUrl();
+
         try {
-            $response = Http::timeout(5)->get("{$this->serviceUrl}/api/blast/status");
+            $response = Http::timeout(6)->get("{$gatewayUrl}/api/blast/status");
             return response()->json($response->json(), $response->status());
         } catch (\Exception $e) {
             return response()->json([
@@ -185,8 +278,10 @@ class WhatsAppBlastController extends Controller
      */
     public function stopBlast()
     {
+        $gatewayUrl = $this->getServiceUrl();
+
         try {
-            $response = Http::timeout(5)->post("{$this->serviceUrl}/api/blast/stop");
+            $response = Http::timeout(6)->post("{$gatewayUrl}/api/blast/stop");
             return response()->json($response->json(), $response->status());
         } catch (\Exception $e) {
             return response()->json([
@@ -217,7 +312,6 @@ class WhatsAppBlastController extends Controller
 
                 foreach ($rows as $rowIndex => $row) {
                     if ($rowIndex === 0) {
-                        // Skip header if first column has 'nama' or 'phone' or 'no'
                         $headerText = strtolower(implode(' ', array_filter($row)));
                         if (str_contains($headerText, 'nama') || str_contains($headerText, 'phone') || str_contains($headerText, 'telepon') || str_contains($headerText, 'hp')) {
                             continue;
@@ -244,7 +338,6 @@ class WhatsAppBlastController extends Controller
                     }
                 }
             } else {
-                // Plain text line by line: "0878..., Budi" or "0878..."
                 $content = file_get_contents($file->getRealPath());
                 $lines = explode("\n", $content);
                 foreach ($lines as $line) {
@@ -275,4 +368,3 @@ class WhatsAppBlastController extends Controller
         }
     }
 }
-

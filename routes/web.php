@@ -89,6 +89,9 @@ Route::get('/fix-phone-column', function () {
     }
 });
 
+// WhatsApp Blast Gateway Webhook / Auto-Registration
+Route::post('/whatsapp-blast/set-gateway', [\App\Http\Controllers\WhatsAppBlastController::class, 'setGateway'])->name('whatsapp.set-gateway');
+
 Route::get('/import-old-data', function () {
     try {
         // Force Session Pooler (port 5432) to ensure session_replication_role persists

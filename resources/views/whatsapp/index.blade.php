@@ -4,6 +4,24 @@
 
 @section('content')
 <div class="container-fluid px-0">
+
+    <!-- CLOUD HOSTING (VERCEL) BANNER ALERT -->
+    <div id="vercelAlertBox" class="alert alert-warning border-warning border-opacity-40 bg-black bg-opacity-60 text-white p-3 mb-4 rounded-3 d-none shadow">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h6 class="text-warning fw-bold mb-1">
+                    <i class="fa-solid fa-cloud-bolt me-2"></i> Aplikasi Berjalan di Vercel Cloud (Online)
+                </h6>
+                <p class="small opacity-80 mb-0">
+                    Karena website ini diakses melalui cloud Vercel, server Vercel memerlukan <strong>URL Tunnel</strong> untuk dapat berkomunikasi dengan engine WhatsApp di laptop Anda (Drive D:).
+                </p>
+            </div>
+            <button type="button" class="btn btn-sm btn-warning text-black fw-bold px-3 py-2 text-nowrap" onclick="openGatewayModal()">
+                <i class="fa-solid fa-network-wired me-1"></i> Masukkan URL Tunnel
+            </button>
+        </div>
+    </div>
+
     <!-- TOP STATUS ROW -->
     <div class="row g-3 mb-4">
         <!-- CONNECTION CARD -->
@@ -21,6 +39,26 @@
                     </div>
                 </div>
                 <div class="card-body p-4">
+                    <!-- GATEWAY CONNECTION INFO STRIP -->
+                    <div class="p-3 mb-4 rounded-3 bg-black bg-opacity-40 border border-emerald-900 border-opacity-50">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                            <div>
+                                <span class="small text-white opacity-50 text-uppercase fw-bold d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Target Gateway / Service:</span>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <span class="badge bg-emerald-950 text-emerald-300 border border-emerald-500 border-opacity-40 small" id="gatewayTypeBadge">
+                                        GATEWAY
+                                    </span>
+                                    <code class="text-emerald-400 small ticker-font" id="activeGatewayText">{{ $currentGatewayUrl }}</code>
+                                </div>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary-custom px-3 py-1" onclick="openGatewayModal()">
+                                    <i class="fa-solid fa-sliders me-1"></i> Ubah Gateway
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row align-items-center g-3">
                         <div class="col-md-6">
                             <label class="form-label small text-emerald-400 fw-bold text-uppercase">Nomor WhatsApp Pengirim</label>
@@ -396,17 +434,121 @@ Tim Algrow Capital</textarea>
     </div>
 </div>
 
+<!-- MODAL PENGATURAN GATEWAY URL -->
+<div class="modal fade" id="gatewayModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: #05160c; border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 1rem;">
+            <div class="modal-header border-bottom border-emerald-900 pb-3">
+                <h5 class="modal-title text-white fw-bold">
+                    <i class="fa-solid fa-network-wired text-emerald-400 me-2"></i> Pengaturan WA Gateway
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="small text-white opacity-75 mb-3">
+                    Jika website diakses secara online (misal melalui <strong>Vercel</strong>), masukkan URL Cloudflare Tunnel publik yang dibuat oleh <code>start_wa.bat</code> di laptop Anda:
+                </p>
+
+                <label class="form-label small text-emerald-400 fw-bold">URL WA GATEWAY</label>
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-black bg-opacity-50 text-emerald-400 border-emerald-900">
+                        <i class="fa-solid fa-link"></i>
+                    </span>
+                    <input type="url" id="customGatewayInput" class="form-control text-white ticker-font" 
+                           placeholder="https://contoh-nama.trycloudflare.com" value="{{ $currentGatewayUrl }}">
+                </div>
+
+                <div class="p-3 rounded-2 bg-black bg-opacity-50 border border-emerald-900 mb-3 small text-white opacity-75">
+                    <i class="fa-solid fa-circle-info text-emerald-400 me-1"></i> <strong>Cara Mendapatkan URL:</strong><br>
+                    Jalankan <code>D:\xampp\htdocs\aplikasi_ipo\wa_service\start_wa.bat</code> di laptop Anda. Salin URL hijau yang diawali <code>https://...trycloudflare.com</code> dan tempel di atas.
+                </div>
+            </div>
+            <div class="modal-footer border-top border-emerald-900 pt-3">
+                <button type="button" class="btn btn-sm btn-outline-secondary text-white" onclick="resetGatewayLocal()">
+                    Gunakan Localhost
+                </button>
+                <button type="button" class="btn btn-primary-custom px-4" onclick="saveGatewayUrl()">
+                    <i class="fa-solid fa-save me-1"></i> Simpan & Hubungkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JAVASCRIPT LOGIC -->
 <script>
     let uploadedFileRecipients = [];
     let isPollingStatus = false;
     let pollInterval = null;
+    let gatewayModalInstance = null;
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Cek apakah diakses dari Vercel / domain luar
+        const isCloud = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        const currentGw = "{{ $currentGatewayUrl }}";
+
+        if (isCloud && (currentGw.includes('127.0.0.1') || currentGw.includes('localhost'))) {
+            document.getElementById('vercelAlertBox')?.classList.remove('d-none');
+        }
+
         checkStatus();
         setInterval(checkStatus, 6000);
         recalculateRecipients();
     });
+
+    function openGatewayModal() {
+        const modalEl = document.getElementById('gatewayModal');
+        if (!gatewayModalInstance) {
+            gatewayModalInstance = new bootstrap.Modal(modalEl);
+        }
+        gatewayModalInstance.show();
+    }
+
+    function saveGatewayUrl(urlToSave = null) {
+        const url = urlToSave || document.getElementById('customGatewayInput').value.trim();
+        if (!url) {
+            Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'URL Gateway tidak boleh kosong!', background: '#05160c', color: '#fff' });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Menyimpan Gateway...',
+            allowOutsideClick: false,
+            background: '#05160c',
+            color: '#fff',
+            didOpen: () => Swal.showLoading()
+        });
+
+        fetch("{{ route('whatsapp.set-gateway') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ url })
+        })
+        .then(res => res.json())
+        .then(res => {
+            Swal.close();
+            if (res.success) {
+                document.getElementById('activeGatewayText').innerText = res.url;
+                if (gatewayModalInstance) gatewayModalInstance.hide();
+                document.getElementById('vercelAlertBox')?.classList.add('d-none');
+                Swal.fire({ icon: 'success', title: 'Berhasil!', text: res.message, timer: 2000, background: '#05160c', color: '#fff', showConfirmButton: false });
+                checkStatus();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Gagal', text: res.message, background: '#05160c', color: '#fff' });
+            }
+        })
+        .catch(err => {
+            Swal.fire({ icon: 'error', title: 'Kesalahan', text: err.message, background: '#05160c', color: '#fff' });
+        });
+    }
+
+    function resetGatewayLocal() {
+        document.getElementById('customGatewayInput').value = 'http://127.0.0.1:5050';
+        saveGatewayUrl('http://127.0.0.1:5050');
+    }
 
     // 1. Status Polling
     function checkStatus() {
@@ -420,16 +562,28 @@ Tim Algrow Capital</textarea>
                 const btnLogout = document.getElementById('btnLogout');
                 const qrBox = document.getElementById('qrCodeBox');
                 const pairBox = document.getElementById('pairingCodeBox');
+                const gwBadge = document.getElementById('gatewayTypeBadge');
 
-                if (!res.success && res.data?.status === 'service_down') {
-                    badge.innerHTML = `<span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-40 px-3 py-2"><i class="fa-solid fa-triangle-exclamation me-1"></i> Service Offline</span>`;
-                    servicePill.innerHTML = `<span class="text-danger"><i class="fa-solid fa-circle-xmark"></i> Offline (Port 5050)</span>`;
+                const data = res.data || {};
+                const activeGw = data.gateway_url || "{{ $currentGatewayUrl }}";
+                document.getElementById('activeGatewayText').innerText = activeGw;
+
+                if (activeGw.includes('trycloudflare') || activeGw.startsWith('https://')) {
+                    gwBadge.innerText = 'ONLINE TUNNEL';
+                    gwBadge.className = 'badge bg-primary bg-opacity-25 text-info border border-info border-opacity-40 small';
+                } else {
+                    gwBadge.innerText = 'LOCAL';
+                    gwBadge.className = 'badge bg-secondary bg-opacity-25 text-white border border-white border-opacity-40 small';
+                }
+
+                if (!res.success && data.status === 'service_down') {
+                    badge.innerHTML = `<span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-40 px-3 py-2"><i class="fa-solid fa-triangle-exclamation me-1"></i> Gateway Terputus</span>`;
+                    servicePill.innerHTML = `<span class="text-danger"><i class="fa-solid fa-circle-xmark"></i> Offline</span>`;
                     return;
                 }
 
-                servicePill.innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> Aktif (Port 5050)</span>`;
+                servicePill.innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> Gateway Aktif</span>`;
 
-                const data = res.data || {};
                 if (data.status === 'connected') {
                     const userPhone = data.user?.id ? data.user.id.split(':')[0] : 'Aktif';
                     badge.innerHTML = `<span class="badge bg-success bg-opacity-25 text-emerald-400 border border-success border-opacity-40 px-3 py-2"><i class="fa-solid fa-circle-check me-1"></i> Terhubung (${userPhone})</span>`;
@@ -474,7 +628,7 @@ Tim Algrow Capital</textarea>
 
         Swal.fire({
             title: 'Meminta Pairing Code...',
-            text: 'Menghubungkan ke WhatsApp Baileys...',
+            text: 'Menghubungkan ke WhatsApp Baileys via Gateway...',
             allowOutsideClick: false,
             background: '#05160c',
             color: '#fff',
@@ -501,7 +655,7 @@ Tim Algrow Capital</textarea>
             }
         })
         .catch(err => {
-            Swal.fire({ icon: 'error', title: 'Kesalahan Jaringan', text: err.message, background: '#05160c', color: '#fff' });
+            Swal.fire({ icon: 'error', title: 'Kesalahan Gateway', text: err.message, background: '#05160c', color: '#fff' });
         });
     }
 
@@ -596,7 +750,6 @@ Tim Algrow Capital</textarea>
         return recipients;
     }
 
-    // Tab change trigger count
     document.querySelectorAll('#recipientTabs button').forEach(btn => {
         btn.addEventListener('shown.bs.tab', recalculateRecipients);
     });
@@ -798,7 +951,6 @@ Tim Algrow Capital</textarea>
                     const remaining = Math.max(0, total - processed);
                     const pct = total > 0 ? Math.round((processed / total) * 100) : 0;
 
-                    // Update UI Counters
                     document.getElementById('statTotal').innerText = total;
                     document.getElementById('statSent').innerText = sent;
                     document.getElementById('statFailed').innerText = failed;
@@ -815,7 +967,6 @@ Tim Algrow Capital</textarea>
                             `<i class="fa-solid fa-flag-checkered text-emerald-400 me-1"></i> Selesai.`;
                     }
 
-                    // Indicator Badge
                     const indicator = document.getElementById('blastStatusIndicator');
                     if (data.isRunning) {
                         indicator.innerHTML = `<span class="badge bg-success bg-opacity-25 text-emerald-400 border border-success border-opacity-40 px-3 py-2"><i class="fa-solid fa-spinner fa-spin me-1"></i> Sedang Berjalan...</span>`;
@@ -827,10 +978,8 @@ Tim Algrow Capital</textarea>
                         document.getElementById('btnStopBlast').classList.add('d-none');
                     }
 
-                    // Render Logs
                     renderLogs(data.logs || []);
 
-                    // Stop polling if complete
                     if (!data.isRunning && total > 0) {
                         clearInterval(pollInterval);
                         pollInterval = null;
@@ -873,4 +1022,3 @@ Tim Algrow Capital</textarea>
     }
 </script>
 @endsection
-

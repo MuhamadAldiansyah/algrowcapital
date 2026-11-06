@@ -22,6 +22,8 @@
 /wa_service/node_modules
 /wa_service/.npm-cache
 /wa_service/session
+/wa_service/cloudflared.exe
+/wa_service/tunnel_url.txt
 Homestead.json
 Homestead.yaml
 Thumbs.db
