@@ -410,6 +410,9 @@
             <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
                 <i class="fa-solid fa-fw fa-users-gear me-2"></i> Manajemen User
             </a>
+            <a href="{{ route('whatsapp.index') }}" class="nav-link {{ request()->routeIs('whatsapp.*') ? 'active' : '' }}">
+                <i class="fa-brands fa-whatsapp me-2 text-emerald-400"></i> WhatsApp Blast
+            </a>
             @endif
 
             {{-- Fitur Master: Hanya untuk Developer --}}

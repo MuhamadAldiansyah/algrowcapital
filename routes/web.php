@@ -239,6 +239,20 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
         // Profit Distribution
         Route::get('/profit-distribution', [App\Http\Controllers\ProfitDistributionController::class, 'index'])->name('profit-distribution.index');
         Route::post('/profit-distribution/{ipo}/distribute', [App\Http\Controllers\ProfitDistributionController::class, 'distribute'])->name('profit-distribution.distribute');
+
+        // WhatsApp Blast Routes
+        Route::prefix('whatsapp-blast')->name('whatsapp.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\WhatsAppBlastController::class, 'index'])->name('index');
+            Route::get('/status', [\App\Http\Controllers\WhatsAppBlastController::class, 'getStatus'])->name('status');
+            Route::post('/pair', [\App\Http\Controllers\WhatsAppBlastController::class, 'pair'])->name('pair');
+            Route::post('/connect-qr', [\App\Http\Controllers\WhatsAppBlastController::class, 'connectQr'])->name('connect-qr');
+            Route::post('/logout', [\App\Http\Controllers\WhatsAppBlastController::class, 'logout'])->name('logout');
+            Route::post('/test-send', [\App\Http\Controllers\WhatsAppBlastController::class, 'testSend'])->name('test-send');
+            Route::post('/start', [\App\Http\Controllers\WhatsAppBlastController::class, 'startBlast'])->name('start');
+            Route::get('/progress', [\App\Http\Controllers\WhatsAppBlastController::class, 'getBlastProgress'])->name('progress');
+            Route::post('/stop', [\App\Http\Controllers\WhatsAppBlastController::class, 'stopBlast'])->name('stop');
+            Route::post('/parse-file', [\App\Http\Controllers\WhatsAppBlastController::class, 'parseFile'])->name('parse-file');
+        });
     });
 
     // Routes accessible by Investors (and Admins/Developers)

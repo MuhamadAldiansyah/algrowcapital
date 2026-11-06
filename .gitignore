@@ -19,6 +19,9 @@
 /storage/*.key
 /storage/pail
 /vendor
+/wa_service/node_modules
+/wa_service/.npm-cache
+/wa_service/session
 Homestead.json
 Homestead.yaml
 Thumbs.db
