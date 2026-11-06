@@ -228,17 +228,34 @@
                         <!-- TAB 1: DATABASE -->
                         <div class="tab-pane fade show active" id="content-db">
                             <!-- SEARCH & FILTER TOOLBAR FOR MOBILE & DESKTOP -->
-                            <div class="mb-2">
-                                <div class="input-group input-group-sm">
-                                    <span class="input-group-text bg-black bg-opacity-50 text-emerald-400 border-emerald-900 border-opacity-50">
-                                        <i class="fa-solid fa-search"></i>
-                                    </span>
-                                    <input type="text" id="dbRecipientSearch" class="form-control text-white border-emerald-900 border-opacity-50 bg-black bg-opacity-40" 
-                                           placeholder="Cari nama atau no. telepon..." onkeyup="filterRecipientList(this.value)">
-                                    <button class="btn btn-outline-secondary border-emerald-900 border-opacity-50 text-white opacity-75" type="button" onclick="document.getElementById('dbRecipientSearch').value=''; filterRecipientList('')">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
+                            <div class="row g-2 mb-2">
+                                <div class="col-12 {{ $isDeveloper || $tenants->count() > 1 ? 'col-md-7' : '' }}">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-black bg-opacity-50 text-emerald-400 border-emerald-900 border-opacity-50">
+                                            <i class="fa-solid fa-search"></i>
+                                        </span>
+                                        <input type="text" id="dbRecipientSearch" class="form-control text-white border-emerald-900 border-opacity-50 bg-black bg-opacity-40" 
+                                               placeholder="Cari nama, nomor, perusahaan..." onkeyup="filterRecipientList(this.value)">
+                                        <button class="btn btn-outline-secondary border-emerald-900 border-opacity-50 text-white opacity-75" type="button" onclick="document.getElementById('dbRecipientSearch').value=''; filterRecipientList('')">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                 </div>
+                                @if($isDeveloper || $tenants->count() > 1)
+                                <div class="col-12 col-md-5">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-black bg-opacity-50 text-emerald-400 border-emerald-900 border-opacity-50" title="Filter Perusahaan">
+                                            <i class="fa-solid fa-building"></i>
+                                        </span>
+                                        <select class="form-select text-white border-emerald-900 border-opacity-50 bg-black bg-opacity-40" onchange="window.location.href='{{ route('whatsapp.index') }}' + (this.value ? '?tenant_id=' + this.value : '')">
+                                            <option value="" {{ empty($selectedTenantId) ? 'selected' : '' }}>Semua Perusahaan</option>
+                                            @foreach($tenants as $t)
+                                            <option value="{{ $t->id }}" {{ $selectedTenantId == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                @endif
                             </div>
 
                             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-1 mb-2">
@@ -255,7 +272,7 @@
                                             <th style="width: 38px;" class="text-center">#</th>
                                             <th>NAMA</th>
                                             <th class="d-none d-sm-table-cell">NO. WHATSAPP</th>
-                                            <th class="text-end text-sm-start">ROLE</th>
+                                            <th class="text-end text-sm-start">PERUSAHAAN / ROLE</th>
                                         </tr>
                                     </thead>
                                     <tbody id="recipientTableBody">
@@ -275,9 +292,14 @@
                                             </td>
                                             <td class="ticker-font text-emerald-400 d-none d-sm-table-cell">{{ $u->phone }}</td>
                                             <td class="text-end text-sm-start">
-                                                <span class="badge bg-black bg-opacity-50 text-emerald-300 border border-emerald-900 border-opacity-40 small" style="font-size: 0.7rem;">
-                                                    {{ strtoupper($u->role ?? 'MITRA') }}
-                                                </span>
+                                                <div class="d-flex flex-wrap gap-1 justify-content-end justify-content-sm-start align-items-center">
+                                                    <span class="badge bg-emerald-950 text-emerald-300 border border-emerald-700 border-opacity-50 small" style="font-size: 0.68rem;" title="Perusahaan">
+                                                        <i class="fa-solid fa-building me-1 opacity-75"></i>{{ $u->company }}
+                                                    </span>
+                                                    <span class="badge bg-black bg-opacity-50 text-white opacity-75 border border-emerald-900 border-opacity-40 small" style="font-size: 0.68rem;">
+                                                        {{ strtoupper($u->role ?? 'MITRA') }}
+                                                    </span>
+                                                </div>
                                             </td>
                                         </tr>
                                         @empty

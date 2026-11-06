@@ -52,51 +52,75 @@ class WhatsAppBlastController extends Controller
     /**
      * Display the WhatsApp Blast Dashboard
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 1. Get recipients from mitra_accounts (bypass global tenant scopes so all contacts appear)
-        $allMitra = \App\Models\MitraAccount::withoutGlobalScopes()
+        $currentUser = auth()->user();
+        $isDeveloper = $currentUser && $currentUser->role === 'developer';
+        $tenants = \App\Models\Tenant::orderBy('name', 'asc')->get();
+
+        // Company / Tenant scoping:
+        // - Non-developer is strictly restricted to their own tenant so accounts never get mixed up.
+        // - Developer can filter by company via dropdown or view all.
+        if ($isDeveloper) {
+            $selectedTenantId = $request->input('tenant_id');
+        } else {
+            $selectedTenantId = $currentUser ? $currentUser->tenant_id : null;
+        }
+
+        // 1. Get recipients from mitra_accounts
+        $mitraQuery = \App\Models\MitraAccount::withoutGlobalScopes()
             ->with(['user' => function($q) {
                 $q->withoutGlobalScopes();
-            }])
-            ->orderBy('owner_name', 'asc')
-            ->get();
+            }, 'tenant']);
 
+        if ($selectedTenantId) {
+            $mitraQuery->where('tenant_id', $selectedTenantId);
+        }
+
+        $allMitra = $mitraQuery->orderBy('owner_name', 'asc')->get();
         $recipientsList = collect();
 
         foreach ($allMitra as $m) {
-            // Check direct phone on mitra_account or fallback to user profile
             $rawPhone = $m->getRawOriginal('phone') ?: ($m->user ? $m->user->phone : null);
             if ($rawPhone) {
                 $cleanPhone = trim($rawPhone);
                 $digits = preg_replace('/[^0-9]/', '', $cleanPhone);
                 if ($cleanPhone !== '' && $cleanPhone !== '-' && strlen($digits) >= 8) {
+                    $companyName = $m->tenant ? $m->tenant->name : 'Algrow Capital';
                     $recipientsList->push((object) [
                         'name' => $m->owner_name ?: ($m->user ? $m->user->name : $m->username),
                         'phone' => $cleanPhone,
                         'role' => 'Mitra',
+                        'company' => $companyName,
                         'source' => 'mitra',
                     ]);
                 }
             }
         }
 
-        // 2. Also get standalone users (without global scopes)
-        $usersWithPhoneRaw = User::withoutGlobalScopes()
+        // 2. Also get standalone users
+        $userQuery = User::withoutGlobalScopes()
+            ->with('tenant')
             ->whereNotNull('phone')
             ->where('phone', '!=', '')
-            ->where('phone', '!=', '-')
-            ->orderBy('name', 'asc')
-            ->get();
+            ->where('phone', '!=', '-');
+
+        if ($selectedTenantId) {
+            $userQuery->where('tenant_id', $selectedTenantId);
+        }
+
+        $usersWithPhoneRaw = $userQuery->orderBy('name', 'asc')->get();
 
         foreach ($usersWithPhoneRaw as $u) {
             $cleanPhone = trim($u->phone);
             $digits = preg_replace('/[^0-9]/', '', $cleanPhone);
             if ($cleanPhone !== '' && $cleanPhone !== '-' && strlen($digits) >= 8) {
+                $companyName = $u->tenant ? $u->tenant->name : 'Algrow Capital';
                 $recipientsList->push((object) [
                     'name' => $u->name ?: $u->username,
                     'phone' => $cleanPhone,
                     'role' => $u->role ? ucfirst($u->role) : 'User',
+                    'company' => $companyName,
                     'source' => 'user',
                 ]);
             }
@@ -123,7 +147,7 @@ class WhatsAppBlastController extends Controller
         $allUsers = User::withoutGlobalScopes()->orderBy('name', 'asc')->get();
         $currentGatewayUrl = $this->getServiceUrl();
 
-        return view('whatsapp.index', compact('usersWithPhone', 'allUsers', 'currentGatewayUrl'));
+        return view('whatsapp.index', compact('usersWithPhone', 'allUsers', 'currentGatewayUrl', 'tenants', 'selectedTenantId', 'isDeveloper'));
     }
 
     /**

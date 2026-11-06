@@ -36,6 +36,11 @@ class MitraAccount extends Model
 
     protected $hidden = ['password', 'pin'];
 
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class, 'tenant_id');
+    }
+
     public function group()
     {
         return $this->belongsTo(MitraGroup::class, 'mitra_group_id');
