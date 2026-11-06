@@ -394,42 +394,116 @@
                         </div>
                     </div>
 
-                    <!-- TAG CHIPS -->
-                    <div class="mb-2">
-                        <label class="form-label small text-emerald-400 fw-bold mb-1">Sisipkan Tag Dinamis:</label>
-                        <div class="d-flex flex-wrap gap-1">
-                            <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{nama}')">
-                                + {nama}
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{saham}')">
-                                + {saham}
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{perusahaan}')">
-                                + {perusahaan}
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{phone}')">
-                                + {phone}
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{tanggal}')">
-                                + {tanggal}
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{jam}')">
-                                + {jam}
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary text-warning border-warning" onclick="insertTag('{Halo|Hai|Selamat siang}')" title="Pilihan kata acak">
-                                + Spintax {Halo|Hai}
-                            </button>
+                    <!-- FORMAT PENGIRIMAN: PESAN TEKS VS WHATSAPP POLL (TOMBOL KLIK INTERAKTIF) -->
+                    <div class="mb-3 p-2 rounded-3 bg-black bg-opacity-50 border border-emerald-900 border-opacity-50">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <span class="small text-white fw-bold">
+                                <i class="fa-solid fa-layer-group text-emerald-400 me-1"></i> Format Pesan WhatsApp:
+                            </span>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <input type="radio" class="btn-check" name="msgTypeOption" id="msgTypeText" value="text" checked onchange="switchMessageType('text')">
+                                <label class="btn btn-outline-primary-custom text-white px-3 py-1" for="msgTypeText">
+                                    <i class="fa-solid fa-align-left me-1"></i> Pesan Teks
+                                </label>
+
+                                <input type="radio" class="btn-check" name="msgTypeOption" id="msgTypePoll" value="poll" onchange="switchMessageType('poll')">
+                                <label class="btn btn-outline-primary-custom text-white px-3 py-1 fw-bold" for="msgTypePoll">
+                                    <i class="fa-solid fa-square-poll-vertical text-emerald-300 me-1"></i> Tombol Polling (YA / TIDAK)
+                                </label>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- MESSAGE TEXTAREA -->
-                    <div class="mb-3">
-                        <textarea id="messageTemplate" class="form-control text-white" rows="6" placeholder="{Halo|Hai|Selamat siang} {nama},&#10;&#10;Kami menginformasikan update terbaru dari Algrow Capital...">{Halo|Hai|Selamat siang} {nama},
+                    <!-- POLL EDITOR BOX (DAPAT DI-TAP LANGSUNG OLEH PENERIMA DI WHATSAPP) -->
+                    <div id="pollEditorBox" class="mb-3 p-3 rounded-3 bg-black bg-opacity-40 border border-emerald-500 border-opacity-40 d-none">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small text-emerald-400 fw-bold">
+                                <i class="fa-solid fa-square-poll-vertical me-1"></i> WhatsApp Poll (Tombol Interaktif di Chat Penerima)
+                            </span>
+                            <span class="badge bg-success bg-opacity-25 text-emerald-300 border border-success border-opacity-30 small">
+                                Penerima Tinggal Tap Tombol
+                            </span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small text-white opacity-75 mb-1">Pertanyaan Polling (Tampil di chat WhatsApp):</label>
+                            <input type="text" id="pollQuestionInput" class="form-control text-white" value="Apakah Anda masih ingin melanjutkan keikutsertaan alokasi saham IPO *{saham}*?" placeholder="Contoh: Apakah Anda masih ingin melanjutkan keikutsertaan saham IPO *{saham}*?" oninput="updatePollPreview()">
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small text-white opacity-75 mb-1">Pilihan Tombol WhatsApp (Maksimal 1 pilihan per user):</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-black bg-opacity-50 text-success border-emerald-900"><i class="fa-solid fa-circle-check"></i></span>
+                                        <input type="text" id="pollOption1" class="form-control text-white ticker-font" value="YA (Lanjut)" oninput="updatePollPreview()">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-black bg-opacity-50 text-danger border-emerald-900"><i class="fa-solid fa-circle-xmark"></i></span>
+                                        <input type="text" id="pollOption2" class="form-control text-white ticker-font" value="TIDAK (Batal)" oninput="updatePollPreview()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- LIVE PREVIEW OF POLL BUTTONS -->
+                        <div class="mt-3 p-3 rounded-3 bg-black bg-opacity-60 border border-emerald-900 border-opacity-50">
+                            <div class="small text-white opacity-50 mb-1" style="font-size: 0.72rem;">
+                                <i class="fa-brands fa-whatsapp text-emerald-400 me-1"></i> PREVIEW TAMPILAN DI WHATSAPP PENERIMA:
+                            </div>
+                            <div class="p-2 rounded-2 bg-dark bg-opacity-50 border border-white border-opacity-10 text-white" style="font-size: 0.85rem;">
+                                <div class="fw-bold mb-2 text-white" id="pollPreviewQuestion">Apakah Anda masih ingin melanjutkan keikutsertaan alokasi saham IPO *SUPA*?</div>
+                                <div class="p-2 rounded bg-secondary bg-opacity-25 mb-1 d-flex align-items-center gap-2">
+                                    <i class="fa-regular fa-circle text-emerald-400"></i> <span id="pollPreviewOpt1">YA (Lanjut)</span>
+                                </div>
+                                <div class="p-2 rounded bg-secondary bg-opacity-25 d-flex align-items-center gap-2">
+                                    <i class="fa-regular fa-circle text-danger"></i> <span id="pollPreviewOpt2">TIDAK (Batal)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TEXT EDITOR WRAPPER -->
+                    <div id="textEditorBox">
+                        <!-- TAG CHIPS -->
+                        <div class="mb-2">
+                            <label class="form-label small text-emerald-400 fw-bold mb-1">Sisipkan Tag Dinamis:</label>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{nama}')">
+                                    + {nama}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{saham}')">
+                                    + {saham}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{perusahaan}')">
+                                    + {perusahaan}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{phone}')">
+                                    + {phone}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{tanggal}')">
+                                    + {tanggal}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-emerald-300 border-emerald-800" onclick="insertTag('{jam}')">
+                                    + {jam}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary text-warning border-warning" onclick="insertTag('{Halo|Hai|Selamat siang}')" title="Pilihan kata acak">
+                                    + Spintax {Halo|Hai}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- MESSAGE TEXTAREA -->
+                        <div class="mb-3">
+                            <textarea id="messageTemplate" class="form-control text-white" rows="6" placeholder="{Halo|Hai|Selamat siang} {nama},&#10;&#10;Kami menginformasikan update terbaru dari Algrow Capital...">{Halo|Hai|Selamat siang} {nama},
 
 Terima kasih telah bergabung bersama Algrow Capital. Portofolio & transaksi Anda dapat dipantau langsung melalui dashboard kami.
 
 Salam sukses,
 Tim Algrow Capital</textarea>
+                        </div>
                     </div>
 
                     <!-- ANTI-BAN SETTINGS ACCORDION / COLLAPSIBLE -->
@@ -949,6 +1023,35 @@ Tim Algrow Capital</textarea>
         textarea.selectionEnd = start + tag.length;
     }
 
+    // Message Type Manager: Text vs WhatsApp Poll (Interactive Tap Buttons)
+    function switchMessageType(type) {
+        const textEditor = document.getElementById('textEditorBox');
+        const pollEditor = document.getElementById('pollEditorBox');
+        if (type === 'poll') {
+            textEditor.classList.add('d-none');
+            pollEditor.classList.remove('d-none');
+            updatePollPreview();
+        } else {
+            pollEditor.classList.add('d-none');
+            textEditor.classList.remove('d-none');
+        }
+    }
+
+    function updatePollPreview() {
+        const ticker = document.getElementById('selectedIpoTicker')?.value || 'SUPA';
+        const rawQ = document.getElementById('pollQuestionInput')?.value || 'Apakah Anda masih ingin melanjutkan keikutsertaan saham IPO *{saham}*?';
+        const opt1 = document.getElementById('pollOption1')?.value || 'YA (Lanjut)';
+        const opt2 = document.getElementById('pollOption2')?.value || 'TIDAK (Batal)';
+
+        const displayQ = rawQ.replace(/\{saham\}/gi, ticker !== 'IPO' ? ticker : 'SUPA')
+                             .replace(/\{perusahaan\}/gi, 'Algrow Capital')
+                             .replace(/\{nama\}/gi, 'Budi');
+
+        document.getElementById('pollPreviewQuestion').innerText = displayQ;
+        document.getElementById('pollPreviewOpt1').innerText = opt1;
+        document.getElementById('pollPreviewOpt2').innerText = opt2;
+    }
+
     // Quick Template Manager
     function applyQuickTemplate(type) {
         const textarea = document.getElementById('messageTemplate');
@@ -956,22 +1059,33 @@ Tim Algrow Capital</textarea>
         const sahamDisplay = ticker && ticker !== 'IPO' ? ticker : '{saham}';
 
         if (type === 'konfirmasi_saham') {
+            // Auto switch to WhatsApp Poll (Interactive Tap Buttons)
+            document.getElementById('msgTypePoll').checked = true;
+            switchMessageType('poll');
+
+            document.getElementById('pollQuestionInput').value = `Apakah Anda masih ingin melanjutkan alokasi saham IPO *${sahamDisplay}*?`;
+            document.getElementById('pollOption1').value = 'YA (Lanjut)';
+            document.getElementById('pollOption2').value = 'TIDAK (Batal)';
+            updatePollPreview();
+
+            // Also prepare fallback text
             textarea.value = `{Halo|Hai|Selamat siang} {nama},
 
-Kami dari {perusahaan} ingin mengonfirmasi terkait keikutsertaan Anda pada alokasi saham IPO *${sahamDisplay}*.
+Kami dari {perusahaan} ingin mengonfirmasi terkait alokasi saham IPO *${sahamDisplay}*.
 
-*Apakah Anda masih ingin melanjutkan keikutsertaan saham ini?*
+Apakah Anda masih ingin melanjutkan keikutsertaan saham ini?
+👉 Ketik YA (Lanjut)
+👉 Ketik TIDAK (Batal)
 
-Mohon balas pesan ini dengan:
-👉 Balas *YA* (jika ingin lanjut)
-👉 Balas *TIDAK* (jika tidak lanjut / batal)
-
-Batas konfirmasi adalah hari ini sebelum pukul 17:00 WIB. Terima kasih atas perhatian dan kerja samanya.
-
-Salam sukses,
+Terima kasih,
 Tim {perusahaan}`;
-        } else if (type === 'info_ipo') {
-            textarea.value = `{Halo|Hai|Selamat siang} {nama},
+        } else {
+            // Switch to text mode for regular announcements
+            document.getElementById('msgTypeText').checked = true;
+            switchMessageType('text');
+
+            if (type === 'info_ipo') {
+                textarea.value = `{Halo|Hai|Selamat siang} {nama},
 
 Kami informasikan bahwa penawaran awal saham IPO baru *${sahamDisplay}* telah resmi dibuka.
 
@@ -979,8 +1093,8 @@ Bagi Anda yang berminat mengamankan alokasi atau menambah kepemilikan, silakan h
 
 Terima kasih,
 Tim {perusahaan}`;
-        } else if (type === 'profit_dividen') {
-            textarea.value = `{Halo|Hai|Selamat siang} {nama},
+            } else if (type === 'profit_dividen') {
+                textarea.value = `{Halo|Hai|Selamat siang} {nama},
 
 Kabar gembira! Distribusi profit dan pencairan alokasi saham IPO *${sahamDisplay}* Anda telah selesai diproses oleh tim kami.
 
@@ -990,20 +1104,21 @@ Terima kasih atas kerja sama dan kepercayaan Anda bersama {perusahaan}.
 
 Salam sukses,
 Tim {perusahaan}`;
-        } else if (type === 'sapaan_umum') {
-            textarea.value = `{Halo|Hai|Selamat siang} {nama},
+            } else if (type === 'sapaan_umum') {
+                textarea.value = `{Halo|Hai|Selamat siang} {nama},
 
 Terima kasih telah bergabung bersama {perusahaan}. Portofolio & transaksi Anda dapat dipantau langsung melalui dashboard kami.
 
 Salam sukses,
 Tim {perusahaan}`;
+            }
         }
 
         Swal.fire({
             toast: true,
             position: 'top-end',
             icon: 'success',
-            title: 'Template berhasil dimuat',
+            title: type === 'konfirmasi_saham' ? 'Mode Tombol Polling YA/TIDAK aktif!' : 'Template berhasil dimuat',
             showConfirmButton: false,
             timer: 1500,
             background: '#05160c',
@@ -1018,20 +1133,38 @@ Tim {perusahaan}`;
             textarea.value = textarea.value.replace(/saham IPO \*[^*]+\*/gi, `saham IPO *${ticker}*`);
             textarea.value = textarea.value.replace(/\*\{saham\}\*/gi, `*${ticker}*`);
         }
+        updatePollPreview();
     }
 
-    // 9. Send Test Message
+    // 9. Send Test Message (Supports Text & WhatsApp Poll Buttons)
     function sendTestMessage() {
         const phone = document.getElementById('testPhoneInput').value.trim();
+        const sendType = document.querySelector('input[name="msgTypeOption"]:checked')?.value || 'text';
         const message = document.getElementById('messageTemplate').value.trim();
+        const pollQuestion = document.getElementById('pollQuestionInput')?.value.trim() || '';
+        const pollOptions = [
+            document.getElementById('pollOption1')?.value.trim() || 'YA (Lanjut)',
+            document.getElementById('pollOption2')?.value.trim() || 'TIDAK (Batal)'
+        ];
 
-        if (!phone || !message) {
-            Swal.fire({ icon: 'warning', title: 'Lengkapi Data', text: 'Nomor uji coba dan isi pesan wajib diisi.', background: '#05160c', color: '#fff' });
+        if (!phone) {
+            Swal.fire({ icon: 'warning', title: 'Nomor Kosong', text: 'Nomor telepon uji coba wajib diisi.', background: '#05160c', color: '#fff' });
             return;
         }
 
+        if (sendType === 'poll' && !pollQuestion) {
+            Swal.fire({ icon: 'warning', title: 'Pertanyaan Kosong', text: 'Pertanyaan polling wajib diisi.', background: '#05160c', color: '#fff' });
+            return;
+        }
+
+        if (sendType === 'text' && !message) {
+            Swal.fire({ icon: 'warning', title: 'Pesan Kosong', text: 'Isi pesan teks wajib diisi.', background: '#05160c', color: '#fff' });
+            return;
+        }
+
+        const typeLabel = sendType === 'poll' ? 'Tombol Polling (YA/TIDAK)' : 'Pesan Teks';
         Swal.fire({
-            title: 'Mengirim Pesan Uji Coba...',
+            title: `Mengirim Uji Coba [${typeLabel}]...`,
             text: `Mengirim ke ${phone}...`,
             allowOutsideClick: false,
             background: '#05160c',
@@ -1045,7 +1178,13 @@ Tim {perusahaan}`;
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            body: JSON.stringify({ phone, message })
+            body: JSON.stringify({
+                phone,
+                message: sendType === 'poll' ? pollQuestion : message,
+                sendType,
+                pollQuestion,
+                pollOptions
+            })
         })
         .then(res => res.json())
         .then(res => {
@@ -1061,10 +1200,17 @@ Tim {perusahaan}`;
         });
     }
 
-    // 10. Start Blast Process
+    // 10. Start Blast Process (Supports Text & WhatsApp Poll Buttons)
     function startBlastProcess() {
         const recipients = getSelectedRecipients();
+        const sendType = document.querySelector('input[name="msgTypeOption"]:checked')?.value || 'text';
         const message = document.getElementById('messageTemplate').value.trim();
+        const pollQuestion = document.getElementById('pollQuestionInput')?.value.trim() || '';
+        const pollOptions = [
+            document.getElementById('pollOption1')?.value.trim() || 'YA (Lanjut)',
+            document.getElementById('pollOption2')?.value.trim() || 'TIDAK (Batal)'
+        ];
+
         const minDelay = document.getElementById('minDelay').value;
         const maxDelay = document.getElementById('maxDelay').value;
         const batchSize = document.getElementById('batchSize').value;
@@ -1075,14 +1221,20 @@ Tim {perusahaan}`;
             return;
         }
 
-        if (!message) {
+        if (sendType === 'poll' && !pollQuestion) {
+            Swal.fire({ icon: 'warning', title: 'Pertanyaan Kosong', text: 'Pertanyaan polling wajib diisi.', background: '#05160c', color: '#fff' });
+            return;
+        }
+
+        if (sendType === 'text' && !message) {
             Swal.fire({ icon: 'warning', title: 'Pesan Kosong', text: 'Isi template pesan tidak boleh kosong.', background: '#05160c', color: '#fff' });
             return;
         }
 
+        const formatLabel = sendType === 'poll' ? '<span class="badge bg-success">Tombol Polling YA/TIDAK</span>' : '<span class="badge bg-secondary">Pesan Teks</span>';
         Swal.fire({
             title: 'Mulai Pengiriman Blast?',
-            html: `Akan mengirim pesan ke <strong>${recipients.length} nomor</strong> dengan jeda anti-ban <strong>${minDelay}-${maxDelay} detik</strong>.<br><br><span class="small text-emerald-400">Pastikan perangkat Anda tetap terhubung selama proses berjalan.</span>`,
+            html: `Format: <strong>${formatLabel}</strong><br>Akan mengirim ke <strong>${recipients.length} nomor</strong> dengan jeda anti-ban <strong>${minDelay}-${maxDelay} detik</strong>.<br><br><span class="small text-emerald-400">Pastikan WhatsApp Anda tetap terhubung selama proses berjalan.</span>`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#10b981',
@@ -1101,7 +1253,10 @@ Tim {perusahaan}`;
                     },
                     body: JSON.stringify({
                         recipients,
-                        message,
+                        message: sendType === 'poll' ? pollQuestion : message,
+                        sendType,
+                        pollQuestion,
+                        pollOptions,
                         minDelay,
                         maxDelay,
                         batchSize,

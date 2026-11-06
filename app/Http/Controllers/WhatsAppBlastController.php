@@ -287,7 +287,10 @@ class WhatsAppBlastController extends Controller
     {
         $request->validate([
             'phone' => 'required|string',
-            'message' => 'required|string'
+            'message' => 'nullable|string',
+            'sendType' => 'nullable|in:text,poll',
+            'pollQuestion' => 'nullable|string',
+            'pollOptions' => 'nullable|array'
         ]);
 
         $gatewayUrl = $this->getServiceUrl();
@@ -295,7 +298,10 @@ class WhatsAppBlastController extends Controller
         try {
             $response = Http::timeout(18)->post("{$gatewayUrl}/api/test-send", [
                 'phone' => $request->phone,
-                'message' => $request->message
+                'message' => $request->input('message', ''),
+                'sendType' => $request->input('sendType', 'text'),
+                'pollQuestion' => $request->input('pollQuestion', ''),
+                'pollOptions' => $request->input('pollOptions', ['YA (Lanjut)', 'TIDAK (Batal)'])
             ]);
             return response()->json($response->json(), $response->status());
         } catch (\Exception $e) {
@@ -314,7 +320,10 @@ class WhatsAppBlastController extends Controller
         $request->validate([
             'recipients' => 'required|array|min:1',
             'recipients.*.phone' => 'required|string',
-            'message' => 'required|string',
+            'message' => 'nullable|string',
+            'sendType' => 'nullable|in:text,poll',
+            'pollQuestion' => 'nullable|string',
+            'pollOptions' => 'nullable|array',
             'minDelay' => 'nullable|numeric|min:3',
             'maxDelay' => 'nullable|numeric|min:5',
             'batchSize' => 'nullable|numeric|min:1',
@@ -326,7 +335,10 @@ class WhatsAppBlastController extends Controller
         try {
             $response = Http::timeout(15)->post("{$gatewayUrl}/api/blast/start", [
                 'recipients' => $request->recipients,
-                'message' => $request->message,
+                'message' => $request->input('message', ''),
+                'sendType' => $request->input('sendType', 'text'),
+                'pollQuestion' => $request->input('pollQuestion', ''),
+                'pollOptions' => $request->input('pollOptions', ['YA (Lanjut)', 'TIDAK (Batal)']),
                 'minDelay' => $request->input('minDelay', 10),
                 'maxDelay' => $request->input('maxDelay', 25),
                 'batchSize' => $request->input('batchSize', 15),

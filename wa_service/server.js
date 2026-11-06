@@ -264,22 +264,39 @@ app.post('/api/logout', async (req, res) => {
 
 // Test Message to a single number
 app.post('/api/test-send', async (req, res) => {
-    const { phone, message } = req.body;
+    const { phone, message, sendType = 'text', pollQuestion = '', pollOptions = [] } = req.body;
     if (connectionState.status !== 'connected' || !sock) {
         return res.status(400).json({ success: false, message: 'WhatsApp belum terhubung!' });
     }
-    if (!phone || !message) {
-        return res.status(400).json({ success: false, message: 'Nomor dan pesan wajib diisi.' });
+    if (!phone || (!message && !pollQuestion)) {
+        return res.status(400).json({ success: false, message: 'Nomor dan pesan/pertanyaan polling wajib diisi.' });
     }
 
     try {
         const jid = formatToJid(phone);
         await sock.sendPresenceUpdate('composing', jid);
-        await delay(2000);
-        await sock.sendMessage(jid, { text: parseSpintax(message) });
+        await delay(1500);
+
+        if (sendType === 'poll') {
+            const questionText = parseSpintax(pollQuestion || message);
+            const values = Array.isArray(pollOptions) && pollOptions.length >= 2
+                ? pollOptions.map(o => o.trim()).filter(Boolean)
+                : ['YA (Lanjut)', 'TIDAK (Batal)'];
+
+            await sock.sendMessage(jid, {
+                poll: {
+                    name: questionText,
+                    values: values,
+                    selectableCount: 1
+                }
+            });
+        } else {
+            await sock.sendMessage(jid, { text: parseSpintax(message) });
+        }
+
         await sock.sendPresenceUpdate('paused', jid);
 
-        res.json({ success: true, message: `Pesan uji coba berhasil terkirim ke ${phone}` });
+        res.json({ success: true, message: `Pesan uji coba (${sendType === 'poll' ? 'Polling Interaktif' : 'Teks'}) berhasil terkirim ke ${phone}` });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
@@ -290,6 +307,9 @@ app.post('/api/blast/start', async (req, res) => {
     const {
         recipients = [],
         message = '',
+        sendType = 'text',
+        pollQuestion = '',
+        pollOptions = ['YA (Lanjut)', 'TIDAK (Batal)'],
         minDelay = 10,
         maxDelay = 25,
         batchSize = 15,
@@ -308,8 +328,8 @@ app.post('/api/blast/start', async (req, res) => {
         return res.status(400).json({ success: false, message: 'Daftar penerima kosong.' });
     }
 
-    if (!message || message.trim() === '') {
-        return res.status(400).json({ success: false, message: 'Isi template pesan tidak boleh kosong.' });
+    if (!message && !pollQuestion) {
+        return res.status(400).json({ success: false, message: 'Isi template pesan atau pertanyaan polling tidak boleh kosong.' });
     }
 
     // Reset blast state
@@ -326,7 +346,17 @@ app.post('/api/blast/start', async (req, res) => {
     };
 
     // Run async in background
-    runBlastJob(recipients, message, Number(minDelay), Number(maxDelay), Number(batchSize), Number(batchDelay));
+    runBlastJob(
+        recipients,
+        message,
+        Number(minDelay),
+        Number(maxDelay),
+        Number(batchSize),
+        Number(batchDelay),
+        sendType,
+        pollQuestion,
+        pollOptions
+    );
 
     res.json({
         success: true,
@@ -336,12 +366,23 @@ app.post('/api/blast/start', async (req, res) => {
 });
 
 // Background Blast Runner
-async function runBlastJob(recipients, templateMessage, minDelay, maxDelay, batchSize, batchDelaySec) {
+async function runBlastJob(
+    recipients,
+    templateMessage,
+    minDelay,
+    maxDelay,
+    batchSize,
+    batchDelaySec,
+    sendType = 'text',
+    pollQuestion = '',
+    pollOptions = ['YA (Lanjut)', 'TIDAK (Batal)']
+) {
     const minD = Math.max(minDelay, 5) * 1000;
     const maxD = Math.max(maxDelay, minDelay) * 1000;
     const batchCooldownMs = Math.max(batchDelaySec, 10) * 1000;
 
-    addBlastLog('INFO', `Memulai blast ke ${recipients.length} kontak...`);
+    const blastLabel = sendType === 'poll' ? 'Polling Interaktif (Tombol YA/TIDAK)' : 'Pesan Teks';
+    addBlastLog('INFO', `Memulai blast [${blastLabel}] ke ${recipients.length} kontak...`);
 
     let consecutiveCount = 0;
 
@@ -369,10 +410,10 @@ async function runBlastJob(recipients, templateMessage, minDelay, maxDelay, batc
         const dateStr = now.toLocaleDateString('id-ID', { dateStyle: 'long' });
         const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-        const recipientCompany = recipient.company || 'Algrow Capital';
-        const recipientSaham = recipient.saham || 'IPO';
+        const recipientCompany = item.company || 'Algrow Capital';
+        const recipientSaham = item.saham || 'IPO';
 
-        let personalized = templateMessage
+        let personalized = (templateMessage || pollQuestion)
             .replace(/\{nama\}/gi, name)
             .replace(/\{name\}/gi, name)
             .replace(/\{phone\}/gi, rawPhone)
@@ -385,19 +426,41 @@ async function runBlastJob(recipients, templateMessage, minDelay, maxDelay, batc
         personalized = parseSpintax(personalized);
 
         try {
-            // Anti-ban step 1: Presence Composing (Simulasi mengetik 3 detik)
+            // Anti-ban step 1: Presence Composing (Simulasi mengetik 2-3 detik)
             await sock.sendPresenceUpdate('available');
             await delay(1000);
             await sock.sendPresenceUpdate('composing', jid);
-            await delay(3000);
+            await delay(2500);
 
-            // Send
-            await sock.sendMessage(jid, { text: personalized });
+            // Send as Poll (Interactive Buttons) or Text
+            if (sendType === 'poll') {
+                let qText = (pollQuestion || personalized)
+                    .replace(/\{nama\}/gi, name)
+                    .replace(/\{name\}/gi, name)
+                    .replace(/\{perusahaan\}/gi, recipientCompany)
+                    .replace(/\{saham\}/gi, recipientSaham);
+                qText = parseSpintax(qText);
+
+                const values = Array.isArray(pollOptions) && pollOptions.length >= 2
+                    ? pollOptions.map(o => o.trim()).filter(Boolean)
+                    : ['YA (Lanjut)', 'TIDAK (Batal)'];
+
+                await sock.sendMessage(jid, {
+                    poll: {
+                        name: qText,
+                        values: values,
+                        selectableCount: 1
+                    }
+                });
+            } else {
+                await sock.sendMessage(jid, { text: personalized });
+            }
+
             await sock.sendPresenceUpdate('paused', jid);
 
             blastState.sent++;
             consecutiveCount++;
-            addBlastLog('SUCCESS', `[${i + 1}/${recipients.length}] Terkirim ke ${name} (${rawPhone})`);
+            addBlastLog('SUCCESS', `[${i + 1}/${recipients.length}] Terkirim ke ${name} (${rawPhone}) [${sendType === 'poll' ? 'Polling' : 'Teks'}]`);
 
             // Anti-ban step 2: Batch Cooldown
             if (consecutiveCount >= batchSize && i < recipients.length - 1) {
