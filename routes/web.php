@@ -54,6 +54,14 @@ Route::get('/fix-type-constraint', function () {
     }
 });
 
+Route::get('/app-version', function () {
+    return response()->json([
+        'version' => '172273a',
+        'updated_at' => '2026-11-06 16:08',
+        'features' => ['quick_templates', 'tenant_isolation', 'mobile_responsive']
+    ]);
+});
+
 Route::get('/fix-phone-column', function () {
     try {
         $url = env('DATABASE_URL');
