@@ -82,6 +82,19 @@ function formatCleanNumber(phone) {
     return clean;
 }
 
+// In-memory message store for Signal Protocol retry receipts
+// Resolves the "Waiting for this message. This may take a while" issue
+const recentMessageStore = new Map();
+
+function storeSentMessage(key, msg) {
+    if (!key || !key.id) return;
+    recentMessageStore.set(key.id, msg);
+    if (recentMessageStore.size > 1000) {
+        const oldestKey = recentMessageStore.keys().next().value;
+        recentMessageStore.delete(oldestKey);
+    }
+}
+
 // Initialize WhatsApp connection
 async function initWhatsApp(pairingNumber = null) {
     try {
@@ -103,10 +116,24 @@ async function initWhatsApp(pairingNumber = null) {
             },
             browser: ['Ubuntu', 'Chrome', '20.0.04'],
             generateHighQualityLinkPreview: false,
-            syncFullHistory: false
+            syncFullHistory: false,
+            getMessage: async (key) => {
+                if (recentMessageStore.has(key.id)) {
+                    return recentMessageStore.get(key.id);
+                }
+                return undefined;
+            }
         });
 
         sock.ev.on('creds.update', saveCreds);
+
+        sock.ev.on('messages.upsert', async ({ messages }) => {
+            for (const msg of messages) {
+                if (msg.key && msg.key.id && msg.message) {
+                    storeSentMessage(msg.key, msg.message);
+                }
+            }
+        });
 
         // Pairing Code Handler
         if (pairingNumber && !sock.authState.creds.registered) {
@@ -277,13 +304,14 @@ app.post('/api/test-send', async (req, res) => {
         await sock.sendPresenceUpdate('composing', jid);
         await delay(1500);
 
+        let sentMsg;
         if (sendType === 'poll') {
             const questionText = parseSpintax(pollQuestion || message);
             const values = Array.isArray(pollOptions) && pollOptions.length >= 2
                 ? pollOptions.map(o => o.trim()).filter(Boolean)
                 : ['YA (Lanjut)', 'TIDAK (Batal)'];
 
-            await sock.sendMessage(jid, {
+            sentMsg = await sock.sendMessage(jid, {
                 poll: {
                     name: questionText,
                     values: values,
@@ -291,7 +319,11 @@ app.post('/api/test-send', async (req, res) => {
                 }
             });
         } else {
-            await sock.sendMessage(jid, { text: parseSpintax(message) });
+            sentMsg = await sock.sendMessage(jid, { text: parseSpintax(message) });
+        }
+
+        if (sentMsg?.key && sentMsg?.message) {
+            storeSentMessage(sentMsg.key, sentMsg.message);
         }
 
         await sock.sendPresenceUpdate('paused', jid);
@@ -433,6 +465,7 @@ async function runBlastJob(
             await delay(2500);
 
             // Send as Poll (Interactive Buttons) or Text
+            let sentMsg;
             if (sendType === 'poll') {
                 let qText = (pollQuestion || personalized)
                     .replace(/\{nama\}/gi, name)
@@ -445,7 +478,7 @@ async function runBlastJob(
                     ? pollOptions.map(o => o.trim()).filter(Boolean)
                     : ['YA (Lanjut)', 'TIDAK (Batal)'];
 
-                await sock.sendMessage(jid, {
+                sentMsg = await sock.sendMessage(jid, {
                     poll: {
                         name: qText,
                         values: values,
@@ -453,7 +486,11 @@ async function runBlastJob(
                     }
                 });
             } else {
-                await sock.sendMessage(jid, { text: personalized });
+                sentMsg = await sock.sendMessage(jid, { text: personalized });
+            }
+
+            if (sentMsg?.key && sentMsg?.message) {
+                storeSentMessage(sentMsg.key, sentMsg.message);
             }
 
             await sock.sendPresenceUpdate('paused', jid);
