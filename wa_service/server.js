@@ -3,8 +3,11 @@ import makeWASocket, {
     DisconnectReason,
     fetchLatestBaileysVersion,
     makeCacheableSignalKeyStore,
-    delay
+    delay,
+    Browsers,
+    proto
 } from '@whiskeysockets/baileys';
+import NodeCache from 'node-cache';
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
@@ -28,6 +31,9 @@ app.use(express.json());
 
 const PORT = 5050;
 const logger = pino({ level: 'silent' });
+
+// Cache for retry receipts
+const msgRetryCounterCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
 let sock = null;
 let connectionState = {
@@ -114,14 +120,16 @@ async function initWhatsApp(pairingNumber = null) {
                 creds: state.creds,
                 keys: makeCacheableSignalKeyStore(state.keys, logger)
             },
-            browser: ['Ubuntu', 'Chrome', '20.0.04'],
+            browser: Browsers.windows('Desktop'),
             generateHighQualityLinkPreview: false,
             syncFullHistory: false,
+            msgRetryCounterCache,
+            retryRequestDelayMs: 250,
             getMessage: async (key) => {
-                if (recentMessageStore.has(key.id)) {
+                if (key?.id && recentMessageStore.has(key.id)) {
                     return recentMessageStore.get(key.id);
                 }
-                return undefined;
+                return proto.Message.fromObject({});
             }
         });
 
@@ -265,10 +273,15 @@ app.post('/api/connect-qr', async (req, res) => {
 // Logout / Reset Session
 app.post('/api/logout', async (req, res) => {
     try {
+        console.log('[WA] Logout / reset session requested.');
         if (sock) {
             try { await sock.logout(); } catch (e) {}
             try { sock.end(); } catch (e) {}
             sock = null;
+        }
+        recentMessageStore.clear();
+        if (msgRetryCounterCache) {
+            try { msgRetryCounterCache.flushAll(); } catch (e) {}
         }
         try {
             fs.rmSync(SESSION_DIR, { recursive: true, force: true });
@@ -283,7 +296,7 @@ app.post('/api/logout', async (req, res) => {
             error: null
         };
 
-        res.json({ success: true, message: 'Sesi WhatsApp berhasil dihapus.' });
+        res.json({ success: true, message: 'Sesi WhatsApp berhasil di-reset. Silakan hubungkan ulang.' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
@@ -301,6 +314,7 @@ app.post('/api/test-send', async (req, res) => {
 
     try {
         const jid = formatToJid(phone);
+        console.log(`[TEST-SEND] Mengirim ke ${phone} (${jid}) [type: ${sendType}]...`);
         await sock.sendPresenceUpdate('composing', jid);
         await delay(1500);
 
@@ -327,9 +341,11 @@ app.post('/api/test-send', async (req, res) => {
         }
 
         await sock.sendPresenceUpdate('paused', jid);
+        console.log(`[TEST-SEND] Berhasil terkirim ke ${phone}`);
 
         res.json({ success: true, message: `Pesan uji coba (${sendType === 'poll' ? 'Polling Interaktif' : 'Teks'}) berhasil terkirim ke ${phone}` });
     } catch (err) {
+        console.error(`[TEST-SEND] Gagal kirim ke ${phone}:`, err);
         res.status(500).json({ success: false, message: err.message });
     }
 });
