@@ -164,6 +164,7 @@ Route::post('forgot-password', [AuthController::class, 'sendResetLinkEmail'])->n
 Route::get('reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
 Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 Route::get('register', [AuthController::class, 'showRegister'])->name('register');
+Route::get('register/success', [AuthController::class, 'showRegisterSuccess'])->name('register.success');
 Route::get('register/search-mitra', [AuthController::class, 'searchMitra'])->name('register.search-mitra');
 Route::get('register/companies', [AuthController::class, 'getCompanies'])->name('register.companies');
 Route::get('register/mitras/{tenant}', [AuthController::class, 'getTenantMitras'])->name('register.tenant-mitras');
@@ -202,6 +203,7 @@ Route::middleware(['auth', 'verified', 'subscribed'])->group(function () {
         Route::post('mitra-groups/{mitra_group}/remove', [\App\Http\Controllers\MitraGroupController::class, 'removeAccounts'])->name('mitra-groups.remove');
         Route::resource('mitra-groups', \App\Http\Controllers\MitraGroupController::class);
         Route::patch('mitra-accounts/{mitraAccount}/update-field', [MitraAccountController::class, 'updateField'])->name('mitra-accounts.update-field');
+        Route::patch('mitra-accounts/{mitraAccount}/approve', [MitraAccountController::class, 'approve'])->name('mitra-accounts.approve');
         Route::get('mitra-accounts/export', [MitraAccountController::class, 'export'])->name('mitra-accounts.export');
         Route::get('mitra-accounts/template', [MitraAccountController::class, 'template'])->name('mitra-accounts.template');
         Route::resource('mitra-accounts', MitraAccountController::class)->except(['index']);

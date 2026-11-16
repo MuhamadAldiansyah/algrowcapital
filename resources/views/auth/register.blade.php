@@ -344,10 +344,10 @@
                             </div>
                         </div>
 
-                        <!-- STEP: Data Mitra Baru (Khusus Mitra Baru Algrow Capital) -->
+                        <!-- STEP: Data Diri Mitra Baru -->
                         <div id="step-new-mitra-data" class="step-section hidden space-y-4">
-                            <h2 class="text-white text-lg font-bold text-center mb-1">Data Diri Mitra</h2>
-                            <p class="text-slate-400 text-xs text-center mb-4">Lengkapi data pendaftaran kemitraan Algrow Capital</p>
+                            <h2 class="text-white text-lg font-bold text-center mb-1">Data Diri & Rekening</h2>
+                            <p class="text-slate-400 text-xs text-center mb-4">Lengkapi data diri dan rekening bank untuk pencairan profit</p>
 
                             <!-- Nama Lengkap -->
                             <div class="float-group @error('full_name') has-error @enderror entrance" style="animation-delay:.1s">
@@ -369,25 +369,97 @@
                                 @error('phone') <p class="text-red-400 text-[11px] font-medium mt-1.5 pl-1">{{ $message }}</p> @enderror
                             </div>
 
+                            <!-- Bank RDN & No RDN -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 entrance" style="animation-delay:.2s">
+                                <div class="float-group @error('bank_rdn') has-error @enderror">
+                                    <input type="text" id="bank_rdn" name="bank_rdn" value="{{ old('bank_rdn') }}" placeholder=" " class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[44px] pr-3 text-white text-sm outline-none focus:border-accent/50 focus:bg-white/[.06] transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                    <label style="left:44px;">Bank RDN (mis: BCA)</label>
+                                </div>
+                                <div class="float-group @error('rdn_account') has-error @enderror">
+                                    <input type="text" id="rdn_account" name="rdn_account" value="{{ old('rdn_account') }}" placeholder=" " class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[44px] pr-3 text-white text-sm outline-none focus:border-accent/50 focus:bg-white/[.06] transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/></svg>
+                                    <label style="left:44px;">No. Rekening RDN</label>
+                                </div>
+                            </div>
+
+                            <!-- Bank Pribadi & No Rek Pribadi -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 entrance" style="animation-delay:.25s">
+                                <div class="float-group @error('personal_bank') has-error @enderror">
+                                    <input type="text" id="personal_bank" name="personal_bank" value="{{ old('personal_bank') }}" placeholder=" " class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[44px] pr-3 text-white text-sm outline-none focus:border-accent/50 focus:bg-white/[.06] transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                    <label style="left:44px;">Bank Pribadi (mis: BCA)</label>
+                                </div>
+                                <div class="float-group @error('no_rek') has-error @enderror">
+                                    <input type="text" id="no_rek" name="no_rek" value="{{ old('no_rek') }}" placeholder=" " class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[44px] pr-3 text-white text-sm outline-none focus:border-accent/50 focus:bg-white/[.06] transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    <label style="left:44px;">No. Rekening Pribadi</label>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3 mt-4 entrance" style="animation-delay:.3s">
+                                <button type="button" onclick="prevStep()" class="w-[60px] h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] text-white flex items-center justify-center hover:bg-white/[.08] transition-all"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg></button>
+                                <button type="button" onclick="nextStep()" class="flex-1 btn-shimmer h-[54px] rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 text-white font-bold text-[15px] tracking-wide shadow-lg shadow-emerald-600/25 hover:shadow-emerald-500/40 hover:scale-[1.015] active:scale-[.985] transition-all duration-200 flex items-center justify-center gap-2.5">
+                                    Lanjut ke Akun Sekuritas <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- STEP: Data Akun Sekuritas (Mitra Baru) -->
+                        <div id="step-new-mitra-sekuritas" class="step-section hidden space-y-4">
+                            <h2 class="text-white text-lg font-bold text-center mb-1">Akun Sekuritas</h2>
+                            <p class="text-slate-400 text-xs text-center mb-4">Masukkan data akun sekuritas Stockbit / Ajaib Anda</p>
+
                             <!-- Pilihan Aplikasi Sekuritas -->
-                            <div class="float-group @error('platform') has-error @enderror entrance" style="animation-delay:.2s">
+                            <div class="float-group @error('platform') has-error @enderror entrance" style="animation-delay:.1s">
                                 <select id="platform" name="platform" class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[48px] pr-4 text-white text-base outline-none focus:border-accent/50 focus:bg-white/[.06] focus:shadow-[0_0_0_4px_rgba(52,211,153,.1)] transition-all appearance-none cursor-pointer">
-                                    <option value="Stockbit" class="bg-surface text-white" {{ old('platform') == 'Stockbit' ? 'selected' : '' }}>Stockbit</option>
+                                    <option value="Stockbit" class="bg-surface text-white" {{ old('platform', 'Stockbit') == 'Stockbit' ? 'selected' : '' }}>Stockbit</option>
                                     <option value="Ajaib" class="bg-surface text-white" {{ old('platform') == 'Ajaib' ? 'selected' : '' }}>Ajaib</option>
-                                    <option value="Belum Ada" class="bg-surface text-white" {{ old('platform') == 'Belum Ada' ? 'selected' : '' }}>Belum Ada (Perlu Panduan Pembuatan Akun)</option>
                                 </select>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-500 transition-colors pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" />
                                 </svg>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                                <label style="top:0;left:16px;font-size:.65rem;font-weight:700;color:#34d399;background:linear-gradient(to bottom, rgba(4,47,34,.95) 50%, rgba(4,47,34,.6) 100%);letter-spacing:.06em;text-transform:uppercase;">Akun Sekuritas yang Dimiliki</label>
+                                <label style="top:0;left:16px;font-size:.65rem;font-weight:700;color:#34d399;background:linear-gradient(to bottom, rgba(4,47,34,.95) 50%, rgba(4,47,34,.6) 100%);letter-spacing:.06em;text-transform:uppercase;">Pilih Sekuritas</label>
                                 @error('platform') <p class="text-red-400 text-[11px] font-medium mt-1.5 pl-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <!-- Username Sekuritas -->
+                            <div class="float-group @error('sekuritas_username') has-error @enderror entrance" style="animation-delay:.15s">
+                                <input type="text" id="sekuritas_username" name="sekuritas_username" value="{{ old('sekuritas_username') }}" placeholder=" " class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[48px] pr-4 text-white text-base outline-none focus:border-accent/50 focus:bg-white/[.06] focus:shadow-[0_0_0_4px_rgba(52,211,153,.1)] transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                <label>Username Akun Sekuritas</label>
+                                @error('sekuritas_username') <p class="text-red-400 text-[11px] font-medium mt-1.5 pl-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <!-- Password Sekuritas & PIN Sekuritas -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 entrance" style="animation-delay:.2s">
+                                <!-- Password Sekuritas -->
+                                <div class="float-group @error('sekuritas_password') has-error @enderror relative">
+                                    <input type="password" id="sekuritas_password" name="sekuritas_password" placeholder=" " class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[44px] pr-10 text-white text-sm outline-none focus:border-accent/50 focus:bg-white/[.06] transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                    <label style="left:44px;">Password Sekuritas</label>
+                                    <button type="button" onclick="togglePassword('sekuritas_password','pw-icon-sek')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-accent p-1">
+                                        <svg id="pw-icon-sek" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
+                                </div>
+                                <!-- PIN Sekuritas -->
+                                <div class="float-group @error('sekuritas_pin') has-error @enderror relative">
+                                    <input type="password" id="sekuritas_pin" name="sekuritas_pin" placeholder=" " maxlength="8" class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[44px] pr-10 text-white text-sm outline-none focus:border-accent/50 focus:bg-white/[.06] transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                    <label style="left:44px;">PIN Transaksi</label>
+                                    <button type="button" onclick="togglePassword('sekuritas_pin','pin-icon-sek')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-accent p-1">
+                                        <svg id="pin-icon-sek" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="flex gap-3 mt-4 entrance" style="animation-delay:.25s">
                                 <button type="button" onclick="prevStep()" class="w-[60px] h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] text-white flex items-center justify-center hover:bg-white/[.08] transition-all"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg></button>
                                 <button type="button" onclick="nextStep()" class="flex-1 btn-shimmer h-[54px] rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 text-white font-bold text-[15px] tracking-wide shadow-lg shadow-emerald-600/25 hover:shadow-emerald-500/40 hover:scale-[1.015] active:scale-[.985] transition-all duration-200 flex items-center justify-center gap-2.5">
-                                    Lanjut <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                                    Lanjut ke Akun Web <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
                                 </button>
                             </div>
                         </div>
@@ -537,7 +609,7 @@
         // ── Navigation Flow Logic ──
         const flows = {
             owner: ['step-0', 'step-company', 'step-email', 'step-password'],
-            user_new: ['step-0', 'step-mitra-category', 'step-new-mitra-data', 'step-email', 'step-password'],
+            user_new: ['step-0', 'step-mitra-category', 'step-new-mitra-data', 'step-new-mitra-sekuritas', 'step-email', 'step-password'],
             user_existing: ['step-0', 'step-mitra-category', 'step-tenant', 'step-mitra', 'step-email', 'step-password']
         };
         
@@ -550,6 +622,7 @@
         const hasPasswordError = {{ $errors->has('password') ? 'true' : 'false' }};
         const hasEmailError = {{ $errors->has('email') ? 'true' : 'false' }};
         const hasNewMitraError = {{ $errors->has('full_name') || $errors->has('phone') ? 'true' : 'false' }};
+        const hasSekuritasError = {{ $errors->has('sekuritas_username') || $errors->has('sekuritas_password') || $errors->has('sekuritas_pin') ? 'true' : 'false' }};
         const hasExistingMitraError = {{ $errors->has('mitra_account_id') || $errors->has('tenant_id') ? 'true' : 'false' }};
         
         if (oldRole) {
@@ -567,6 +640,8 @@
                 currentStepIndex = currentFlow.indexOf('step-password');
             } else if (hasEmailError) {
                 currentStepIndex = currentFlow.indexOf('step-email');
+            } else if (hasSekuritasError && currentFlow.includes('step-new-mitra-sekuritas')) {
+                currentStepIndex = currentFlow.indexOf('step-new-mitra-sekuritas');
             } else if (hasNewMitraError && currentFlow.includes('step-new-mitra-data')) {
                 currentStepIndex = currentFlow.indexOf('step-new-mitra-data');
             } else if (hasExistingMitraError) {
@@ -697,6 +772,30 @@
                     valid = false;
                 } else {
                     phoneInput.closest('.float-group').classList.remove('has-error');
+                }
+                isValid = valid;
+            } else if (stepId === 'step-new-mitra-sekuritas') {
+                const uInput = document.getElementById('sekuritas_username');
+                const pInput = document.getElementById('sekuritas_password');
+                const pinInput = document.getElementById('sekuritas_pin');
+                let valid = true;
+                if (!uInput.value.trim()) {
+                    uInput.closest('.float-group').classList.add('has-error');
+                    valid = false;
+                } else {
+                    uInput.closest('.float-group').classList.remove('has-error');
+                }
+                if (!pInput.value.trim()) {
+                    pInput.closest('.float-group').classList.add('has-error');
+                    valid = false;
+                } else {
+                    pInput.closest('.float-group').classList.remove('has-error');
+                }
+                if (!pinInput.value.trim()) {
+                    pinInput.closest('.float-group').classList.add('has-error');
+                    valid = false;
+                } else {
+                    pinInput.closest('.float-group').classList.remove('has-error');
                 }
                 isValid = valid;
             } else if (stepId === 'step-tenant') {

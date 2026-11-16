@@ -152,7 +152,7 @@ class MitraAccountController extends Controller
                 
                 $ownerText = '<a href="' . route('mitra-accounts.show', $account) . '" class="text-white text-decoration-none fw-bold hover-emerald d-block">' . strtoupper($account->owner_name) . '</a>';
                 if ($account->status === 'nonaktif') {
-                    $ownerText .= '<span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25 mt-1" style="font-size: 0.65rem;">NONAKTIF</span>';
+                    $ownerText .= '<span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-30 mt-1" style="font-size: 0.65rem;"><i class="fa-solid fa-clock me-1"></i>MENUNGGU APPROVAL</span>';
                 }
 
                 $editableClass = ($user && $user->role === 'investor') ? '' : 'editable-cell';
@@ -161,8 +161,14 @@ class MitraAccountController extends Controller
                 if ($user && $user->role === 'investor') {
                     $actionBtns = '<span class="text-muted small"><i class="fa-solid fa-lock"></i> Read Only</span>';
                 } else {
+                    $approveBtn = '';
+                    if ($account->status === 'nonaktif') {
+                        $approveBtn = '<button type="button" onclick="approveMitraAccount(' . $account->id . ')" class="btn btn-sm btn-success px-2 py-1 rounded-pill" style="font-size: 0.72rem;" title="Approve & Aktifkan Mitra"><i class="fa-solid fa-check me-1"></i>Approve</button>';
+                    }
+
                     $actionBtns = '
-                        <div class="d-flex gap-2">
+                        <div class="d-flex align-items-center gap-1.5">
+                            ' . $approveBtn . '
                             <a href="' . route('mitra-accounts.edit', $account) . '" class="btn btn-sm text-white border-0 rounded-circle" title="Edit">
                                 <i class="fa-solid fa-edit"></i>
                             </a>
@@ -678,7 +684,7 @@ class MitraAccountController extends Controller
         $field = $request->field;
         $value = $request->value;
 
-        $allowedFields = ['owner_name', 'handler_name', 'username', 'bank_rdn', 'rdn_account', 'device', 'password', 'pin', 'phone'];
+        $allowedFields = ['owner_name', 'handler_name', 'username', 'bank_rdn', 'rdn_account', 'device', 'password', 'pin', 'phone', 'status'];
         if (!in_array($field, $allowedFields)) {
             return response()->json(['success' => false, 'message' => 'Field not allowed.'], 403);
         }
@@ -691,5 +697,20 @@ class MitraAccountController extends Controller
         $mitraAccount->update([$field => $value]);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Approve a pending / inactive mitra account.
+     */
+    public function approve(MitraAccount $mitraAccount)
+    {
+        $this->checkAccountAccess($mitraAccount);
+
+        $mitraAccount->update(['status' => 'aktif']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Akun Mitra ' . $mitraAccount->owner_name . ' berhasil di-approve dan diaktifkan!'
+        ]);
     }
 }

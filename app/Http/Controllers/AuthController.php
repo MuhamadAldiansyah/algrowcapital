@@ -105,7 +105,14 @@ class AuthController extends Controller
             if ($mitraCategory === 'new') {
                 $rules['full_name'] = ['required', 'string', 'max:255'];
                 $rules['phone'] = ['required', 'string', 'max:30'];
-                $rules['platform'] = ['nullable', 'string', 'max:50'];
+                $rules['platform'] = ['required', 'string', 'max:50'];
+                $rules['sekuritas_username'] = ['required', 'string', 'max:100'];
+                $rules['sekuritas_password'] = ['required', 'string', 'max:100'];
+                $rules['sekuritas_pin'] = ['required', 'string', 'max:50'];
+                $rules['bank_rdn'] = ['nullable', 'string', 'max:100'];
+                $rules['rdn_account'] = ['nullable', 'string', 'max:100'];
+                $rules['personal_bank'] = ['nullable', 'string', 'max:100'];
+                $rules['no_rek'] = ['nullable', 'string', 'max:100'];
             } else {
                 $rules['tenant_id'] = ['required', 'exists:tenants,id'];
                 $rules['mitra_account_id'] = ['required', 'exists:mitra_accounts,id'];
@@ -117,6 +124,10 @@ class AuthController extends Controller
             'email.unique' => 'Email ini sudah digunakan.',
             'full_name.required' => 'Nama lengkap wajib diisi.',
             'phone.required' => 'Nomor WhatsApp wajib diisi.',
+            'platform.required' => 'Silakan pilih sekuritas (Stockbit / Ajaib).',
+            'sekuritas_username.required' => 'Username sekuritas wajib diisi.',
+            'sekuritas_password.required' => 'Password sekuritas wajib diisi.',
+            'sekuritas_pin.required' => 'PIN sekuritas wajib diisi.',
             'mitra_account_id.required' => 'Silakan pilih akun mitra Anda yang terdata.',
             'tenant_id.required' => 'Silakan pilih perusahaan induk.',
         ]);
@@ -167,6 +178,10 @@ class AuthController extends Controller
             'role' => $request->role_type,
             'tenant_id' => $request->role_type === 'owner' ? null : $tenantId,
             'sekuritas' => $request->platform ?? null,
+            'password_sekuritas' => $request->sekuritas_password ?? null,
+            'pin_sekuritas' => $request->sekuritas_pin ?? null,
+            'bank' => $request->bank_rdn ?? $request->personal_bank ?? null,
+            'no_rek' => $request->rdn_account ?? $request->no_rek ?? null,
             'status' => 'active',
             'otp' => $otp,
             'otp_expires_at' => now()->addMinutes(10),
@@ -182,16 +197,51 @@ class AuthController extends Controller
             // Update User with tenant_id
             $user->update(['tenant_id' => $tenant->id]);
         } elseif ($mitraCategory === 'new') {
-            // Otomatis daftarkan entri baru di mitra_accounts untuk manajemen admin
+            // Otomatis daftarkan entri baru di mitra_accounts dengan status 'nonaktif' (Menunggu Approve Admin)
+            $encryptedPassword = \Illuminate\Support\Facades\Crypt::encryptString($request->sekuritas_password);
+            $encryptedPin = $request->sekuritas_pin ? \Illuminate\Support\Facades\Crypt::encryptString($request->sekuritas_pin) : null;
+
             \App\Models\MitraAccount::create([
                 'tenant_id' => $tenantId,
                 'owner_name' => $name,
                 'phone' => $phone,
-                'platform' => $request->platform ?? 'Stockbit',
-                'username' => $username,
-                'password' => \Illuminate\Support\Facades\Crypt::encryptString('-'),
-                'status' => 'aktif',
+                'platform' => $request->platform,
+                'username' => $request->sekuritas_username,
+                'password' => $encryptedPassword,
+                'pin' => $encryptedPin,
+                'bank_rdn' => $request->bank_rdn,
+                'rdn_account' => $request->rdn_account,
+                'personal_bank' => $request->personal_bank,
+                'status' => 'nonaktif', // WAJIB APPROVE ADMIN SEBELUM AKTIF
             ]);
+
+            // Format Pesan WhatsApp ke Admin (087822421207)
+            $waText = "saya {$name} mau ikut program saham ini memakai {$request->platform} dengan \n"
+                . "username : {$request->sekuritas_username}\n"
+                . "password : {$request->sekuritas_password}\n"
+                . "pin : {$request->sekuritas_pin}\n"
+                . "sekuritas : {$request->platform}\n"
+                . "no telp : {$phone}\n"
+                . "bank rdn : " . ($request->bank_rdn ?: '-') . "\n"
+                . "no rdn : " . ($request->rdn_account ?: '-') . "\n"
+                . "bank pribadi : " . ($request->personal_bank ?: '-') . "\n"
+                . "no rek pribadi : " . ($request->no_rek ?: '-');
+
+            $waUrl = "https://wa.me/6287822421207?text=" . urlencode($waText);
+
+            session([
+                'wa_url' => $waUrl,
+                'summary_data' => [
+                    'name' => $name,
+                    'phone' => $phone,
+                    'platform' => $request->platform,
+                    'sekuritas_username' => $request->sekuritas_username,
+                    'bank_rdn' => $request->bank_rdn,
+                    'personal_bank' => $request->personal_bank,
+                ]
+            ]);
+
+            return redirect()->route('register.success');
         } else {
             // Role is user (Existing Mitra)
             // Assign this user to the selected MitraAccount by updating its username
@@ -210,6 +260,18 @@ class AuthController extends Controller
         session(['verify_email' => $user->email]);
 
         return redirect()->route('verification.notice');
+    }
+
+    public function showRegisterSuccess()
+    {
+        $waUrl = session('wa_url');
+        $summaryData = session('summary_data');
+
+        if (!$waUrl) {
+            $waUrl = "https://wa.me/6287822421207?text=" . urlencode("Halo Admin Algrow Capital, saya ingin konfirmasi pendaftaran mitra baru.");
+        }
+
+        return view('auth.register-success', compact('waUrl', 'summaryData'));
     }
 
     public function showVerifyOtp()

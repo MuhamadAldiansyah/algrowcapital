@@ -325,6 +325,51 @@ $(document).ready(function() {
         });
     });
 });
+
+// Function to approve pending mitra account
+function approveMitraAccount(id) {
+    Swal.fire({
+        title: 'Approve Mitra Ini?',
+        text: 'Akun ini akan diaktifkan dan masuk ke daftar mitra aktif.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Approve & Aktifkan',
+        cancelButtonText: 'Batal',
+        background: '#05160c',
+        color: '#ffffff'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: `/mitra-accounts/${id}/approve`,
+                method: 'PATCH',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(res) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: res.message || 'Mitra berhasil diapprove!',
+                        background: '#05160c',
+                        color: '#ffffff'
+                    });
+                    $('#mitraTable').DataTable().ajax.reload(null, false);
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: xhr.responseJSON?.message || 'Terjadi kesalahan saat approve mitra.',
+                        background: '#05160c',
+                        color: '#ffffff'
+                    });
+                }
+            });
+        }
+    });
+}
 </script>
 @endsection
 @endsection
