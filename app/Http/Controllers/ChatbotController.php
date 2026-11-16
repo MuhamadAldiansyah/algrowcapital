@@ -174,196 +174,247 @@ PROMPT;
     }
 
     /**
-     * High-Precision Local Knowledge Base Guardrail Engine.
-     * Ensures instant, deterministic, and accurate responses even without third-party API keys.
+     * Intent Scoring NLP Engine — Semantic Understanding (No API Key Required).
+     * Scores each topic by counting matching intent signals in the user's message.
+     * Returns response for the highest-scoring topic. Far more robust than exact keyword matching.
      */
     private function strictKnowledgeEngine(string $text): string
     {
         $q = strtolower(trim($text));
+        // Normalize common typos & slang
+        $q = str_replace(['gmn', 'gimn', 'bgmn', 'bgmna', 'yg', 'utk', 'tuk', 'tp', 'tapi', 'kalo', 'kalau', 'klu', 'kl ', 'udah', 'udh', 'sdh', 'udh', 'bisa', 'bs ', 'bantu', 'tolong', 'tlng', 'jelaskan', 'jelasin', 'cerita', 'ceritain'], ['gimana', 'gimana', 'gimana', 'gimana', 'yang', 'untuk', 'untuk', 'tapi', 'tapi', 'kalau', 'kalau', 'kalau', 'kalau ', 'sudah', 'sudah', 'sudah', 'sudah', 'bisa', 'bisa ', 'bantu', 'tolong', 'tolong', 'jelaskan', 'jelaskan', 'cerita', 'cerita'], $q);
 
-        // 1. PANDUAN DAFTAR SEKURITAS (STOCKBIT / AJAIB / RDN)
-        if (
-            str_contains($q, 'daftar sekuritas') ||
-            str_contains($q, 'daftar stockbit') ||
-            str_contains($q, 'daftar ajaib') ||
-            str_contains($q, 'bikin akun sekuritas') ||
-            str_contains($q, 'buat akun sekuritas') ||
-            str_contains($q, 'buka rekening sekuritas') ||
-            str_contains($q, 'cara bikin stockbit') ||
-            str_contains($q, 'cara bikin ajaib') ||
-            str_contains($q, 'registrasi sekuritas') ||
-            str_contains($q, 'buka rdn') ||
-            str_contains($q, 'daftar rdn') ||
-            (str_contains($q, 'stockbit') && (str_contains($q, 'daftar') || str_contains($q, 'bikin') || str_contains($q, 'buat') || str_contains($q, 'panduan') || str_contains($q, 'cara') || str_contains($q, 'gimana'))) ||
-            (str_contains($q, 'ajaib') && (str_contains($q, 'daftar') || str_contains($q, 'bikin') || str_contains($q, 'buat') || str_contains($q, 'panduan') || str_contains($q, 'cara') || str_contains($q, 'gimana'))) ||
-            (str_contains($q, 'sekuritas') && (str_contains($q, 'daftar') || str_contains($q, 'buat') || str_contains($q, 'bikin') || str_contains($q, 'panduan') || str_contains($q, 'gimana') || str_contains($q, 'cara')))
-        ) {
-            return "📝 **Panduan Cara Daftar Akun Sekuritas (Stockbit / Ajaib):**\n\n" .
-                   "1️⃣ **Download Aplikasi:** Unduh **Stockbit** atau **Ajaib** di Google Play Store atau App Store.\n" .
-                   "2️⃣ **Siapkan Dokumen:** e-KTP asli dan nomor rekening bank pribadi (BCA/Mandiri/BRI/dll).\n" .
-                   "3️⃣ **Isi Data Diri:** Buka aplikasi, pilih 'Buka Rekening Saham', isi form identitas dan foto selfie bersama e-KTP.\n" .
-                   "4️⃣ **Pembuatan RDN (Rekening Dana Nasabah):** Pilih bank RDN yang tersedia di aplikasi (gratis, tanpa saldo minimum).\n" .
-                   "5️⃣ **Tunggu Verifikasi:** Pihak sekuritas akan memverifikasi akun Anda dalam 1–24 jam kerja.\n" .
-                   "6️⃣ **Selesai!** Setelah akun aktif dan RDN jadi, akun sekuritas Anda siap ditautkan ke Algrow Capital.";
+        // ─── TOPIC SCORING ────────────────────────────────────────────────────────
+        // Each topic has a list of "intent signals". Score = count of signals found.
+        // The topic with the HIGHEST score (≥ 1) wins.
+
+        $topics = [
+
+            // TOPIC A — Daftar / Panduan Akun Sekuritas (Stockbit / Ajaib / RDN)
+            'sekuritas' => [
+                'signals' => [
+                    'stockbit', 'ajaib', 'sekuritas', 'rdn', 'rekening dana nasabah',
+                    'rekening saham', 'buka rekening', 'buka akun sekuritas',
+                    'daftar sekuritas', 'bikin sekuritas', 'buat sekuritas',
+                    'cara stockbit', 'cara ajaib', 'download stockbit', 'download ajaib',
+                    'install stockbit', 'install ajaib',
+                ],
+                'context_boost' => ['daftar', 'buat', 'bikin', 'cara', 'gimana', 'panduan', 'langkah', 'proses', 'syarat', 'buka'],
+            ],
+
+            // TOPIC B — Cara Join / Daftar ke Algrow Capital
+            'join' => [
+                'signals' => [
+                    'join', 'gabung', 'daftar', 'registrasi', 'register', 'masuk', 'ikut',
+                    'cara masuk', 'cara bergabung', 'cara ikut', 'mau join', 'mau daftar',
+                    'algrow', 'mitra', 'pendaftaran', 'buat akun', 'bikin akun', 'buka akun',
+                    'daftar akun', 'panduan akun', 'panduan daftar', 'panduan buat',
+                    'cara buat', 'cara bikin', 'cara daftar', 'cara join', 'cara gabung',
+                    'gimana join', 'gimana daftar', 'gimana buat', 'gimana bikin',
+                    'gimana cara', 'langkah daftar', 'langkah join', 'langkah masuk',
+                    'apa yang harus', 'mulai dari mana', 'dari mana', 'mulai gimana',
+                    'mulai darimana', 'harus ngapain', 'ngapain dulu', 'pertama apa',
+                    'pertama gimana', 'prosedur', 'tahapan', 'alur daftar', 'alur join',
+                ],
+                'context_boost' => [],
+            ],
+
+            // TOPIC C — Aplikasi / Platform Sekuritas yang Dipakai
+            'aplikasi' => [
+                'signals' => [
+                    'aplikasi', 'platform', 'broker', 'apk', 'app', 'aplikasinya',
+                    'pakai apa', 'pake apa', 'pake aplikasi', 'pakai aplikasi',
+                    'aplikasi apa', 'platform apa', 'broker apa', 'apk apa',
+                    'download apa', 'install apa', 'menggunakan apa', 'digunakan apa',
+                    'rekomendasikan', 'direkomendasikan', 'disarankan', 'sarannya',
+                ],
+                'context_boost' => ['sekuritas', 'trading', 'saham', 'ipo'],
+            ],
+
+            // TOPIC D — Modal / Biaya / Keluar Uang
+            'modal' => [
+                'signals' => [
+                    'modal', 'biaya', 'bayar', 'keluar uang', 'setor', 'deposit', 'depo',
+                    'gratis', 'tarif', 'harga', 'ongkos', 'free', 'berbayar',
+                    'butuh uang', 'perlu uang', 'pakai uang', 'pake uang',
+                    'uang sendiri', 'modal sendiri', 'keluar modal', 'ada biaya',
+                    'dikenakan biaya', 'berapa biaya', 'berapa modal', 'berapaan',
+                ],
+                'context_boost' => [],
+            ],
+
+            // TOPIC E — Syarat / Persyaratan Jadi Mitra
+            'syarat' => [
+                'signals' => [
+                    'syarat', 'persyaratan', 'ketentuan', 'kriteria', 'dokumen',
+                    'perlu apa', 'butuh apa', 'dibutuhkan apa', 'diperlukan apa',
+                    'ktp', 'e-ktp', 'ktp elektronik', 'rekening bank', 'nomor rekening',
+                    'yang diperlukan', 'apa saja yang', 'apa aja yang',
+                ],
+                'context_boost' => ['mitra', 'daftar', 'join', 'algrow'],
+            ],
+
+            // TOPIC F — Cara Kerja & Bagi Hasil / Profit
+            'bagi_hasil' => [
+                'signals' => [
+                    'bagi hasil', 'profit', 'untung', 'keuntungan', 'penghasilan',
+                    'cara kerja', 'kerjanya gimana', 'gimana kerjanya', 'sistem kerja',
+                    'mekanisme', 'prosesnya', 'alurnya', 'hasilnya', 'hasilnya gimana',
+                    'dapat berapa', 'dapet berapa', 'komisi', 'fee', 'imbal hasil',
+                    'return', 'saham naik', 'ipo listing', 'jual saham', 'listing saham',
+                    'penjatahan', 'allotment',
+                ],
+                'context_boost' => [],
+            ],
+
+            // TOPIC G — Kontak / Admin / CS / WhatsApp
+            'kontak' => [
+                'signals' => [
+                    'admin', 'cs', 'customer service', 'layanan', 'support', 'bantuan',
+                    'whatsapp', 'wa', 'kontak', 'nomor', 'hubungi', 'tanya langsung',
+                    'chat langsung', 'minta tolong', 'ada orang',
+                ],
+                'context_boost' => [],
+            ],
+
+            // TOPIC H — Greeting (Exact/near-exact match only)
+            'greeting' => [
+                'signals' => [
+                    'halo', 'hai', 'hi', 'hey', 'hei', 'selamat pagi', 'selamat siang',
+                    'selamat sore', 'selamat malam', 'assalamualaikum', 'permisi', 'tes', 'test',
+                ],
+                'context_boost' => [],
+            ],
+        ];
+
+        // ─── SCORE CALCULATION ────────────────────────────────────────────────────
+        $scores = [];
+        foreach ($topics as $topicKey => $topicData) {
+            $score = 0;
+            foreach ($topicData['signals'] as $signal) {
+                if (str_contains($q, $signal)) {
+                    $score += 2; // primary signal worth 2
+                }
+            }
+            // Context boost: if both a primary signal AND a context word appear, add bonus
+            if (!empty($topicData['context_boost']) && $score > 0) {
+                foreach ($topicData['context_boost'] as $ctx) {
+                    if (str_contains($q, $ctx)) {
+                        $score += 1;
+                    }
+                }
+            }
+            $scores[$topicKey] = $score;
         }
 
-        // 2. CARA JOIN / PANDUAN BUAT AKUN / CARA DAFTAR KE ALGROW
-        if (
-            str_contains($q, 'buat akun') ||
-            str_contains($q, 'bikin akun') ||
-            str_contains($q, 'daftar akun') ||
-            str_contains($q, 'panduan akun') ||
-            str_contains($q, 'panduan daftar') ||
-            str_contains($q, 'panduan buat') ||
-            str_contains($q, 'cara buat') ||
-            str_contains($q, 'cara bikin') ||
-            str_contains($q, 'cara daftar') ||
-            str_contains($q, 'cara join') ||
-            str_contains($q, 'cara gabung') ||
-            str_contains($q, 'gimana join') ||
-            str_contains($q, 'gimana daftar') ||
-            str_contains($q, 'gimana buat') ||
-            str_contains($q, 'gimana bikin') ||
-            str_contains($q, 'buka akun') ||
-            str_contains($q, 'registrasi') ||
-            str_contains($q, 'langkah daftar') ||
-            str_contains($q, 'mau join') ||
-            str_contains($q, 'mau daftar') ||
-            str_contains($q, 'join ke algrow') ||
-            str_contains($q, 'daftar algrow') ||
-            str_contains($q, 'join algrow') ||
-            str_contains($q, 'join') ||
-            str_contains($q, 'pendaftaran')
-        ) {
-            return "🚀 **Panduan Lengkap Pembuatan Akun & Cara Bergabung:**\n\n" .
-                   "Untuk bergabung di Algrow Capital, Anda membutuhkan 2 langkah praktis:\n\n" .
-                   "**Langkah 1: Daftar Akun di Platform Algrow Capital**\n" .
-                   "1️⃣ Klik tombol **[Gabung Sekarang]** di website ini.\n" .
-                   "2️⃣ Pilih peran Anda sebagai **Mitra** (jika ingin menyiapkan akun sekuritas untuk dikelola).\n" .
-                   "3️⃣ Pilih nama perusahaan induk (**Algrow Capital**).\n" .
-                   "4️⃣ Masukkan email aktif dan buat kata sandi akun Anda.\n" .
-                   "5️⃣ Masukkan kode OTP verifikasi yang dikirim ke email Anda.\n\n" .
-                   "**Langkah 2: Siapkan Akun Sekuritas (Stockbit / Ajaib)**\n" .
-                   "• Pastikan Anda sudah memiliki akun sekuritas aktif di **Stockbit** atau **Ajaib**.\n" .
-                   "• Akun sekuritas ini akan digunakan sebagai media penjatahan saham IPO (100% modal disiapkan oleh Algrow Capital, modal Anda Rp 0!).\n\n" .
-                   "💡 *Pendaftaran 100% gratis tanpa dipungut biaya apapun.*";
+        // Find winning topic
+        arsort($scores);
+        $winner = array_key_first($scores);
+        $winnerScore = $scores[$winner];
+
+        // Special: greeting must win outright only if score >= 2 (avoid false greeting on e.g. "halo cara daftar")
+        // If greeting ties with another, prefer the other topic
+        if ($winner === 'greeting' && $winnerScore <= 2) {
+            $otherScores = array_filter($scores, fn($k) => $k !== 'greeting', ARRAY_FILTER_USE_KEY);
+            $maxOther = max($otherScores);
+            if ($maxOther >= 2) {
+                arsort($otherScores);
+                $winner = array_key_first($otherScores);
+                $winnerScore = $maxOther;
+            }
         }
 
-        // 3. PAKE APLIKASI APA / SEKURITAS APA
-        if (
-            str_contains($q, 'pake aplikasi') ||
-            str_contains($q, 'pakai aplikasi') ||
-            str_contains($q, 'aplikasi apa') ||
-            str_contains($q, 'sekuritas apa') ||
-            str_contains($q, 'platform apa') ||
-            str_contains($q, 'broker apa') ||
-            str_contains($q, 'apk apa') ||
-            str_contains($q, 'download apa') ||
-            str_contains($q, 'aplikasinya apa') ||
-            str_contains($q, 'menggunakan apa') ||
-            str_contains($q, 'aplikasi') ||
-            str_contains($q, 'platform')
-        ) {
-            return "📱 **Aplikasi Sekuritas yang Digunakan di Algrow Capital:**\n\n" .
-                   "Saat ini Algrow Capital resmi mendukung 2 aplikasi sekuritas terpercaya yang terdaftar di **OJK & IDX**:\n\n" .
-                   "1. **Stockbit** (PT Stockbit Sekuritas Digital)\n" .
-                   "2. **Ajaib** (PT Ajaib Sekuritas Asia)\n\n" .
-                   "Kedua aplikasi ini sangat mudah digunakan di HP (Android & iOS), pendaftarannya 100% online, dan memiliki fitur pemesanan saham e-IPO yang cepat.";
+        // Sekuritas topic must beat join topic if it has specific app-name signals
+        // (avoid "cara daftar stockbit" being routed to 'join')
+        if ($winner === 'join' && isset($scores['sekuritas']) && $scores['sekuritas'] >= 2) {
+            if (str_contains($q, 'stockbit') || str_contains($q, 'ajaib') || str_contains($q, 'sekuritas') || str_contains($q, 'rdn')) {
+                $winner = 'sekuritas';
+                $winnerScore = $scores['sekuritas'];
+            }
         }
 
-        // 4. SOAL MODAL (APAKAH BUTUH MODAL SENDIRI / KELUAR UANG)
-        if (
-            str_contains($q, 'modal') ||
-            str_contains($q, 'biaya') ||
-            str_contains($q, 'bayar') ||
-            str_contains($q, 'keluar uang') ||
-            str_contains($q, 'setor') ||
-            str_contains($q, 'depo') ||
-            str_contains($q, 'deposit') ||
-            str_contains($q, 'gratis') ||
-            str_contains($q, 'tarif')
-        ) {
-            return "💰 **Apakah Butuh Modal Sendiri?**\n\n" .
-                   "**SAMA SEKALI TIDAK! (Modal Rp 0)** 🎉\n\n" .
-                   "Di Algrow Capital, konsepnya adalah kemitraan investasi saham tanpa modal:\n" .
-                   "• **100% Modal Penjatahan Saham IPO disiapkan oleh Algrow Capital.**\n" .
-                   "• Anda sebagai Mitra **hanya menyediakan akun sekuritas** (Stockbit/Ajaib).\n" .
-                   "• Anda tidak perlu menyetorkan uang sepeserpun.\n" .
-                   "• Ketika saham IPO listing dan menghasilkan keuntungan, profit bersih langsung dibagi hasil secara transparan!";
+        // No topic matched → guardrail
+        if ($winnerScore < 2) {
+            return $this->outOfScopeResponse();
         }
 
-        // 5. SYARAT JADI MITRA
-        if (
-            str_contains($q, 'syarat') ||
-            str_contains($q, 'persyaratan') ||
-            str_contains($q, 'ketentuan') ||
-            str_contains($q, 'kriteria') ||
-            str_contains($q, 'dokumen')
-        ) {
-            return "📋 **Persyaratan Menjadi Mitra Algrow Capital:**\n\n" .
-                   "1. Warga Negara Indonesia (WNI) berusia minimal 17 tahun dan memiliki e-KTP.\n" .
-                   "2. Memiliki akun sekuritas aktif di **Stockbit** atau **Ajaib** yang sudah terverifikasi.\n" .
-                   "3. Memiliki nomor rekening bank pribadi yang valid untuk penerimaan bagi hasil profit.\n" .
-                   "4. Memiliki email & nomor WhatsApp aktif untuk menerima notifikasi alokasi saham IPO.\n\n" .
-                   "Jika syarat di atas sudah lengkap, Anda bisa langsung mendaftar sekarang juga!";
-        }
+        // ─── RESPONSES ───────────────────────────────────────────────────────────
+        return match($winner) {
+            'sekuritas' => "📝 **Panduan Cara Daftar Akun Sekuritas (Stockbit / Ajaib):**\n\n" .
+                "1️⃣ **Download Aplikasi:** Unduh **Stockbit** atau **Ajaib** di Google Play Store atau App Store.\n" .
+                "2️⃣ **Siapkan Dokumen:** e-KTP asli dan nomor rekening bank pribadi (BCA/Mandiri/BRI/dll).\n" .
+                "3️⃣ **Isi Data Diri:** Buka aplikasi, pilih 'Buka Rekening Saham', isi form identitas dan foto selfie bersama e-KTP.\n" .
+                "4️⃣ **Pembuatan RDN:** Pilih bank RDN yang tersedia di aplikasi (gratis, tanpa saldo minimum).\n" .
+                "5️⃣ **Tunggu Verifikasi:** Pihak sekuritas memverifikasi akun Anda dalam 1–24 jam kerja.\n" .
+                "6️⃣ **Selesai!** Akun aktif & RDN jadi → siap ditautkan ke Algrow Capital.",
 
-        // 6. CARA KERJA & BAGI HASIL
-        if (
-            str_contains($q, 'bagi hasil') ||
-            str_contains($q, 'profit') ||
-            str_contains($q, 'cara kerja') ||
-            str_contains($q, 'gimana kerjanya') ||
-            str_contains($q, 'untung') ||
-            str_contains($q, 'keuntungan') ||
-            str_contains($q, 'sistem kerja')
-        ) {
-            return "🤝 **Cara Kerja & Sistem Bagi Hasil di Algrow Capital:**\n\n" .
-                   "1. **Pendaftaran:** Anda mendaftar sebagai Mitra dan mendaftarkan akun sekuritas (Stockbit/Ajaib).\n" .
-                   "2. **Penyediaan Dana:** Algrow Capital menyiapkan 100% modal untuk pemesanan saham IPO melalui akun sekuritas Anda.\n" .
-                   "3. **Penjatahan Saham:** Saat masa listing IPO saham berlangsung, pesanan saham dieksekusi oleh sistem.\n" .
-                   "4. **Realisasi Profit:** Saham dijual pada momentum optimal kenaikan harga.\n" .
-                   "5. **Pencairan:** Keuntungan bersih langsung dibagikan ke rekening pribadi Anda sesuai rasio kesepakatan mitra.";
-        }
+            'join' => "🚀 **Panduan Lengkap Cara Bergabung ke Algrow Capital:**\n\n" .
+                "**Langkah 1 — Daftar Akun di Platform Algrow Capital**\n" .
+                "1️⃣ Klik tombol **[Gabung Sekarang]** di website ini.\n" .
+                "2️⃣ Pilih peran Anda sebagai **Mitra**.\n" .
+                "3️⃣ Pilih nama perusahaan induk (**Algrow Capital**).\n" .
+                "4️⃣ Masukkan email aktif dan buat kata sandi akun Anda.\n" .
+                "5️⃣ Masukkan kode OTP verifikasi yang dikirim ke email Anda.\n\n" .
+                "**Langkah 2 — Siapkan Akun Sekuritas (Stockbit / Ajaib)**\n" .
+                "• Pastikan sudah punya akun sekuritas aktif di **Stockbit** atau **Ajaib**.\n" .
+                "• Akun ini untuk penjatahan saham IPO — **100% modal disiapkan Algrow Capital, modal Anda Rp 0!**\n\n" .
+                "💡 *Pendaftaran 100% gratis, tanpa biaya apapun.*",
 
-        // 7. GREETINGS (Halo, Hai, Pagi, Siang, dll)
-        if (
-            $q === 'halo' || $q === 'hai' || $q === 'hi' || $q === 'hey' ||
-            str_contains($q, 'selamat pagi') || str_contains($q, 'selamat siang') ||
-            str_contains($q, 'selamat sore') || str_contains($q, 'selamat malam') ||
-            str_contains($q, 'assalamualaikum') || $q === 'p' || $q === 'tes'
-        ) {
-            return "Halo! 👋 Selamat datang di **Algrow Capital**.\n\n" .
-                   "Saya adalah asisten virtual khusus yang siap memandu Anda seputar:\n" .
-                   "• **Cara bergabung / join ke Algrow Capital**\n" .
-                   "• **Aplikasi sekuritas apa yang digunakan** (Stockbit & Ajaib)\n" .
-                   "• **Panduan pendaftaran akun sekuritas**\n" .
-                   "• **Sistem investasi saham IPO tanpa modal**\n\n" .
-                   "Ada yang ingin ditanyakan seputar pendaftaran, Kak?";
-        }
+            'aplikasi' => "📱 **Aplikasi Sekuritas yang Digunakan di Algrow Capital:**\n\n" .
+                "Algrow Capital resmi mendukung 2 aplikasi sekuritas terpercaya terdaftar di **OJK & IDX**:\n\n" .
+                "1. **Stockbit** (PT Stockbit Sekuritas Digital)\n" .
+                "2. **Ajaib** (PT Ajaib Sekuritas Asia)\n\n" .
+                "Keduanya tersedia di Android & iOS, pendaftaran 100% online, dan mendukung fitur pemesanan saham **e-IPO**.",
 
-        // 8. HUBUNGI ADMIN / CS
-        if (
-            str_contains($q, 'admin') ||
-            str_contains($q, 'cs') ||
-            str_contains($q, 'whatsapp') ||
-            str_contains($q, 'wa') ||
-            str_contains($q, 'kontak') ||
-            str_contains($q, 'nomor')
-        ) {
-            return "📞 **Hubungi Tim Admin & Support Algrow Capital:**\n\n" .
-                   "Jika butuh bantuan langsung atau pendampingan saat mendaftar, tim kami siap membantu melalui WhatsApp:\n\n" .
-                   "👉 **WhatsApp Support:** `087822421207`\n\n" .
-                   "Atau Anda bisa langsung mengklik tombol **[Gabung Sekarang]** untuk registrasi instan.";
-        }
+            'modal' => "💰 **Apakah Butuh Modal Sendiri?**\n\n" .
+                "**TIDAK SAMA SEKALI! (Modal Rp 0)** 🎉\n\n" .
+                "• **100% modal penjatahan saham IPO disiapkan oleh Algrow Capital.**\n" .
+                "• Anda sebagai Mitra **hanya menyediakan akun sekuritas** (Stockbit/Ajaib).\n" .
+                "• Tidak perlu setor uang sepeserpun.\n" .
+                "• Profit dari penjualan saham IPO langsung dibagi hasil secara transparan!",
 
-        // 9. STRICT GUARDRAIL - OUT OF SCOPE REJECTION
+            'syarat' => "📋 **Persyaratan Menjadi Mitra Algrow Capital:**\n\n" .
+                "1. WNI berusia minimal 17 tahun dengan e-KTP.\n" .
+                "2. Akun sekuritas aktif di **Stockbit** atau **Ajaib** yang sudah terverifikasi.\n" .
+                "3. Nomor rekening bank pribadi untuk pencairan bagi hasil profit.\n" .
+                "4. Email & nomor WhatsApp aktif untuk notifikasi alokasi saham IPO.\n\n" .
+                "Jika sudah lengkap, langsung daftar sekarang!",
+
+            'bagi_hasil' => "🤝 **Cara Kerja & Sistem Bagi Hasil Algrow Capital:**\n\n" .
+                "1. **Daftar** sebagai Mitra & hubungkan akun sekuritas (Stockbit/Ajaib).\n" .
+                "2. **Algrow Capital** siapkan 100% modal untuk memesan saham IPO via akun Anda.\n" .
+                "3. **Penjatahan saham** berlangsung saat masa listing IPO.\n" .
+                "4. **Saham dijual** di momentum optimal kenaikan harga.\n" .
+                "5. **Profit bersih** langsung ditransfer ke rekening pribadi Anda sesuai rasio kesepakatan.",
+
+            'kontak' => "📞 **Hubungi Tim Admin & Support Algrow Capital:**\n\n" .
+                "Butuh panduan langsung atau pendampingan mendaftar? Tim kami siap membantu:\n\n" .
+                "👉 **WhatsApp Support:** `087822421207`\n\n" .
+                "Atau klik tombol **[Gabung Sekarang]** untuk registrasi instan.",
+
+            'greeting' => "Halo! 👋 Selamat datang di **Algrow Capital**.\n\n" .
+                "Saya asisten virtual khusus yang siap memandu Anda seputar:\n" .
+                "• **Cara bergabung / join ke Algrow Capital**\n" .
+                "• **Aplikasi sekuritas yang digunakan** (Stockbit & Ajaib)\n" .
+                "• **Panduan pendaftaran akun sekuritas**\n" .
+                "• **Sistem investasi saham IPO tanpa modal**\n\n" .
+                "Ada yang ingin ditanyakan seputar pendaftaran, Kak?",
+
+            default => $this->outOfScopeResponse(),
+        };
+    }
+
+    /**
+     * Out-of-scope guardrail response.
+     */
+    private function outOfScopeResponse(): string
+    {
         return "Mohon maaf ya, saya adalah **Asisten Khusus Pendaftaran Algrow Capital**. 🙏\n\n" .
-               "Lingkup jawaban saya dikhususkan untuk menjawab pertanyaan seputar:\n" .
+               "Lingkup jawaban saya dikhususkan untuk:\n" .
                "1️⃣ **Cara join & mendaftar ke Algrow Capital**\n" .
                "2️⃣ **Aplikasi sekuritas yang dipakai** (*Stockbit & Ajaib*)\n" .
                "3️⃣ **Panduan pendaftaran akun sekuritas & RDN**\n" .
                "4️⃣ **Syarat kemitraan & sistem bagi hasil tanpa modal**\n\n" .
-               "Silakan tanyakan hal seputar pendaftaran di atas, saya akan bantu jelaskan dengan senang hati! 😊";
+               "Silakan tanyakan hal seputar pendaftaran di atas ya! 😊";
     }
 }

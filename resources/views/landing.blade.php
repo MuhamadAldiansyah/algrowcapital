@@ -479,17 +479,19 @@
 
     <!-- Algrow AI Chatbot Floating Widget -->
     <div id="algrowChatWidget" class="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 font-sans">
-        <!-- Floating Trigger Button (Sleek & Compact) -->
-        <button id="chatbotToggleBtn" onclick="toggleChatbot()" type="button" aria-label="Tanya AI Pendaftaran"
-                class="group flex items-center gap-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white pl-3.5 pr-4 py-2.5 rounded-full shadow-[0_8px_25px_rgba(16,185,129,0.35)] hover:shadow-[0_12px_30px_rgba(16,185,129,0.5)] hover:scale-105 active:scale-95 transition-all duration-200">
-            <span class="relative flex h-2.5 w-2.5">
+        <!-- Floating Trigger Button (CS Icon Only FAB) -->
+        <button id="chatbotToggleBtn" onclick="toggleChatbot()" type="button" aria-label="Customer Service & Panduan AI"
+                class="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-full shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_35px_rgba(16,185,129,0.6)] hover:scale-110 active:scale-95 transition-all duration-200">
+            <!-- Ping dot indicator -->
+            <span class="absolute top-1 right-1 flex h-3 w-3">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-200"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-200"></span>
             </span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            <!-- Customer Service (Headset) Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 transform group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 18v-6a9 9 0 0118 0v6" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z" />
             </svg>
-            <span class="font-bold text-sm tracking-wide">Tanya Cara Join</span>
         </button>
 
         <!-- Chat Window Popup (Extra Large & Spacious Chatroom) -->
@@ -526,15 +528,15 @@
             </div>
 
             <!-- Chat Messages Container (Large & Spacious) -->
-            <div id="chatMessages" class="flex-1 p-6 overflow-y-auto space-y-5 text-[15px] sm:text-base leading-relaxed scroll-smooth">
+            <div id="chatMessages" class="flex-1 p-6 overflow-y-auto space-y-5 text-[15px] sm:text-base leading-relaxed scroll-smooth text-white" style="color-scheme: dark;">
                 <!-- Welcome Bot Message -->
                 <div class="flex items-start gap-3">
                     <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-extrabold shrink-0 mt-1">
                         AI
                     </div>
-                    <div class="bg-[#042f22]/95 border border-emerald-500/25 text-slate-100 rounded-2xl rounded-tl-sm px-5 py-4 max-w-[90%] shadow-md space-y-2.5">
-                        <p class="font-medium text-white">Halo! 👋 Mau tahu panduan cara buat akun, cara join ke Algrow Capital, atau pendaftaran sekuritas?</p>
-                        <p class="text-xs sm:text-sm text-slate-300">Pilih pertanyaan cepat di bawah atau ketik langsung pertanyaan Anda:</p>
+                    <div class="bg-[#042f22]/95 border border-emerald-500/25 text-white rounded-2xl rounded-tl-sm px-5 py-4 max-w-[90%] shadow-md space-y-2.5" style="color: #ffffff !important;">
+                        <p class="font-semibold text-white">Halo! 👋 Mau tahu panduan cara buat akun, cara join ke Algrow Capital, atau pendaftaran sekuritas?</p>
+                        <p class="text-xs sm:text-sm text-slate-200">Pilih pertanyaan cepat di bawah atau ketik langsung pertanyaan Anda:</p>
                     </div>
                 </div>
 
@@ -590,28 +592,6 @@
             </div>
         </div>
     </div>
-                        </svg>
-                    </button>
-                </form>
-                <div class="mt-2.5 flex justify-between items-center text-xs text-slate-400 px-1">
-                    <span>Sudah siap bergabung?</span>
-                    <a href="{{ route('register') }}" class="text-emerald-400 font-bold hover:underline flex items-center gap-1">
-                        <span>Daftar Akun Sekarang</span> &rarr;
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-                        </svg>
-                    </button>
-                </form>
-                <div class="mt-2 flex justify-between items-center text-[10px] text-slate-500 px-1">
-                    <span>Tertarik bergabung?</span>
-                    <a href="{{ route('register') }}" class="text-emerald-400 font-bold hover:underline">Daftar Akun Sekarang &rarr;</a>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Chatbot Client-Side Controller Script -->
     <script>
@@ -643,16 +623,16 @@
             const msgRow = document.createElement('div');
             msgRow.className = `flex items-start gap-2.5 ${isUser ? 'justify-end' : 'justify-start'}`;
 
-            // Format linebreaks and markdown bold
+            // Format linebreaks and markdown bold (pure clean white text)
             let formattedText = text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/`([^`]+)`/g, '<code class="bg-black/40 px-1 py-0.5 rounded text-emerald-300">$1</code>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold tracking-wide">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em class="text-slate-200 not-italic">$1</em>')
+                .replace(/`([^`]+)`/g, '<code class="bg-black/60 px-1.5 py-0.5 rounded text-emerald-300 font-mono text-xs sm:text-sm">$1</code>')
                 .replace(/\n/g, '<br>');
 
             if (isUser) {
                 msgRow.innerHTML = `
-                    <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl rounded-tr-sm px-5 py-3.5 max-w-[88%] shadow-md text-[15px] sm:text-base leading-relaxed font-medium">
+                    <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl rounded-tr-sm px-5 py-3.5 max-w-[88%] shadow-md text-[15px] sm:text-base leading-relaxed font-medium" style="color: #ffffff !important;">
                         ${formattedText}
                     </div>
                 `;
@@ -661,10 +641,10 @@
                     <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-extrabold shrink-0 mt-1 shadow-sm">
                         AI
                     </div>
-                    <div class="bg-[#042f22]/95 border border-emerald-500/25 text-slate-100 rounded-2xl rounded-tl-sm px-5 py-4 max-w-[90%] shadow-md text-[15px] sm:text-base leading-relaxed space-y-3">
-                        <div class="space-y-2">${formattedText}</div>
+                    <div class="bg-[#042f22]/95 border border-emerald-500/25 text-white rounded-2xl rounded-tl-sm px-5 py-4 max-w-[90%] shadow-md text-[15px] sm:text-base leading-relaxed space-y-3" style="color: #ffffff !important;">
+                        <div class="space-y-2 text-white font-normal" style="color: #ffffff !important;">${formattedText}</div>
                         <div class="pt-2 flex flex-wrap gap-2">
-                            <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold bg-gradient-to-r from-emerald-400 to-teal-400 text-black px-4 py-2 rounded-xl hover:from-emerald-300 hover:to-teal-300 transition-all shadow-md">
+                            <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 px-4 py-2 rounded-xl hover:from-emerald-300 hover:to-teal-300 transition-all shadow-md">
                                 <span>Daftar Akun Sekarang</span> &rarr;
                             </a>
                         </div>
