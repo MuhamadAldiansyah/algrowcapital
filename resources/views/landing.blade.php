@@ -685,6 +685,10 @@
                     })
                 });
 
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+
                 const data = await response.json();
                 indicator.classList.add('hidden');
 
@@ -695,8 +699,9 @@
                     appendMessage('model', 'Mohon maaf, terjadi kendala saat memproses pertanyaan. Silakan coba klik tombol [Daftar Sekarang] di atas.');
                 }
             } catch (err) {
+                console.error('Chatbot request failed:', err);
                 indicator.classList.add('hidden');
-                appendMessage('model', 'Koneksi terputus. Pastikan perangkat Anda terhubung ke internet.');
+                appendMessage('model', 'Mohon maaf, terjadi kendala jaringan saat menghubungkan ke asisten. Silakan coba ajukan kembali atau klik tombol [Daftar Sekarang] di bawah.');
             } finally {
                 document.getElementById('chatSendBtn').disabled = false;
                 input.focus();

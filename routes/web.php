@@ -150,7 +150,7 @@ Route::get('/', function () {
     return view('landing');
 })->name('landing');
 
-Route::post('/api/chatbot', [ChatbotController::class, 'message'])->name('chatbot.message');
+Route::post('/chatbot/message', [ChatbotController::class, 'message'])->name('chatbot.message');
 
 Route::get('/asset-manager', function () {
     return view('asset-manager');

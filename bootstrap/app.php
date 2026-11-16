@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->validateCsrfTokens(except: [
             'api/*',
+            'chatbot/message',
             'whatsapp-blast/set-gateway',
         ]);
         $middleware->alias([
