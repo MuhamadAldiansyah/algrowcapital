@@ -181,18 +181,22 @@ PROMPT;
     {
         $q = strtolower(trim($text));
 
-        // 1. CARA DAFTAR SEKURITAS (STOCKBIT / AJAIB) - Evaluasi sebelum pendaftaran umum
+        // 1. PANDUAN DAFTAR SEKURITAS (STOCKBIT / AJAIB / RDN)
         if (
             str_contains($q, 'daftar sekuritas') ||
             str_contains($q, 'daftar stockbit') ||
             str_contains($q, 'daftar ajaib') ||
             str_contains($q, 'bikin akun sekuritas') ||
+            str_contains($q, 'buat akun sekuritas') ||
             str_contains($q, 'buka rekening sekuritas') ||
             str_contains($q, 'cara bikin stockbit') ||
             str_contains($q, 'cara bikin ajaib') ||
             str_contains($q, 'registrasi sekuritas') ||
-            (str_contains($q, 'stockbit') && (str_contains($q, 'daftar') || str_contains($q, 'bikin') || str_contains($q, 'buat'))) ||
-            (str_contains($q, 'ajaib') && (str_contains($q, 'daftar') || str_contains($q, 'bikin') || str_contains($q, 'buat')))
+            str_contains($q, 'buka rdn') ||
+            str_contains($q, 'daftar rdn') ||
+            (str_contains($q, 'stockbit') && (str_contains($q, 'daftar') || str_contains($q, 'bikin') || str_contains($q, 'buat') || str_contains($q, 'panduan') || str_contains($q, 'cara') || str_contains($q, 'gimana'))) ||
+            (str_contains($q, 'ajaib') && (str_contains($q, 'daftar') || str_contains($q, 'bikin') || str_contains($q, 'buat') || str_contains($q, 'panduan') || str_contains($q, 'cara') || str_contains($q, 'gimana'))) ||
+            (str_contains($q, 'sekuritas') && (str_contains($q, 'daftar') || str_contains($q, 'buat') || str_contains($q, 'bikin') || str_contains($q, 'panduan') || str_contains($q, 'gimana') || str_contains($q, 'cara')))
         ) {
             return "📝 **Panduan Cara Daftar Akun Sekuritas (Stockbit / Ajaib):**\n\n" .
                    "1️⃣ **Download Aplikasi:** Unduh **Stockbit** atau **Ajaib** di Google Play Store atau App Store.\n" .
@@ -203,26 +207,45 @@ PROMPT;
                    "6️⃣ **Selesai!** Setelah akun aktif dan RDN jadi, akun sekuritas Anda siap ditautkan ke Algrow Capital.";
         }
 
-        // 2. CARA JOIN / CARA DAFTAR KE ALGROW
+        // 2. CARA JOIN / PANDUAN BUAT AKUN / CARA DAFTAR KE ALGROW
         if (
-            str_contains($q, 'cara join') ||
+            str_contains($q, 'buat akun') ||
+            str_contains($q, 'bikin akun') ||
+            str_contains($q, 'daftar akun') ||
+            str_contains($q, 'panduan akun') ||
+            str_contains($q, 'panduan daftar') ||
+            str_contains($q, 'panduan buat') ||
+            str_contains($q, 'cara buat') ||
+            str_contains($q, 'cara bikin') ||
             str_contains($q, 'cara daftar') ||
+            str_contains($q, 'cara join') ||
             str_contains($q, 'cara gabung') ||
             str_contains($q, 'gimana join') ||
             str_contains($q, 'gimana daftar') ||
+            str_contains($q, 'gimana buat') ||
+            str_contains($q, 'gimana bikin') ||
+            str_contains($q, 'buka akun') ||
+            str_contains($q, 'registrasi') ||
             str_contains($q, 'langkah daftar') ||
             str_contains($q, 'mau join') ||
             str_contains($q, 'mau daftar') ||
             str_contains($q, 'join ke algrow') ||
-            str_contains($q, 'daftar algrow')
+            str_contains($q, 'daftar algrow') ||
+            str_contains($q, 'join algrow') ||
+            str_contains($q, 'join') ||
+            str_contains($q, 'pendaftaran')
         ) {
-            return "🚀 **Cara Bergabung ke Algrow Capital sangat mudah:**\n\n" .
-                   "1️⃣ Klik tombol **[Gabung Sekarang]** di pojok kanan atas website ini.\n" .
-                   "2️⃣ Pilih peran Anda sebagai **Mitra** (jika ingin bekerjasama menggunakan akun sekuritas) atau **Asset Manager** (jika mengelola grup investor).\n" .
-                   "3️⃣ Pilih nama perusahaan induk (**Algrow Capital**) dan tautkan nama akun mitra Anda.\n" .
+            return "🚀 **Panduan Lengkap Pembuatan Akun & Cara Bergabung:**\n\n" .
+                   "Untuk bergabung di Algrow Capital, Anda membutuhkan 2 langkah praktis:\n\n" .
+                   "**Langkah 1: Daftar Akun di Platform Algrow Capital**\n" .
+                   "1️⃣ Klik tombol **[Gabung Sekarang]** di website ini.\n" .
+                   "2️⃣ Pilih peran Anda sebagai **Mitra** (jika ingin menyiapkan akun sekuritas untuk dikelola).\n" .
+                   "3️⃣ Pilih nama perusahaan induk (**Algrow Capital**).\n" .
                    "4️⃣ Masukkan email aktif dan buat kata sandi akun Anda.\n" .
-                   "5️⃣ Masukkan kode OTP verifikasi yang dikirim ke email.\n" .
-                   "6️⃣ Akun Anda langsung aktif dan siap dipasangkan dengan modal alokasi saham IPO!\n\n" .
+                   "5️⃣ Masukkan kode OTP verifikasi yang dikirim ke email Anda.\n\n" .
+                   "**Langkah 2: Siapkan Akun Sekuritas (Stockbit / Ajaib)**\n" .
+                   "• Pastikan Anda sudah memiliki akun sekuritas aktif di **Stockbit** atau **Ajaib**.\n" .
+                   "• Akun sekuritas ini akan digunakan sebagai media penjatahan saham IPO (100% modal disiapkan oleh Algrow Capital, modal Anda Rp 0!).\n\n" .
                    "💡 *Pendaftaran 100% gratis tanpa dipungut biaya apapun.*";
         }
 
@@ -237,7 +260,9 @@ PROMPT;
             str_contains($q, 'apk apa') ||
             str_contains($q, 'download apa') ||
             str_contains($q, 'aplikasinya apa') ||
-            str_contains($q, 'menggunakan apa')
+            str_contains($q, 'menggunakan apa') ||
+            str_contains($q, 'aplikasi') ||
+            str_contains($q, 'platform')
         ) {
             return "📱 **Aplikasi Sekuritas yang Digunakan di Algrow Capital:**\n\n" .
                    "Saat ini Algrow Capital resmi mendukung 2 aplikasi sekuritas terpercaya yang terdaftar di **OJK & IDX**:\n\n" .
