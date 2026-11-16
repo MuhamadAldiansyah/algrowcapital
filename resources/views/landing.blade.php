@@ -59,6 +59,17 @@
             min-height: 100vh;
         }
 
+        /* Chatbot Input & Text Explicit Contrast Overrides */
+        #chatInput, #chatInput:focus, #chatInput:active {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+            caret-color: #34d399 !important;
+        }
+        #chatInput::placeholder {
+            color: #94a3b8 !important;
+            -webkit-text-fill-color: #94a3b8 !important;
+        }
+
         /* Glowing Blobs */
         .blob {
             position: absolute;
@@ -506,7 +517,7 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-white text-base">Algrow AI</h3>
+                            <h3 class="font-bold text-white text-base tracking-wide" style="color: #ffffff !important;">Algrow AI</h3>
                             <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Asisten Resmi</span>
                         </div>
                         <p class="text-xs text-emerald-200/80">Panduan Join, Akun Sekuritas, & IPO Tanpa Modal</p>
@@ -531,7 +542,7 @@
             <div id="chatMessages" class="flex-1 p-6 overflow-y-auto space-y-5 text-[15px] sm:text-base leading-relaxed scroll-smooth text-white" style="color-scheme: dark;">
                 <!-- Welcome Bot Message -->
                 <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-extrabold shrink-0 mt-1">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/30 border border-emerald-400/50 flex items-center justify-center text-white text-xs font-black shrink-0 mt-1 shadow-sm" style="color: #ffffff !important;">
                         AI
                     </div>
                     <div class="bg-[#042f22]/95 border border-emerald-500/25 text-white rounded-2xl rounded-tl-sm px-5 py-4 max-w-[90%] shadow-md space-y-2.5" style="color: #ffffff !important;">
@@ -562,20 +573,21 @@
             </div>
 
             <!-- Typing Indicator (Hidden by default) -->
-            <div id="chatTypingIndicator" class="hidden px-6 py-2 flex items-center gap-2.5 text-xs sm:text-sm text-emerald-300 pl-15">
+            <div id="chatTypingIndicator" class="hidden px-6 py-2 flex items-center gap-2.5 text-xs sm:text-sm text-white pl-15">
                 <span class="flex gap-1.5">
                     <span class="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style="animation-delay: 0s;"></span>
                     <span class="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style="animation-delay: 0.15s;"></span>
                     <span class="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style="animation-delay: 0.3s;"></span>
                 </span>
-                <span class="font-medium">Algrow AI sedang mengetik...</span>
+                <span class="font-medium text-white" style="color: #ffffff !important;">Algrow AI sedang mengetik...</span>
             </div>
 
             <!-- Input Bar -->
             <div class="p-4 bg-[#032319] border-t border-emerald-500/25">
                 <form id="chatbotForm" onsubmit="handleChatSubmit(event)" class="flex items-center gap-2.5">
                     <input type="text" id="chatInput" placeholder="Ketik pertanyaan seputar pendaftaran & sekuritas..." autocomplete="off"
-                           class="flex-1 bg-white/5 border border-emerald-500/30 rounded-2xl px-5 py-3 text-[15px] sm:text-base text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 transition-all">
+                           style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; caret-color: #34d399;"
+                           class="flex-1 bg-white/10 border border-emerald-500/40 rounded-2xl px-5 py-3 text-[15px] sm:text-base text-white font-medium placeholder-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 transition-all">
                     <button type="submit" id="chatSendBtn" aria-label="Kirim Pesan"
                             class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white p-3 rounded-2xl transition-all shadow-md shadow-emerald-500/30 hover:scale-105 active:scale-95 disabled:opacity-50">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
@@ -638,7 +650,7 @@
                 `;
             } else {
                 msgRow.innerHTML = `
-                    <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-extrabold shrink-0 mt-1 shadow-sm">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/30 border border-emerald-400/50 flex items-center justify-center text-white text-xs font-black shrink-0 mt-1 shadow-sm" style="color: #ffffff !important;">
                         AI
                     </div>
                     <div class="bg-[#042f22]/95 border border-emerald-500/25 text-white rounded-2xl rounded-tl-sm px-5 py-4 max-w-[90%] shadow-md text-[15px] sm:text-base leading-relaxed space-y-3" style="color: #ffffff !important;">
