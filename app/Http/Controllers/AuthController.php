@@ -100,37 +100,74 @@ class AuthController extends Controller
         if ($request->role_type === 'owner') {
             $rules['company_name'] = ['required', 'string', 'max:255', 'unique:tenants,name'];
         } else {
-            $rules['tenant_id'] = ['required', 'exists:tenants,id'];
-            $rules['mitra_account_id'] = ['required', 'exists:mitra_accounts,id'];
+            // Mitra: Cek apakah Mitra Baru atau Sudah Terdata
+            $mitraCategory = $request->input('mitra_category', 'new');
+            if ($mitraCategory === 'new') {
+                $rules['full_name'] = ['required', 'string', 'max:255'];
+                $rules['phone'] = ['required', 'string', 'max:30'];
+                $rules['platform'] = ['nullable', 'string', 'max:50'];
+            } else {
+                $rules['tenant_id'] = ['required', 'exists:tenants,id'];
+                $rules['mitra_account_id'] = ['required', 'exists:mitra_accounts,id'];
+            }
         }
 
         $request->validate($rules, [
             'company_name.unique' => 'Nama Perusahaan/Grup ini sudah terdaftar.',
-            'email.unique' => 'Email ini sudah digunakan.'
+            'email.unique' => 'Email ini sudah digunakan.',
+            'full_name.required' => 'Nama lengkap wajib diisi.',
+            'phone.required' => 'Nomor WhatsApp wajib diisi.',
+            'mitra_account_id.required' => 'Silakan pilih akun mitra Anda yang terdata.',
+            'tenant_id.required' => 'Silakan pilih perusahaan induk.',
         ]);
         
         $name = '';
+        $phone = null;
+        $tenantId = null;
+        $mitraCategory = $request->input('mitra_category', 'new');
+
         if ($request->role_type === 'owner') {
             $name = "Owner " . $request->company_name;
+        } elseif ($mitraCategory === 'new') {
+            $name = trim($request->full_name);
+            $phone = trim($request->phone);
+
+            // Cari Tenant Algrow Capital atau Tenant default
+            $tenant = \App\Models\Tenant::where('name', 'ilike', '%algrow%')
+                ->orWhere('name', 'like', '%Algrow%')
+                ->first() ?? \App\Models\Tenant::first();
+
+            // Jika belum ada tenant sama sekali, buatkan Tenant default
+            if (!$tenant) {
+                $tenant = \App\Models\Tenant::create([
+                    'name' => 'Algrow Capital',
+                ]);
+            }
+            $tenantId = $tenant->id;
         } else {
             $mitraAccount = \App\Models\MitraAccount::find($request->mitra_account_id);
             $name = $mitraAccount ? $mitraAccount->owner_name : 'Mitra User';
+            $tenantId = $request->tenant_id;
+            $phone = $mitraAccount ? $mitraAccount->phone : null;
         }
 
         $otp = sprintf("%06d", mt_rand(100000, 999999));
         
-        $username = strtolower(str_replace(' ', '', $name)) . rand(100, 999);
+        // Clean username generation
+        $cleanName = preg_replace('/[^a-zA-Z0-9]/', '', strtolower($name));
+        $username = ($cleanName ? substr($cleanName, 0, 15) : 'mitra') . rand(100, 999);
         
-        $tenantId = null;
-
-        // Create User first with null tenant_id (or selected tenant_id if user)
+        // Create User
         $user = User::create([
             'name' => $name,
             'username' => $username,
             'email' => $request->email,
+            'phone' => $phone,
             'password' => Hash::make($request->password),
             'role' => $request->role_type,
-            'tenant_id' => $request->role_type === 'user' ? $request->tenant_id : null,
+            'tenant_id' => $request->role_type === 'owner' ? null : $tenantId,
+            'sekuritas' => $request->platform ?? null,
+            'status' => 'active',
             'otp' => $otp,
             'otp_expires_at' => now()->addMinutes(10),
         ]);
@@ -144,8 +181,19 @@ class AuthController extends Controller
 
             // Update User with tenant_id
             $user->update(['tenant_id' => $tenant->id]);
+        } elseif ($mitraCategory === 'new') {
+            // Otomatis daftarkan entri baru di mitra_accounts untuk manajemen admin
+            \App\Models\MitraAccount::create([
+                'tenant_id' => $tenantId,
+                'owner_name' => $name,
+                'phone' => $phone,
+                'platform' => $request->platform ?? 'Stockbit',
+                'username' => $username,
+                'password' => \Illuminate\Support\Facades\Crypt::encryptString('-'),
+                'status' => 'aktif',
+            ]);
         } else {
-            // Role is user (Mitra)
+            // Role is user (Existing Mitra)
             // Assign this user to the selected MitraAccount by updating its username
             $mitraAccount = \App\Models\MitraAccount::find($request->mitra_account_id);
             if ($mitraAccount) {
@@ -153,7 +201,11 @@ class AuthController extends Controller
             }
         }
 
-        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\VerificationOtpMail($otp));
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\VerificationOtpMail($otp));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Verification email failed: ' . $e->getMessage());
+        }
 
         session(['verify_email' => $user->email]);
 

@@ -282,6 +282,7 @@
                     <form action="{{ route('register') }}" method="POST" id="registerForm" onkeydown="return handleEnter(event)">
                         @csrf
                         <input type="hidden" name="role_type" id="role_type" value="{{ old('role_type') }}">
+                        <input type="hidden" name="mitra_category" id="mitra_category" value="{{ old('mitra_category', 'new') }}">
                         <input type="hidden" name="mitra_account_id" id="mitra_account_id" value="{{ old('mitra_account_id') }}">
                         
                         <!-- STEP 0: Role Selection -->
@@ -295,6 +296,98 @@
                                 <button type="button" onclick="selectRole('user')" class="h-[120px] rounded-2xl bg-white/[.04] border border-white/[.08] text-white flex flex-col items-center justify-center hover:bg-white/[.08] hover:border-accent/50 hover:-translate-y-1 transition-all gap-2 entrance" style="animation-delay:.35s">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                     <span class="font-bold text-[14px]">Mitra</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- STEP: Mitra Category Selection (New vs Existing) -->
+                        <div id="step-mitra-category" class="step-section hidden space-y-4">
+                            <h2 class="text-white text-lg font-bold text-center mb-1">Status Kemitraan Anda</h2>
+                            <p class="text-slate-400 text-xs text-center mb-4">Pilih kategori pendaftaran Anda sebagai Mitra</p>
+                            
+                            <div class="space-y-3">
+                                <!-- Opsi 1: Mitra Baru Algrow Capital -->
+                                <button type="button" onclick="selectMitraCategory('new')" class="w-full p-4 rounded-2xl bg-white/[.04] border border-emerald-500/30 text-white flex items-center gap-4 hover:bg-emerald-500/10 hover:border-accent hover:-translate-y-0.5 transition-all text-left entrance" style="animation-delay:.1s">
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shrink-0 text-white shadow-md shadow-emerald-900/40">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-white text-[15px] flex items-center gap-2">
+                                            <span>Mitra Baru Algrow Capital</span>
+                                            <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 font-extrabold rounded-md border border-emerald-500/30">Publik</span>
+                                        </h3>
+                                        <p class="text-xs text-slate-300 mt-0.5">Belum pernah terdaftar, ingin bergabung ke kemitraan IPO tanpa modal.</p>
+                                    </div>
+                                </button>
+
+                                <!-- Opsi 2: Sudah Terdata di Perusahaan -->
+                                <button type="button" onclick="selectMitraCategory('existing')" class="w-full p-4 rounded-2xl bg-white/[.04] border border-white/[.08] text-white flex items-center gap-4 hover:bg-white/[.08] hover:border-slate-400 hover:-translate-y-0.5 transition-all text-left entrance" style="animation-delay:.2s">
+                                    <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 text-slate-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h3 class="font-bold text-white text-[15px]">Sudah Terdata di Perusahaan</h3>
+                                        <p class="text-xs text-slate-400 mt-0.5">Akun sekuritas sudah didaftarkan sebelumnya oleh admin/perusahaan.</p>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div class="mt-4 entrance" style="animation-delay:.3s">
+                                <button type="button" onclick="prevStep()" class="w-full h-[48px] rounded-2xl bg-white/[.04] border border-white/[.08] text-slate-300 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-white/[.08] hover:text-white transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                                    Kembali ke Pilihan Peran
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- STEP: Data Mitra Baru (Khusus Mitra Baru Algrow Capital) -->
+                        <div id="step-new-mitra-data" class="step-section hidden space-y-4">
+                            <h2 class="text-white text-lg font-bold text-center mb-1">Data Diri Mitra</h2>
+                            <p class="text-slate-400 text-xs text-center mb-4">Lengkapi data pendaftaran kemitraan Algrow Capital</p>
+
+                            <!-- Nama Lengkap -->
+                            <div class="float-group @error('full_name') has-error @enderror entrance" style="animation-delay:.1s">
+                                <input type="text" id="full_name" name="full_name" value="{{ old('full_name') }}" placeholder=" " class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[48px] pr-4 text-white text-base outline-none focus:border-accent/50 focus:bg-white/[.06] focus:shadow-[0_0_0_4px_rgba(52,211,153,.1)] transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                                <label>Nama Lengkap (Sesuai KTP)</label>
+                                @error('full_name') <p class="text-red-400 text-[11px] font-medium mt-1.5 pl-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <!-- WhatsApp / No HP -->
+                            <div class="float-group @error('phone') has-error @enderror entrance" style="animation-delay:.15s">
+                                <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" placeholder=" " class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[48px] pr-4 text-white text-base outline-none focus:border-accent/50 focus:bg-white/[.06] focus:shadow-[0_0_0_4px_rgba(52,211,153,.1)] transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                                </svg>
+                                <label>Nomor WhatsApp Aktif</label>
+                                @error('phone') <p class="text-red-400 text-[11px] font-medium mt-1.5 pl-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <!-- Pilihan Aplikasi Sekuritas -->
+                            <div class="float-group @error('platform') has-error @enderror entrance" style="animation-delay:.2s">
+                                <select id="platform" name="platform" class="w-full h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] pl-[48px] pr-4 text-white text-base outline-none focus:border-accent/50 focus:bg-white/[.06] focus:shadow-[0_0_0_4px_rgba(52,211,153,.1)] transition-all appearance-none cursor-pointer">
+                                    <option value="Stockbit" class="bg-surface text-white" {{ old('platform') == 'Stockbit' ? 'selected' : '' }}>Stockbit</option>
+                                    <option value="Ajaib" class="bg-surface text-white" {{ old('platform') == 'Ajaib' ? 'selected' : '' }}>Ajaib</option>
+                                    <option value="Belum Ada" class="bg-surface text-white" {{ old('platform') == 'Belum Ada' ? 'selected' : '' }}>Belum Ada (Perlu Panduan Pembuatan Akun)</option>
+                                </select>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-500 transition-colors pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                <label style="top:0;left:16px;font-size:.65rem;font-weight:700;color:#34d399;background:linear-gradient(to bottom, rgba(4,47,34,.95) 50%, rgba(4,47,34,.6) 100%);letter-spacing:.06em;text-transform:uppercase;">Akun Sekuritas yang Dimiliki</label>
+                                @error('platform') <p class="text-red-400 text-[11px] font-medium mt-1.5 pl-1">{{ $message }}</p> @enderror
+                            </div>
+
+                            <div class="flex gap-3 mt-4 entrance" style="animation-delay:.25s">
+                                <button type="button" onclick="prevStep()" class="w-[60px] h-[54px] rounded-2xl bg-white/[.04] border border-white/[.08] text-white flex items-center justify-center hover:bg-white/[.08] transition-all"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg></button>
+                                <button type="button" onclick="nextStep()" class="flex-1 btn-shimmer h-[54px] rounded-2xl bg-gradient-to-r from-emerald-500 via-emerald-500 to-teal-500 text-white font-bold text-[15px] tracking-wide shadow-lg shadow-emerald-600/25 hover:shadow-emerald-500/40 hover:scale-[1.015] active:scale-[.985] transition-all duration-200 flex items-center justify-center gap-2.5">
+                                    Lanjut <svg xmlns="http://www.w3.org/2000/svg" class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
                                 </button>
                             </div>
                         </div>
@@ -444,7 +537,8 @@
         // ── Navigation Flow Logic ──
         const flows = {
             owner: ['step-0', 'step-company', 'step-email', 'step-password'],
-            user: ['step-0', 'step-tenant', 'step-mitra', 'step-email', 'step-password']
+            user_new: ['step-0', 'step-mitra-category', 'step-new-mitra-data', 'step-email', 'step-password'],
+            user_existing: ['step-0', 'step-mitra-category', 'step-tenant', 'step-mitra', 'step-email', 'step-password']
         };
         
         let currentFlow = [];
@@ -452,45 +546,72 @@
         
         // Check for old validation errors to restore state
         const oldRole = "{{ old('role_type') }}";
+        const oldMitraCategory = "{{ old('mitra_category', 'new') }}";
         const hasPasswordError = {{ $errors->has('password') ? 'true' : 'false' }};
         const hasEmailError = {{ $errors->has('email') ? 'true' : 'false' }};
+        const hasNewMitraError = {{ $errors->has('full_name') || $errors->has('phone') ? 'true' : 'false' }};
+        const hasExistingMitraError = {{ $errors->has('mitra_account_id') || $errors->has('tenant_id') ? 'true' : 'false' }};
         
         if (oldRole) {
             document.getElementById('role_type').value = oldRole;
-            currentFlow = flows[oldRole];
+            document.getElementById('mitra_category').value = oldMitraCategory;
+
+            if (oldRole === 'owner') {
+                currentFlow = flows.owner;
+            } else {
+                currentFlow = oldMitraCategory === 'existing' ? flows.user_existing : flows.user_new;
+            }
             
             // Determine step based on errors
             if (hasPasswordError) {
                 currentStepIndex = currentFlow.indexOf('step-password');
             } else if (hasEmailError) {
                 currentStepIndex = currentFlow.indexOf('step-email');
+            } else if (hasNewMitraError && currentFlow.includes('step-new-mitra-data')) {
+                currentStepIndex = currentFlow.indexOf('step-new-mitra-data');
+            } else if (hasExistingMitraError) {
+                currentStepIndex = currentFlow.indexOf('step-mitra');
             } else {
                 currentStepIndex = 1; // Default to first input step
             }
             
-            if (oldRole === 'user') {
+            if (oldRole === 'user' && oldMitraCategory === 'existing') {
                 fetchCompanies(); // Ensure companies are loaded
                 if ('{{ old("mitra_account_id") }}') {
-                    // Pre-fill mitra selected state (dummy display)
                     document.getElementById('mitra_search_input').value = "Mitra ID: {{ old('mitra_account_id') }}";
                     document.getElementById('mitra_selected_icon').classList.remove('hidden');
                 }
             }
             updateView();
         } else {
-            currentFlow = flows.owner; // Fallback
+            currentFlow = flows.user_new; // Fallback
             currentStepIndex = 0;
             updateView();
         }
 
         function selectRole(role) {
             document.getElementById('role_type').value = role;
-            currentFlow = flows[role];
-            currentStepIndex = 1;
-            
-            if (role === 'user') {
-                fetchCompanies();
+            if (role === 'owner') {
+                currentFlow = flows.owner;
+                currentStepIndex = 1; // go to step-company
+            } else {
+                // User (Mitra) -> go to step-mitra-category
+                const cat = document.getElementById('mitra_category').value || 'new';
+                currentFlow = cat === 'existing' ? flows.user_existing : flows.user_new;
+                currentStepIndex = 1; // go to step-mitra-category
             }
+            updateView();
+        }
+
+        function selectMitraCategory(category) {
+            document.getElementById('mitra_category').value = category;
+            if (category === 'existing') {
+                currentFlow = flows.user_existing;
+                fetchCompanies();
+            } else {
+                currentFlow = flows.user_new;
+            }
+            currentStepIndex = 2; // directly proceed to data input step
             updateView();
         }
 
@@ -516,15 +637,17 @@
             // Show current step
             const currentStepId = currentFlow[currentStepIndex];
             const currentStepEl = document.getElementById(currentStepId);
-            currentStepEl.classList.remove('hidden');
-            
-            // Retrigger animations
-            const entrances = currentStepEl.querySelectorAll('.entrance');
-            entrances.forEach(el => {
-                el.style.animation = 'none';
-                el.offsetHeight; // trigger reflow
-                el.style.animation = null;
-            });
+            if (currentStepEl) {
+                currentStepEl.classList.remove('hidden');
+                
+                // Retrigger animations
+                const entrances = currentStepEl.querySelectorAll('.entrance');
+                entrances.forEach(el => {
+                    el.style.animation = 'none';
+                    el.offsetHeight; // trigger reflow
+                    el.style.animation = null;
+                });
+            }
             
             // Update dots
             const totalDots = currentFlow.length - 1; // Step 0 doesn't count as a step in progress
@@ -559,6 +682,23 @@
                 } else {
                     input.closest('.float-group').classList.remove('has-error');
                 }
+            } else if (stepId === 'step-new-mitra-data') {
+                const nameInput = document.getElementById('full_name');
+                const phoneInput = document.getElementById('phone');
+                let valid = true;
+                if (!nameInput.value.trim()) {
+                    nameInput.closest('.float-group').classList.add('has-error');
+                    valid = false;
+                } else {
+                    nameInput.closest('.float-group').classList.remove('has-error');
+                }
+                if (!phoneInput.value.trim()) {
+                    phoneInput.closest('.float-group').classList.add('has-error');
+                    valid = false;
+                } else {
+                    phoneInput.closest('.float-group').classList.remove('has-error');
+                }
+                isValid = valid;
             } else if (stepId === 'step-tenant') {
                 const input = document.getElementById('tenant_id');
                 if (!input.value) {
