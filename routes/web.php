@@ -9,6 +9,7 @@ use App\Http\Controllers\IpoAllocationController;
 use App\Http\Controllers\IpoSaleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ChatbotController;
 
 // Temporary route for Vercel database migration
 Route::get('/migrate-db', function () {
@@ -148,6 +149,8 @@ Route::get('/debug-db', function () {
 Route::get('/', function () {
     return view('landing');
 })->name('landing');
+
+Route::post('/api/chatbot', [ChatbotController::class, 'message'])->name('chatbot.message');
 
 Route::get('/asset-manager', function () {
     return view('asset-manager');

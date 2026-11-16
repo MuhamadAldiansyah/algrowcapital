@@ -466,8 +466,6 @@
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('active');
-                        // Optional: Stop observing once revealed
-                        // observer.unobserve(entry.target); 
                     }
                 });
             }, observerOptions);
@@ -477,6 +475,233 @@
                 revealElements.forEach(el => observer.observe(el));
             }
         });
+    </script>
+
+    <!-- Algrow AI Chatbot Floating Widget -->
+    <div id="algrowChatWidget" class="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 font-sans">
+        <!-- Floating Trigger Button -->
+        <button id="chatbotToggleBtn" onclick="toggleChatbot()" type="button" aria-label="Buka Chatbot Pendaftaran"
+                class="group flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white pl-4 pr-5 py-3.5 rounded-full shadow-[0_10px_30px_rgba(16,185,129,0.35)] hover:shadow-[0_15px_35px_rgba(16,185,129,0.5)] hover:scale-105 active:scale-95 transition-all duration-300">
+            <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-100"></span>
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transform group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+            <span class="font-bold text-sm tracking-wide">Tanya Cara Join</span>
+        </button>
+
+        <!-- Chat Window Popup -->
+        <div id="chatbotWindow"
+             class="hidden fixed inset-x-3 bottom-20 sm:inset-auto sm:absolute sm:bottom-16 sm:right-0 sm:w-[400px] h-[550px] max-h-[82vh] bg-[#021a14]/95 backdrop-blur-2xl border border-emerald-500/25 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] flex flex-col overflow-hidden transition-all duration-300 transform origin-bottom-right">
+            
+            <!-- Header -->
+            <div class="px-5 py-4 bg-gradient-to-r from-[#042f22] to-[#064a38] border-b border-emerald-500/20 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white font-black text-lg shadow-md shadow-emerald-900/50">
+                        A
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-white text-sm">Algrow AI</h3>
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Pendaftaran</span>
+                        </div>
+                        <p class="text-xs text-emerald-200/70">Panduan Join & Akun Sekuritas</p>
+                    </div>
+                </div>
+                <button onclick="toggleChatbot()" type="button" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Guardrail Scope Banner -->
+            <div class="px-4 py-2 bg-emerald-950/60 border-b border-emerald-500/10 text-[11px] text-emerald-300/80 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Fokus khusus seputar cara daftar, syarat, & sekuritas mitra.</span>
+            </div>
+
+            <!-- Chat Messages Container -->
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm scroll-smooth">
+                <!-- Welcome Bot Message -->
+                <div class="flex items-start gap-2.5">
+                    <div class="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-bold shrink-0 mt-0.5">
+                        AI
+                    </div>
+                    <div class="bg-[#042f22]/90 border border-emerald-500/20 text-slate-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] shadow-sm space-y-2">
+                        <p>Halo! 👋 Mau tahu cara gabung ke Algrow Capital atau panduan pendaftaran akun sekuritas?</p>
+                        <p class="text-xs text-slate-400">Pilih pertanyaan cepat di bawah atau ketik langsung:</p>
+                    </div>
+                </div>
+
+                <!-- Quick Suggested Questions Chips -->
+                <div id="quickQuestionsContainer" class="flex flex-col gap-1.5 pt-1 pl-9">
+                    <button type="button" onclick="askPreset('Bagaimana cara join ke Algrow Capital?')"
+                            class="text-left text-xs bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 hover:border-emerald-400 text-emerald-200 px-3 py-2 rounded-xl transition-all">
+                        🚀 Bagaimana cara join ke Algrow?
+                    </button>
+                    <button type="button" onclick="askPreset('Pakai aplikasi sekuritas apa saja?')"
+                            class="text-left text-xs bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 hover:border-emerald-400 text-emerald-200 px-3 py-2 rounded-xl transition-all">
+                        📱 Pakai aplikasi sekuritas apa?
+                    </button>
+                    <button type="button" onclick="askPreset('Bagaimana cara daftar akun sekuritas Stockbit atau Ajaib?')"
+                            class="text-left text-xs bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 hover:border-emerald-400 text-emerald-200 px-3 py-2 rounded-xl transition-all">
+                        📝 Cara daftar akun sekuritasnya gimana?
+                    </button>
+                    <button type="button" onclick="askPreset('Apakah butuh modal sendiri untuk daftar?')"
+                            class="text-left text-xs bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 hover:border-emerald-400 text-emerald-200 px-3 py-2 rounded-xl transition-all">
+                        💰 Apakah butuh modal sendiri?
+                    </button>
+                </div>
+            </div>
+
+            <!-- Typing Indicator (Hidden by default) -->
+            <div id="chatTypingIndicator" class="hidden px-4 py-2 flex items-center gap-2 text-xs text-emerald-400/80 pl-11">
+                <span class="flex gap-1">
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style="animation-delay: 0s;"></span>
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style="animation-delay: 0.15s;"></span>
+                    <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style="animation-delay: 0.3s;"></span>
+                </span>
+                <span>Algrow AI sedang mengetik...</span>
+            </div>
+
+            <!-- Input Bar -->
+            <div class="p-3 bg-[#032319] border-t border-emerald-500/20">
+                <form id="chatbotForm" onsubmit="handleChatSubmit(event)" class="flex items-center gap-2">
+                    <input type="text" id="chatInput" placeholder="Tanya seputar pendaftaran & sekuritas..." autocomplete="off"
+                           class="flex-1 bg-white/5 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all">
+                    <button type="submit" id="chatSendBtn"
+                            class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white p-2.5 rounded-xl transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                        </svg>
+                    </button>
+                </form>
+                <div class="mt-2 flex justify-between items-center text-[10px] text-slate-500 px-1">
+                    <span>Tertarik bergabung?</span>
+                    <a href="{{ route('register') }}" class="text-emerald-400 font-bold hover:underline">Daftar Akun Sekarang &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Client-Side Controller Script -->
+    <script>
+        const chatHistory = [];
+        let isChatbotOpen = false;
+
+        function toggleChatbot() {
+            const win = document.getElementById('chatbotWindow');
+            const btn = document.getElementById('chatbotToggleBtn');
+            isChatbotOpen = !isChatbotOpen;
+            
+            if (isChatbotOpen) {
+                win.classList.remove('hidden');
+                document.getElementById('chatInput').focus();
+            } else {
+                win.classList.add('hidden');
+            }
+        }
+
+        function askPreset(question) {
+            document.getElementById('chatInput').value = question;
+            handleChatSubmit(new Event('submit'));
+        }
+
+        function appendMessage(sender, text) {
+            const container = document.getElementById('chatMessages');
+            const isUser = sender === 'user';
+            
+            const msgRow = document.createElement('div');
+            msgRow.className = `flex items-start gap-2.5 ${isUser ? 'justify-end' : 'justify-start'}`;
+
+            // Format linebreaks and markdown bold
+            let formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`([^`]+)`/g, '<code class="bg-black/40 px-1 py-0.5 rounded text-emerald-300">$1</code>')
+                .replace(/\n/g, '<br>');
+
+            if (isUser) {
+                msgRow.innerHTML = `
+                    <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%] shadow-sm text-sm">
+                        ${formattedText}
+                    </div>
+                `;
+            } else {
+                msgRow.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-bold shrink-0 mt-0.5">
+                        AI
+                    </div>
+                    <div class="bg-[#042f22]/90 border border-emerald-500/20 text-slate-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[88%] shadow-sm text-sm space-y-2">
+                        <div>${formattedText}</div>
+                        <div class="pt-1 flex gap-2">
+                            <a href="{{ route('register') }}" class="inline-flex items-center gap-1 text-xs font-bold bg-emerald-500 text-black px-3 py-1.5 rounded-lg hover:bg-emerald-400 transition-colors shadow">
+                                <span>Daftar Sekarang</span> &rarr;
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.appendChild(msgRow);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInput');
+            const query = input.value.trim();
+            if (!query) return;
+
+            // Clear input & disable submit button temporarily
+            input.value = '';
+            document.getElementById('chatSendBtn').disabled = true;
+
+            // Append user bubble
+            appendMessage('user', query);
+            chatHistory.push({ role: 'user', content: query });
+
+            // Show typing indicator
+            const indicator = document.getElementById('chatTypingIndicator');
+            indicator.classList.remove('hidden');
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            try {
+                const response = await fetch("{{ route('chatbot.message') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        message: query,
+                        history: chatHistory
+                    })
+                });
+
+                const data = await response.json();
+                indicator.classList.add('hidden');
+
+                if (data.success && data.reply) {
+                    appendMessage('model', data.reply);
+                    chatHistory.push({ role: 'model', content: data.reply });
+                } else {
+                    appendMessage('model', 'Mohon maaf, terjadi kendala saat memproses pertanyaan. Silakan coba klik tombol [Daftar Sekarang] di atas.');
+                }
+            } catch (err) {
+                indicator.classList.add('hidden');
+                appendMessage('model', 'Koneksi terputus. Pastikan perangkat Anda terhubung ke internet.');
+            } finally {
+                document.getElementById('chatSendBtn').disabled = false;
+                input.focus();
+            }
+        }
     </script>
 </body>
 </html>
