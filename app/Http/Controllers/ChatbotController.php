@@ -198,8 +198,9 @@ FALLBACK;
         );
 
         // ─── CONTEXT AWARENESS: Deteksi apakah user SUDAH PUNYA akun ─────────────
-        // Sinyal "sudah punya / sudah ada" akun sekuritas
+        // Sinyal "sudah punya / sudah ada / sudah buka" akun sekuritas
         $alreadyHasSignals = [
+            // Sudah punya / ada akun
             'sudah punya', 'sudah ada', 'udah punya', 'udah ada',
             'saya punya', 'saya ada', 'aku punya', 'aku ada',
             'sudah daftar', 'sudah register', 'sudah bikin', 'sudah buat',
@@ -208,19 +209,45 @@ FALLBACK;
             'stockbit saya', 'ajaib saya', 'akun saya', 'rekening saya',
             'udah ada akun', 'udah punya akun', 'sudah ada akun', 'sudah punya akun',
             'akun sudah', 'sudah aktif', 'udah aktif',
+            // Sudah buka rekening saham (Step 2 di Stockbit/Ajaib)
+            'sudah buka rekening', 'udah buka rekening',
+            'buka rekening sudah', 'buka rekening saham sudah',
+            'sudah buka akun', 'udah buka akun',
+            'sudah ajukan', 'sudah mengajukan', 'sudah submit',
+            'sudah kirim data', 'sudah isi data', 'sudah upload',
+            'sudah lengkapi', 'sudah selesai daftar',
+            'rekening saham sudah dibuka', 'rekening efek sudah dibuka',
+            // Frasa pendek yang menyatakan "sudah" diikuti buka/daftar
+            'sudah buka', 'udah buka',
         ];
-        $userAlreadyHas = false;
-        $mentionedPlatform = '';
-        foreach ($alreadyHasSignals as $signal) {
-            if (str_contains($q, $signal)) {
-                $userAlreadyHas = true;
+
+        // Deteksi khusus: "buka rekening saham" / "buka rekening efek" dengan konteks sudah
+        // Misal: "udah buka rekening saham", "buka rekening sahamnya sudah"
+        $openedRekeningPhrases = [
+            'buka rekening saham', 'buka rekening efek', 'buka rekening di stockbit',
+            'buka rekening di ajaib', 'buka rekening sahamnya', 'buka rekening efeknya',
+            'pengajuan rekening', 'ajukan rekening', 'rekening saham diajukan',
+        ];
+        $userOpenedRekening = false;
+        foreach ($openedRekeningPhrases as $phrase) {
+            if (str_contains($q, $phrase)) {
+                $userOpenedRekening = true;
                 break;
             }
         }
-        if ($userAlreadyHas) {
-            if (str_contains($q, 'stockbit')) $mentionedPlatform = 'Stockbit';
-            elseif (str_contains($q, 'ajaib')) $mentionedPlatform = 'Ajaib';
+
+        $userAlreadyHas = $userOpenedRekening;
+        $mentionedPlatform = '';
+        if (!$userAlreadyHas) {
+            foreach ($alreadyHasSignals as $signal) {
+                if (str_contains($q, $signal)) {
+                    $userAlreadyHas = true;
+                    break;
+                }
+            }
         }
+        if (str_contains($q, 'stockbit')) $mentionedPlatform = 'Stockbit';
+        elseif (str_contains($q, 'ajaib')) $mentionedPlatform = 'Ajaib';
 
         // Sinyal rekening efek / RDN sudah aktif
         $rekeningAktifSignals = [
@@ -500,19 +527,35 @@ FALLBACK;
 
         // ── Context-Aware: Sekuritas response tergantung status user ──────────────
         if ($winner === 'sekuritas') {
+
+            // Rekening efek sudah aktif penuh
             if ($rekeningAlreadyActive) {
                 return "Bagus! Berarti rekening efek dan RDN-nya sudah aktif. Kamu sudah siap untuk melanjutkan ke proses pendaftaran mitra Algrow Capital. Klik tombol **Gabung Sekarang** di website, isi formulir, lalu kamu akan diarahkan ke WhatsApp Admin **087822421207** untuk konfirmasi dan approval.";
             }
+
+            // User sudah buka rekening saham (submit form), tapi status belum jelas
+            if ($userOpenedRekening) {
+                $platform = $mentionedPlatform ?: 'Stockbit/Ajaib';
+                if ($inVerification) {
+                    return "Oke, berarti pengajuan rekening saham di **{$platform}** sudah dikirim dan lagi dalam proses verifikasi. Biasanya proses ini selesai dalam **1–24 jam kerja**. Kalau sudah aktif, langsung kabarin ya — kita lanjut ke pendaftaran mitra Algrow Capital! 👍";
+                }
+                return "Oke, berarti kamu sudah mengajukan pembukaan rekening saham di **{$platform}**. Sekarang tinggal ditunggu proses verifikasinya — biasanya selesai dalam **1–24 jam kerja**.\n\nApakah rekeningnya sudah aktif dan bisa digunakan, atau masih dalam proses verifikasi?";
+            }
+
+            // Masih proses verifikasi (tanpa info buka rekening eksplisit)
             if ($inVerification) {
                 return "Oke, berarti rekening efek kamu masih dalam proses verifikasi. Biasanya proses ini selesai dalam **1–24 jam kerja**. Sambil menunggu, kamu bisa mulai pelajari program Algrow Capital lebih lanjut. Kalau sudah aktif, langsung kabarin ya — kita lanjut ke tahap pendaftaran mitra! 👍";
             }
+
+            // User sudah punya akun aplikasi (tapi belum jelas status rekening efek)
             if ($userAlreadyHas && $mentionedPlatform) {
                 return "Oke, berarti kamu sudah punya akun **{$mentionedPlatform}** ya. Sekarang perlu dipastikan satu hal — apakah pembukaan **rekening efek dan RDN**-nya sudah selesai dan akunnya sudah aktif, atau baru akun aplikasinya saja?";
             }
             if ($userAlreadyHas) {
                 return "Oke, berarti kamu sudah punya akun sekuritasnya. Sekarang yang perlu dicek: apakah **rekening efek dan RDN**-nya sudah aktif juga? Akun aplikasi dan rekening efek itu dua hal berbeda — kalau baru akun aplikasinya, perlu selesaikan proses pembukaan rekening efek dulu.";
             }
-            // Default: user belum punya akun
+
+            // Default: user belum punya akun sama sekali
             return "Belum punya akun sekuritas? Tenang, prosesnya gampang!\n\nDownload **Stockbit** atau **Ajaib** di Play Store / App Store, siapkan e-KTP dan rekening bank pribadi kamu, lalu ikuti panduan buka rekening saham di dalam aplikasinya — isi data diri, foto selfie dengan e-KTP, pilih bank RDN (gratis, tanpa saldo minimum). Proses verifikasi biasanya selesai dalam **1–24 jam kerja**. Setelah akun aktif, langsung bisa didaftarkan ke kemitraan Algrow Capital!";
         }
 
