@@ -187,7 +187,68 @@ FALLBACK;
     {
         $q = strtolower(trim($text));
         // Normalize common typos & slang
-        $q = str_replace(['gmn', 'gimn', 'bgmn', 'bgmna', 'yg', 'utk', 'tuk', 'tp', 'tapi', 'kalo', 'kalau', 'klu', 'kl ', 'udah', 'udh', 'sdh', 'udh', 'bisa', 'bs ', 'bantu', 'tolong', 'tlng', 'jelaskan', 'jelasin', 'cerita', 'ceritain'], ['gimana', 'gimana', 'gimana', 'gimana', 'yang', 'untuk', 'untuk', 'tapi', 'tapi', 'kalau', 'kalau', 'kalau', 'kalau ', 'sudah', 'sudah', 'sudah', 'sudah', 'bisa', 'bisa ', 'bantu', 'tolong', 'tolong', 'jelaskan', 'jelaskan', 'cerita', 'cerita'], $q);
+        $q = str_replace(
+            ['gmn', 'gimn', 'bgmn', 'bgmna', 'yg', 'utk', 'tuk', 'tp', 'tapi',
+             'kalo', 'kalau', 'klu', 'kl ', 'udah', 'udh', 'sdh', 'bisa', 'bs ',
+             'bantu', 'tolong', 'tlng', 'jelaskan', 'jelasin', 'cerita', 'ceritain'],
+            ['gimana', 'gimana', 'gimana', 'gimana', 'yang', 'untuk', 'untuk', 'tapi', 'tapi',
+             'kalau', 'kalau', 'kalau', 'kalau ', 'sudah', 'sudah', 'sudah', 'bisa', 'bisa ',
+             'bantu', 'tolong', 'tolong', 'jelaskan', 'jelaskan', 'cerita', 'cerita'],
+            $q
+        );
+
+        // ─── CONTEXT AWARENESS: Deteksi apakah user SUDAH PUNYA akun ─────────────
+        // Sinyal "sudah punya / sudah ada" akun sekuritas
+        $alreadyHasSignals = [
+            'sudah punya', 'sudah ada', 'udah punya', 'udah ada',
+            'saya punya', 'saya ada', 'aku punya', 'aku ada',
+            'sudah daftar', 'sudah register', 'sudah bikin', 'sudah buat',
+            'udah daftar', 'udah register', 'udah bikin', 'udah buat',
+            'punya stockbit', 'ada stockbit', 'punya ajaib', 'ada ajaib',
+            'stockbit saya', 'ajaib saya', 'akun saya', 'rekening saya',
+            'udah ada akun', 'udah punya akun', 'sudah ada akun', 'sudah punya akun',
+            'akun sudah', 'sudah aktif', 'udah aktif',
+        ];
+        $userAlreadyHas = false;
+        $mentionedPlatform = '';
+        foreach ($alreadyHasSignals as $signal) {
+            if (str_contains($q, $signal)) {
+                $userAlreadyHas = true;
+                break;
+            }
+        }
+        if ($userAlreadyHas) {
+            if (str_contains($q, 'stockbit')) $mentionedPlatform = 'Stockbit';
+            elseif (str_contains($q, 'ajaib')) $mentionedPlatform = 'Ajaib';
+        }
+
+        // Sinyal rekening efek / RDN sudah aktif
+        $rekeningAktifSignals = [
+            'rekening sudah aktif', 'rekening efek aktif', 'rdn sudah aktif', 'rdn aktif',
+            'sudah aktif semua', 'sudah lengkap', 'sudah siap', 'sudah bisa trading',
+            'rekening saham aktif', 'rekening efek sudah', 'sudah verified', 'sudah terverifikasi',
+        ];
+        $rekeningAlreadyActive = false;
+        foreach ($rekeningAktifSignals as $signal) {
+            if (str_contains($q, $signal)) {
+                $rekeningAlreadyActive = true;
+                break;
+            }
+        }
+
+        // Sinyal masih proses verifikasi
+        $inVerificationSignals = [
+            'masih proses', 'lagi proses', 'masih verifikasi', 'lagi verifikasi',
+            'belum aktif', 'belum verified', 'belum terverifikasi', 'masih menunggu',
+            'masih nunggu', 'pending', 'dalam proses',
+        ];
+        $inVerification = false;
+        foreach ($inVerificationSignals as $signal) {
+            if (str_contains($q, $signal)) {
+                $inVerification = true;
+                break;
+            }
+        }
 
         // ─── TOPIC SCORING ────────────────────────────────────────────────────────
         // Each topic has a list of "intent signals". Score = count of signals found.
@@ -436,6 +497,25 @@ FALLBACK;
         }
 
         // ─── RESPONSES (Varied format: mix of paragraphs, structured, short & punchy) ──
+
+        // ── Context-Aware: Sekuritas response tergantung status user ──────────────
+        if ($winner === 'sekuritas') {
+            if ($rekeningAlreadyActive) {
+                return "Bagus! Berarti rekening efek dan RDN-nya sudah aktif. Kamu sudah siap untuk melanjutkan ke proses pendaftaran mitra Algrow Capital. Klik tombol **Gabung Sekarang** di website, isi formulir, lalu kamu akan diarahkan ke WhatsApp Admin **087822421207** untuk konfirmasi dan approval.";
+            }
+            if ($inVerification) {
+                return "Oke, berarti rekening efek kamu masih dalam proses verifikasi. Biasanya proses ini selesai dalam **1–24 jam kerja**. Sambil menunggu, kamu bisa mulai pelajari program Algrow Capital lebih lanjut. Kalau sudah aktif, langsung kabarin ya — kita lanjut ke tahap pendaftaran mitra! 👍";
+            }
+            if ($userAlreadyHas && $mentionedPlatform) {
+                return "Oke, berarti kamu sudah punya akun **{$mentionedPlatform}** ya. Sekarang perlu dipastikan satu hal — apakah pembukaan **rekening efek dan RDN**-nya sudah selesai dan akunnya sudah aktif, atau baru akun aplikasinya saja?";
+            }
+            if ($userAlreadyHas) {
+                return "Oke, berarti kamu sudah punya akun sekuritasnya. Sekarang yang perlu dicek: apakah **rekening efek dan RDN**-nya sudah aktif juga? Akun aplikasi dan rekening efek itu dua hal berbeda — kalau baru akun aplikasinya, perlu selesaikan proses pembukaan rekening efek dulu.";
+            }
+            // Default: user belum punya akun
+            return "Belum punya akun sekuritas? Tenang, prosesnya gampang!\n\nDownload **Stockbit** atau **Ajaib** di Play Store / App Store, siapkan e-KTP dan rekening bank pribadi kamu, lalu ikuti panduan buka rekening saham di dalam aplikasinya — isi data diri, foto selfie dengan e-KTP, pilih bank RDN (gratis, tanpa saldo minimum). Proses verifikasi biasanya selesai dalam **1–24 jam kerja**. Setelah akun aktif, langsung bisa didaftarkan ke kemitraan Algrow Capital!";
+        }
+
         return match($winner) {
             'other_sekuritas' => "Pertanyaan bagus! Sekuritas seperti IPOT, Mirae Asset, Mandiri Sekuritas (MOST), BNI Sekuritas (BIONS), hingga BCA Sekuritas memang besar dan terpercaya di pasar modal Indonesia.\n\nTapi untuk program kemitraan IPO di Algrow Capital, saat ini kami hanya mendukung **Stockbit** dan **Ajaib**. Alasannya simpel — dua platform ini 100% online (tanpa berkas fisik), tanpa biaya admin RDN bulanan, verifikasi cepat, dan paling mulus diintegrasikan ke sistem alokasi IPO kolektif kami. Sekuritas lain punya alur teknis berbeda yang belum kami support. Ke depannya mungkin bisa berkembang, tapi untuk sekarang tetap pakai Stockbit atau Ajaib ya!",
 
