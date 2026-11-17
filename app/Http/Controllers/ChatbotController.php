@@ -341,6 +341,25 @@ PROMPT;
         $winner = array_key_first($scores);
         $winnerScore = $scores[$winner];
 
+        // ─── SEKURITAS OVERRIDE (HIGHEST PRIORITY) ─────────────────────────────
+        // If the word 'sekuritas' appears explicitly in the query, ALWAYS route to sekuritas topic
+        // This prevents "cara daftar sekuritas" being wrongly sent to 'join'
+        if (str_contains($q, 'sekuritas') || str_contains($q, 'rdn') || str_contains($q, 'rekening dana nasabah')) {
+            if (isset($scores['sekuritas']) && $scores['sekuritas'] >= 2) {
+                $winner = 'sekuritas';
+                $winnerScore = $scores['sekuritas'];
+            }
+        }
+
+        // If stockbit or ajaib is explicitly mentioned with how-to context, route to sekuritas
+        if ((str_contains($q, 'stockbit') || str_contains($q, 'ajaib')) &&
+            (str_contains($q, 'cara') || str_contains($q, 'gimana') || str_contains($q, 'daftar') || str_contains($q, 'buka') || str_contains($q, 'buat') || str_contains($q, 'download') || str_contains($q, 'install'))) {
+            if (isset($scores['sekuritas']) && $scores['sekuritas'] >= 2) {
+                $winner = 'sekuritas';
+                $winnerScore = $scores['sekuritas'];
+            }
+        }
+
         // Special: greeting must win outright only if score >= 2 (avoid false greeting on e.g. "halo cara daftar")
         // If greeting ties with another, prefer the other topic
         if ($winner === 'greeting' && $winnerScore <= 2) {
@@ -368,15 +387,6 @@ PROMPT;
                     $winner = 'other_sekuritas';
                     $winnerScore = $scores['other_sekuritas'];
                 }
-            }
-        }
-
-        // Sekuritas topic must beat join topic if it has specific app-name signals
-        // (avoid "cara daftar stockbit" being routed to 'join')
-        if ($winner === 'join' && isset($scores['sekuritas']) && $scores['sekuritas'] >= 2) {
-            if (str_contains($q, 'stockbit') || str_contains($q, 'ajaib') || str_contains($q, 'sekuritas') || str_contains($q, 'rdn')) {
-                $winner = 'sekuritas';
-                $winnerScore = $scores['sekuritas'];
             }
         }
 
