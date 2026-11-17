@@ -162,12 +162,22 @@ class ChatbotController extends Controller
      */
     private function loadMasterPrompt(): string
     {
-        $path = 'C:\\Users\\Julius\\.gemini\\antigravity\\brain\\883c0e05-d6c2-4b2e-bde5-0a6cec338a75\\master_prompt_algrow_chatbot.md';
-        $content = @file_get_contents($path);
-        if ($content !== false && strlen($content) > 100) {
-            return $content;
+        $candidatePaths = [
+            resource_path('chatbot/master_prompt_algrow_chatbot.md'),
+            base_path('resources/chatbot/master_prompt_algrow_chatbot.md'),
+            'C:\\Users\\Julius\\.gemini\\antigravity\\brain\\883c0e05-d6c2-4b2e-bde5-0a6cec338a75\\master_prompt_algrow_chatbot.md',
+        ];
+
+        foreach ($candidatePaths as $path) {
+            if (@file_exists($path)) {
+                $content = @file_get_contents($path);
+                if ($content !== false && strlen($content) > 100) {
+                    return $content;
+                }
+            }
         }
-        Log::error('ChatbotController: master prompt file missing or empty at: ' . $path);
+
+        Log::warning('ChatbotController: master prompt file missing, using inline fallback.');
         // Minimal fallback
         return <<<FALLBACK
 Anda adalah "Algrow AI Assistant", asisten resmi Algrow Capital.
@@ -431,50 +441,72 @@ FALLBACK;
         $winnerScore = $scores[$winner];
 
         // ─── SEKURITAS OVERRIDE (HIGHEST PRIORITY) ─────────────────────────────
-        // If the word 'sekuritas' appears explicitly in the query, ALWAYS route to sekuritas topic
-        // This prevents "cara daftar sekuritas" being wrongly sent to 'join'
-        if (str_contains($q, 'sekuritas') || str_contains($q, 'rdn') || str_contains($q, 'rekening dana nasabah')) {
-            if (isset($scores['sekuritas']) && $scores['sekuritas'] >= 2) {
-                $winner = 'sekuritas';
-                $winnerScore = $scores['sekuritas'];
+        // Jangan paksa sekuritas jika 'aplikasi' score lebih tinggi (untuk pertanyaan "pakai apa")
+        $aplikasiWinsClearly = isset($scores['aplikasi']) && $scores['aplikasi'] > ($scores['sekuritas'] ?? 0);
+
+        if (!$aplikasiWinsClearly) {
+            if (str_contains($q, 'sekuritas') || str_contains($q, 'rdn') || str_contains($q, 'rekening dana nasabah')) {
+                if (isset($scores['sekuritas']) && $scores['sekuritas'] >= 2) {
+                    $winner = 'sekuritas';
+                    $winnerScore = $scores['sekuritas'];
+                }
+            }
+
+            // If stockbit or ajaib is explicitly mentioned with how-to context, route to sekuritas
+            if ((str_contains($q, 'stockbit') || str_contains($q, 'ajaib')) &&
+                (str_contains($q, 'cara') || str_contains($q, 'gimana') || str_contains($q, 'daftar') || str_contains($q, 'buka') || str_contains($q, 'buat') || str_contains($q, 'download') || str_contains($q, 'install'))) {
+                if (isset($scores['sekuritas']) && $scores['sekuritas'] >= 2) {
+                    $winner = 'sekuritas';
+                    $winnerScore = $scores['sekuritas'];
+                }
             }
         }
 
-        // If stockbit or ajaib is explicitly mentioned with how-to context, route to sekuritas
-        if ((str_contains($q, 'stockbit') || str_contains($q, 'ajaib')) &&
-            (str_contains($q, 'cara') || str_contains($q, 'gimana') || str_contains($q, 'daftar') || str_contains($q, 'buka') || str_contains($q, 'buat') || str_contains($q, 'download') || str_contains($q, 'install'))) {
-            if (isset($scores['sekuritas']) && $scores['sekuritas'] >= 2) {
-                $winner = 'sekuritas';
-                $winnerScore = $scores['sekuritas'];
-            }
+        // ─── MODAL OVERRIDE sebelum AMBIGUITY CHECK ────────────────────────────
+        // Jika ada sinyal modal/biaya/uang yang jelas → langsung ke modal, bypass ambiguity
+        $hasModalSignal = str_contains($q, 'modal') || str_contains($q, 'biaya') ||
+                          str_contains($q, 'uang') || str_contains($q, 'duit') ||
+                          str_contains($q, 'keluar') || str_contains($q, 'bayar') ||
+                          str_contains($q, 'gratis') || str_contains($q, 'rugi') ||
+                          str_contains($q, 'risiko') || str_contains($q, 'resiko') ||
+                          str_contains($q, 'aman');
+        if ($hasModalSignal && isset($scores['modal']) && $scores['modal'] >= 2) {
+            $winner = 'modal';
+            $winnerScore = $scores['modal'];
         }
 
         // ─── AMBIGUITY DETECTION ───────────────────────────────────────────────
-        // Detect inherently ambiguous queries: words that could mean "daftar akun sekuritas"
-        // OR "daftar bergabung ke algrow" with no clear context either way.
+        // Hanya berlaku untuk kata generik yang bisa berarti daftar akun ATAU daftar mitra
+        // "buat akun", "bikin akun", "buka akun" DIHAPUS dari sini karena lebih sering = sekuritas
 
-        // Ambiguous trigger keywords (generic, context-free)
-        $ambiguousKeywords = ['daftar', 'buat akun', 'bikin akun', 'buka akun', 'cara daftar', 'mau daftar', 'gimana daftar', 'cara bikin akun', 'cara buat akun', 'panduan daftar'];
-        $isAmbiguousQuery = false;
-        foreach ($ambiguousKeywords as $kw) {
-            if (str_contains($q, $kw)) {
-                $isAmbiguousQuery = true;
-                break;
+        $ambiguousKeywords = ['cara daftar', 'mau daftar', 'gimana daftar', 'panduan daftar', 'daftar dong', 'mau join', 'mau gabung'];
+        // "daftar" saja hanya ambigu jika berdiri sendiri (panjang query pendek)
+        if (strlen(trim($q)) <= 10 && str_contains($q, 'daftar')) {
+            $isAmbiguousQuery = true;
+        } else {
+            $isAmbiguousQuery = false;
+            foreach ($ambiguousKeywords as $kw) {
+                if (str_contains($q, $kw)) {
+                    $isAmbiguousQuery = true;
+                    break;
+                }
             }
         }
 
-        // Clear disambiguators for sekuritas
+        // Clear disambiguators untuk sekuritas
         $hasSekuritasHint = str_contains($q, 'sekuritas') || str_contains($q, 'stockbit') ||
                             str_contains($q, 'ajaib') || str_contains($q, 'rdn') ||
-                            str_contains($q, 'rekening saham') || str_contains($q, 'rekening dana');
+                            str_contains($q, 'rekening saham') || str_contains($q, 'rekening dana') ||
+                            str_contains($q, 'akun') || str_contains($q, 'aplikasi') ||
+                            str_contains($q, 'panduan') || str_contains($q, 'cara');
 
-        // Clear disambiguators for join/algrow
+        // Clear disambiguators untuk join/algrow
         $hasJoinHint = str_contains($q, 'algrow') || str_contains($q, 'mitra') ||
                        str_contains($q, 'gabung') || str_contains($q, 'join') ||
                        str_contains($q, 'program') || str_contains($q, 'komunitas');
 
-        // Ambiguous: query has generic daftar/akun keyword but no hint which direction
-        if ($isAmbiguousQuery && !$hasSekuritasHint && !$hasJoinHint) {
+        // Ambiguous: query benar-benar tidak ada konteks sama sekali
+        if ($isAmbiguousQuery && !$hasSekuritasHint && !$hasJoinHint && !$hasModalSignal) {
             return $this->ambiguousResponse();
         }
 
@@ -556,7 +588,7 @@ FALLBACK;
             }
 
             // Default: user belum punya akun sama sekali
-            return "Belum punya akun sekuritas? Tenang, prosesnya gampang!\n\nDownload **Stockbit** atau **Ajaib** di Play Store / App Store, siapkan e-KTP dan rekening bank pribadi kamu, lalu ikuti panduan buka rekening saham di dalam aplikasinya — isi data diri, foto selfie dengan e-KTP, pilih bank RDN (gratis, tanpa saldo minimum). Proses verifikasi biasanya selesai dalam **1–24 jam kerja**. Setelah akun aktif, langsung bisa didaftarkan ke kemitraan Algrow Capital!";
+            return "Berikut panduan cara daftar akun sekuritas di **Stockbit** atau **Ajaib** secara online:\n\n1️⃣ **Download Aplikasi**: Unduh aplikasi **Stockbit** atau **Ajaib** di Play Store atau App Store.\n2️⃣ **Registrasi Akun**: Buka aplikasi, lalu daftar dengan nomor HP dan email aktif kamu.\n3️⃣ **Buka Rekening Efek & RDN**: Masuk ke menu pembukaan rekening saham, siapkan **e-KTP fisik**, ambil foto selfie verifikasi, dan isi data diri.\n4️⃣ **Pilih Bank RDN**: Pilih rekening dana nasabah. Di Stockbit, disarankan terhubung dengan **Bank Jago reguler (warna kuning)**, bukan syariah.\n5️⃣ **Verifikasi**: Tunggu proses persetujuan sekuritas (biasanya 1–24 jam kerja).\n\nSetelah akun efek dan RDN kamu aktif, akun langsung siap didaftarkan ke program kemitraan Algrow Capital!";
         }
 
         return match($winner) {
@@ -566,11 +598,11 @@ FALLBACK;
 
             'modal' => "Tenang, **kamu tidak perlu keluar modal sama sekali — Rp 0.** 🎉\n\nSeluruh dana untuk pemesanan saham IPO disiapkan 100% oleh Algrow Capital. Kamu cuma perlu menyediakan akun sekuritas (Stockbit/Ajaib) yang aktif dan terverifikasi. Setelah saham listing dan dijual di harga terbaik, profit bersihnya langsung dibagi hasil ke rekening kamu secara transparan. Tidak ada risiko kehilangan uang pribadi sama sekali.",
 
-            'join' => "Cara gabung ke **Algrow Capital** itu gampang banget:\n\n1️⃣ Klik tombol **Gabung Sekarang** di website ini\n2️⃣ Pilih **Mitra Baru Algrow Capital**\n3️⃣ Isi formulir data diri + info akun sekuritas (username, password, PIN)\n4️⃣ Setelah submit, kamu langsung diarahkan ke **WhatsApp Admin 087822421207** untuk konfirmasi & proses approval\n\n*Seluruh proses gratis, tanpa biaya pendaftaran apapun.* 👍",
+            'join' => "Untuk panduan buat akun dan bergabung di **Algrow Capital**, alurnya terdiri dari 2 langkah mudah:\n\n1️⃣ **Buat Akun Sekuritas (Stockbit atau Ajaib)**\nDownload aplikasi **Stockbit** atau **Ajaib** di Play Store/App Store. Siapkan e-KTP dan ikuti registrasi pembukaan rekening efek & RDN (gratis, verifikasi 1–24 jam). Untuk rekening bank penampung, gunakan **Bank Jago reguler (kuning)**, bukan Jago Syariah.\n\n2️⃣ **Daftar Kemitraan Algrow Capital**\nSetelah akun sekuritas aktif, klik tombol **Gabung Sekarang** di website ini, lengkapi formulir pendaftaran Mitra Baru, lalu kamu akan otomatis diarahkan ke WhatsApp Admin (**087822421207**) untuk verifikasi data & approval.\n\n*Seluruh proses pendaftaran dan program ini 100% gratis tanpa modal uang pribadi.* Jika kamu sudah punya akun Stockbit/Ajaib yang aktif, bisa langsung lanjut ke langkah ke-2!",
 
-            'sekuritas' => "Belum punya akun sekuritas? Tenang, prosesnya gampang!\n\nDownload **Stockbit** atau **Ajaib** di Play Store / App Store, siapkan e-KTP dan rekening bank pribadi kamu, lalu ikuti panduan buka rekening saham di dalam aplikasinya — isi data diri, foto selfie dengan e-KTP, pilih bank RDN (gratis, tanpa saldo minimum). Proses verifikasi biasanya selesai dalam **1–24 jam kerja**. Setelah akun aktif, langsung bisa didaftarkan ke kemitraan Algrow Capital!",
+            'sekuritas' => "Berikut panduan cara daftar akun sekuritas di **Stockbit** atau **Ajaib** secara online:\n\n1️⃣ **Download Aplikasi**: Unduh aplikasi **Stockbit** atau **Ajaib** di Play Store atau App Store.\n2️⃣ **Registrasi Akun**: Buka aplikasi, lalu daftar dengan nomor HP dan email aktif kamu.\n3️⃣ **Buka Rekening Efek & RDN**: Masuk ke menu pembukaan rekening saham, siapkan **e-KTP fisik**, ambil foto selfie verifikasi, dan isi data diri.\n4️⃣ **Pilih Bank RDN**: Pilih rekening dana nasabah. Di Stockbit, disarankan terhubung dengan **Bank Jago reguler (warna kuning)**, bukan syariah.\n5️⃣ **Verifikasi**: Tunggu proses persetujuan sekuritas (biasanya 1–24 jam kerja).\n\nSetelah akun efek dan RDN kamu aktif, akun langsung siap didaftarkan ke program kemitraan Algrow Capital!",
 
-            'aplikasi' => "Algrow Capital saat ini resmi menggunakan **2 platform sekuritas**:\n\n📱 **Stockbit** — PT Stockbit Sekuritas Digital\n📱 **Ajaib** — PT Ajaib Sekuritas Asia\n\nKeduanya terdaftar & diawasi OJK dan IDX, tersedia di Android dan iOS, pendaftaran 100% online, dan mendukung fitur e-IPO untuk pemesanan saham perdana.",
+            'aplikasi' => "Algrow Capital saat ini resmi menggunakan **2 platform sekuritas**:\n\n📱 **Stockbit** — PT Stockbit Sekuritas Digital\n📱 **Ajaib** — PT Ajaib Sekuritas Asia\n\nKeduanya terdaftar & diawasi OJK dan IDX, tersedia di Android dan iOS, pendaftaran 100% online, dan mendukung fitur e-IPO untuk pemesanan saham perdana. Untuk rekening penampung transaksi, pastikan menggunakan **Bank Jago reguler (kuning)** ya, bukan Jago Syariah.",
 
             'syarat' => "Syarat jadi mitra Algrow Capital simpel banget:\n\n✅ WNI minimal **17 tahun** + punya e-KTP\n✅ Akun sekuritas aktif di **Stockbit atau Ajaib**\n✅ Rekening bank pribadi atas nama sendiri\n✅ WhatsApp & email aktif\n\nSudah punya semua? Langsung daftar aja sekarang!",
 
