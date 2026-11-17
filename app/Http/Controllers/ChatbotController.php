@@ -360,6 +360,35 @@ PROMPT;
             }
         }
 
+        // ─── AMBIGUITY DETECTION ───────────────────────────────────────────────
+        // Detect inherently ambiguous queries: words that could mean "daftar akun sekuritas"
+        // OR "daftar bergabung ke algrow" with no clear context either way.
+
+        // Ambiguous trigger keywords (generic, context-free)
+        $ambiguousKeywords = ['daftar', 'buat akun', 'bikin akun', 'buka akun', 'cara daftar', 'mau daftar', 'gimana daftar', 'cara bikin akun', 'cara buat akun', 'panduan daftar'];
+        $isAmbiguousQuery = false;
+        foreach ($ambiguousKeywords as $kw) {
+            if (str_contains($q, $kw)) {
+                $isAmbiguousQuery = true;
+                break;
+            }
+        }
+
+        // Clear disambiguators for sekuritas
+        $hasSekuritasHint = str_contains($q, 'sekuritas') || str_contains($q, 'stockbit') ||
+                            str_contains($q, 'ajaib') || str_contains($q, 'rdn') ||
+                            str_contains($q, 'rekening saham') || str_contains($q, 'rekening dana');
+
+        // Clear disambiguators for join/algrow
+        $hasJoinHint = str_contains($q, 'algrow') || str_contains($q, 'mitra') ||
+                       str_contains($q, 'gabung') || str_contains($q, 'join') ||
+                       str_contains($q, 'program') || str_contains($q, 'komunitas');
+
+        // Ambiguous: query has generic daftar/akun keyword but no hint which direction
+        if ($isAmbiguousQuery && !$hasSekuritasHint && !$hasJoinHint) {
+            return $this->ambiguousResponse();
+        }
+
         // Special: greeting must win outright only if score >= 2 (avoid false greeting on e.g. "halo cara daftar")
         // If greeting ties with another, prefer the other topic
         if ($winner === 'greeting' && $winnerScore <= 2) {
@@ -405,27 +434,27 @@ PROMPT;
             return $this->outOfScopeResponse();
         }
 
-        // ─── RESPONSES (Clean, natural paragraphs without stiff bullet points) ──────
+        // ─── RESPONSES (Varied format: mix of paragraphs, structured, short & punchy) ──
         return match($winner) {
-            'other_sekuritas' => "Pertanyaan yang sangat bagus! Sekuritas seperti IPOT (Indo Premier Sekuritas), Mirae Asset Sekuritas, Mandiri Sekuritas (MOST), BNI Sekuritas (BIONS), hingga BCA Sekuritas memang nama-nama besar dan sangat terpercaya di pasar modal Indonesia.\n\nNamun untuk program kemitraan IPO saham di Algrow Capital saat ini, kami secara khusus memfokuskan kerja sama pada platform **Stockbit** dan **Ajaib**. Hal ini dikarenakan proses pembukaan rekening di kedua platform tersebut 100% online tanpa berkas fisik, tanpa saldo minimal awal dan bebas biaya administrasi bulanan RDN, serta fitur antarmuka e-IPO di smartphone-nya sangat cepat dan terintegrasi mulus dengan sistem alokasi kolektif kami. Sekuritas lain seperti IPOT memiliki antarmuka dan alur verifikasi internal yang berbeda sehingga saat ini belum kami integrasikan. Jadi untuk saat ini, kamu tetap disarankan menggunakan akun Stockbit atau Ajaib ya agar bisa langsung berpartisipasi!",
+            'other_sekuritas' => "Pertanyaan bagus! Sekuritas seperti IPOT, Mirae Asset, Mandiri Sekuritas (MOST), BNI Sekuritas (BIONS), hingga BCA Sekuritas memang besar dan terpercaya di pasar modal Indonesia.\n\nTapi untuk program kemitraan IPO di Algrow Capital, saat ini kami hanya mendukung **Stockbit** dan **Ajaib**. Alasannya simpel — dua platform ini 100% online (tanpa berkas fisik), tanpa biaya admin RDN bulanan, verifikasi cepat, dan paling mulus diintegrasikan ke sistem alokasi IPO kolektif kami. Sekuritas lain punya alur teknis berbeda yang belum kami support. Ke depannya mungkin bisa berkembang, tapi untuk sekarang tetap pakai Stockbit atau Ajaib ya!",
 
-            'jago' => "Bank Jago memang bisa menjadi salah satu pilihan rekening bank pendamping, namun ada satu hal **sangat penting** yang perlu kamu perhatikan: Bank Jago punya **dua versi aplikasi** yang berbeda — yaitu **Jago Biasa (ikon kuning)** dan **Jago Syariah (ikon hijau)**.\n\nUntuk kemitraan di Algrow Capital, kamu **wajib menggunakan Jago Biasa (kuning)**, bukan Jago Syariah. Ini karena RDN dan mekanisme pemesanan saham IPO hanya kompatibel dengan Jago versi reguler. Jadi pastikan saat download atau daftar, kamu pilih aplikasi **Jago** yang berlogo kuning ya, bukan yang versi syariah/hijau. Kalau salah pilih, akun tidak bisa digunakan untuk program kemitraan IPO ini.",
+            'jago' => "⚠️ **Perhatian penting soal Bank Jago!**\n\nBank Jago punya **2 versi aplikasi** yang beda:\n— **Jago Biasa** → ikon **kuning** ✅ (ini yang dipakai)\n— **Jago Syariah** → ikon **hijau** ❌ (tidak kompatibel)\n\nPastikan kamu download dan daftar **Jago yang ikonnya kuning (reguler)**, bukan yang syariah/hijau. Kalau salah pilih, akun tidak bisa digunakan untuk program kemitraan IPO ini.",
 
-            'modal' => "Kamu sama sekali **tidak perlu mengeluarkan modal sepeserpun alias 100% gratis (Rp 0)**! Seluruh kebutuhan dana untuk pemesanan dan pembelian saham IPO akan disediakan dan ditanggung sepenuhnya oleh pihak Algrow Capital.\n\nPeran kamu sebagai mitra cukup menyediakan akun sekuritas (Stockbit atau Ajaib) yang sudah aktif dan terverifikasi untuk menerima alokasi penjatahan saham IPO tersebut. Ketika saham yang dipesan sudah resmi melantai di bursa efek (listing) dan dijual pada momentum harga terbaik, seluruh keuntungan bersihnya langsung kita bagi hasil secara transparan tanpa ada risiko kerugian modal pribadi untuk kamu. Jadi kamu bisa ikut serta dengan aman, nyaman, dan tenang tanpa perlu khawatir boncos!",
+            'modal' => "Tenang, **kamu tidak perlu keluar modal sama sekali — Rp 0.** 🎉\n\nSeluruh dana untuk pemesanan saham IPO disiapkan 100% oleh Algrow Capital. Kamu cuma perlu menyediakan akun sekuritas (Stockbit/Ajaib) yang aktif dan terverifikasi. Setelah saham listing dan dijual di harga terbaik, profit bersihnya langsung dibagi hasil ke rekening kamu secara transparan. Tidak ada risiko kehilangan uang pribadi sama sekali.",
 
-            'join' => "Untuk bergabung menjadi mitra Algrow Capital caranya sangat mudah dan cepat! Kamu cukup menekan tombol **Gabung Sekarang** yang ada di website ini, kemudian pilih pendaftaran Mitra Baru Algrow Capital. Setelah itu, lengkapi formulir pendaftaran dengan data diri dan informasi akun sekuritas kamu (Stockbit atau Ajaib) seperti username, password, dan PIN sekuritas yang diperlukan untuk pemesanan IPO.\n\nBegitu formulir berhasil dikirim, sistem akan secara otomatis mengarahkan kamu ke WhatsApp Admin resmi kami di nomor **087822421207** untuk konfirmasi data dan proses persetujuan (approval) oleh admin. Seluruh proses pendaftaran ini sepenuhnya gratis tanpa dipungut biaya apapun.",
+            'join' => "Cara gabung ke **Algrow Capital** itu gampang banget:\n\n1️⃣ Klik tombol **Gabung Sekarang** di website ini\n2️⃣ Pilih **Mitra Baru Algrow Capital**\n3️⃣ Isi formulir data diri + info akun sekuritas (username, password, PIN)\n4️⃣ Setelah submit, kamu langsung diarahkan ke **WhatsApp Admin 087822421207** untuk konfirmasi & proses approval\n\n*Seluruh proses gratis, tanpa biaya pendaftaran apapun.* 👍",
 
-            'sekuritas' => "Bagi kamu yang belum memiliki akun sekuritas, proses pembuatannya sangat mudah dan bisa diselesaikan langsung dari smartphone kamu. Pertama, unduh aplikasi **Stockbit** atau **Ajaib** melalui Google Play Store atau App Store. Siapkan e-KTP dan nomor rekening bank pribadi kamu, lalu ikuti instruksi pembukaan rekening saham di dalam aplikasi dengan mengisi identitas dan mengunggah foto selfie bersama e-KTP.\n\nPilih bank Rekening Dana Nasabah (RDN) yang gratis dan tanpa saldo minimum. Setelah proses verifikasi oleh pihak sekuritas selesai (biasanya memerlukan waktu 1 hingga 24 jam kerja), akun sekuritas kamu sudah aktif dan siap didaftarkan ke kemitraan Algrow Capital.",
+            'sekuritas' => "Belum punya akun sekuritas? Tenang, prosesnya gampang!\n\nDownload **Stockbit** atau **Ajaib** di Play Store / App Store, siapkan e-KTP dan rekening bank pribadi kamu, lalu ikuti panduan buka rekening saham di dalam aplikasinya — isi data diri, foto selfie dengan e-KTP, pilih bank RDN (gratis, tanpa saldo minimum). Proses verifikasi biasanya selesai dalam **1–24 jam kerja**. Setelah akun aktif, langsung bisa didaftarkan ke kemitraan Algrow Capital!",
 
-            'aplikasi' => "Saat ini kemitraan Algrow Capital resmi menggunakan dua aplikasi sekuritas terkemuka di Indonesia, yaitu **Stockbit** (PT Stockbit Sekuritas Digital) dan **Ajaib** (PT Ajaib Sekuritas Asia). Kedua perusahaan sekuritas ini telah berizin resmi dan diawasi langsung oleh Otoritas Jasa Keuangan (OJK) serta Bursa Efek Indonesia (IDX), sehingga keamanan data maupun legalitasnya terjamin.\n\nKami memilih Stockbit dan Ajaib karena aplikasinya sangat ramah pengguna, proses pembuatan RDN serba online, dan fitur e-IPO di smartphone sangat cepat untuk eksekusi alokasi saham perdana.",
+            'aplikasi' => "Algrow Capital saat ini resmi menggunakan **2 platform sekuritas**:\n\n📱 **Stockbit** — PT Stockbit Sekuritas Digital\n📱 **Ajaib** — PT Ajaib Sekuritas Asia\n\nKeduanya terdaftar & diawasi OJK dan IDX, tersedia di Android dan iOS, pendaftaran 100% online, dan mendukung fitur e-IPO untuk pemesanan saham perdana.",
 
-            'syarat' => "Persyaratan untuk menjadi mitra di Algrow Capital sangat praktis dan tidak memberatkan. Kamu hanya perlu merupakan Warga Negara Indonesia (WNI) berusia minimal 17 tahun dan memiliki e-KTP yang valid. Selain itu, kamu wajib memiliki akun sekuritas yang sudah aktif dan terverifikasi di Stockbit atau Ajaib, nomor rekening bank pribadi atas nama sendiri untuk pencairan dana bagi hasil profit, serta nomor WhatsApp dan email aktif untuk kelancaran komunikasi dan konfirmasi alokasi saham IPO. Jika semua syarat tersebut sudah kamu miliki, kamu bisa langsung mendaftar sekarang juga!",
+            'syarat' => "Syarat jadi mitra Algrow Capital simpel banget:\n\n✅ WNI minimal **17 tahun** + punya e-KTP\n✅ Akun sekuritas aktif di **Stockbit atau Ajaib**\n✅ Rekening bank pribadi atas nama sendiri\n✅ WhatsApp & email aktif\n\nSudah punya semua? Langsung daftar aja sekarang!",
 
-            'bagi_hasil' => "Sistem bagi hasil dan mekanisme kerja di Algrow Capital dirancang secara transparan, adil, dan saling menguntungkan. Setelah akun sekuritas kamu terhubung dan disetujui, tim profesional kami akan menyalurkan modal dana penuh untuk memesan saham IPO berpotensi tinggi melalui akun kamu.\n\nKetika emiten resmi mencatatkan sahamnya di bursa efek (listing) dan mencapai kenaikan harga optimal, saham akan direalisasikan keuntungannya. Profit bersih yang didapatkan akan langsung ditransfer ke rekening bank pribadi kamu sesuai dengan persentase bagi hasil yang telah disepakati bersama tanpa potongan tersembunyi.",
+            'bagi_hasil' => "Begini cara kerjanya:\n\nSetelah akun sekuritas kamu terdaftar dan disetujui, Algrow Capital menyiapkan **100% modal** untuk memesan saham IPO potensial melalui akun kamu. Ketika saham resmi listing di bursa dan mencapai harga optimal, saham dijual dan **profit bersihnya langsung ditransfer ke rekening bank kamu** sesuai rasio bagi hasil yang sudah disepakati — tanpa potongan tersembunyi, tanpa risiko modal pribadi.",
 
-            'kontak' => "Jika kamu membutuhkan bantuan langsung, ingin berkonsultasi, atau memerlukan pendampingan saat mendaftar, tim Customer Support Algrow Capital siap membantu kamu dengan senang hati. Kamu bisa langsung menghubungi Admin Support resmi kami melalui WhatsApp di nomor **087822421207**. Kami siap memandu kamu dari awal hingga akun kemitraan kamu aktif dan siap menghasilkan profit bersama!",
+            'kontak' => "Butuh bantuan langsung? 👋\n\n📲 **WhatsApp Admin:** 087822421207\n\nTim kami siap memandu dari nol sampai akun kemitraan kamu aktif!",
 
-            'greeting' => "Halo! Selamat datang di layanan asisten resmi **Algrow Capital**! Saya siap membantu dan menjawab semua pertanyaan kamu seputar panduan mendaftar kemitraan, pilihan sekuritas seperti Stockbit dan Ajaib, penjelasan industri sekuritas di Indonesia, maupun sistem kemitraan IPO 100% tanpa modal pribadi. Ada yang bisa saya bantu atau jelaskan untuk kamu hari ini?",
+            'greeting' => "Halo! 👋 Selamat datang di **Algrow Capital**!\n\nAda yang bisa saya bantu hari ini? Misalnya:\n— Cara gabung / daftar mitra\n— Panduan buka akun sekuritas (Stockbit/Ajaib)\n— Sistem bagi hasil & modal\n— Syarat kemitraan\n\nSilakan tanyakan langsung ya!",
 
             default => $this->outOfScopeResponse(),
         };
@@ -437,5 +466,13 @@ PROMPT;
     private function outOfScopeResponse(): string
     {
         return "Mohon maaf ya, sebagai asisten khusus Algrow Capital, tugas saya adalah membantu menjawab pertanyaan seputar pendaftaran kemitraan, pilihan sekuritas seperti Stockbit dan Ajaib, informasi industri sekuritas di Indonesia, serta mekanisme saham IPO tanpa modal. Apabila kamu memiliki pertanyaan seputar cara mendaftar, syarat kemitraan, atau ingin berkonsultasi lebih lanjut, silakan tanyakan langsung di sini atau hubungi WhatsApp Admin kami di nomor **087822421207** ya!";
+    }
+
+    /**
+     * Clarifying question when intent is ambiguous (join vs sekuritas).
+     */
+    private function ambiguousResponse(): string
+    {
+        return "Hm, boleh saya tanyakan dulu nih biar bisa jawab yang tepat 😊\n\nMaksudnya **\"daftar\"** di sini yang mana:\n\n**A.** Daftar / buka **akun sekuritas** (Stockbit atau Ajaib) — untuk yang belum punya rekening saham\n**B.** Daftar **bergabung sebagai Mitra** ke program Algrow Capital\n\nTulis aja **A** atau **B**, atau ceritain lebih detail ya!";
     }
 }
