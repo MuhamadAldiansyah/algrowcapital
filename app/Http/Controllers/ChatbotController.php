@@ -168,7 +168,11 @@ LINGKUP PENGETAHUAN & ATURAN MENJAWAB:
 4. CARA BERGABUNG & SYARAT:
    - Syarat: WNI minimal 17 tahun, punya e-KTP, punya akun sekuritas aktif (Stockbit / Ajaib), dan rekening bank pribadi untuk pencairan bagi hasil.
    - Cara bergabung: Klik tombol "Daftar / Gabung Sekarang" di website, pilih Mitra Baru Algrow Capital, isi data diri dan akun sekuritas, lalu diarahkan ke WhatsApp Admin 087822421207 untuk konfirmasi approval.
-5. BATASAN TOPIK:
+5. BANK JAGO (SANGAT PENTING — WAJIB DISAMPAIKAN):
+   - Bank Jago memiliki DUA versi aplikasi yang berbeda: Jago Biasa (ikon warna KUNING, reguler) dan Jago Syariah (ikon warna HIJAU).
+   - Untuk kemitraan Algrow Capital, mitra HARUS menggunakan Jago Biasa (kuning/reguler), BUKAN Jago Syariah. RDN saham IPO hanya kompatibel dengan Jago versi reguler.
+   - Jika ada yang bertanya tentang Bank Jago, selalu ingatkan dengan tegas bahwa harus pilih Jago Biasa (kuning), bukan Jago Syariah.
+6. BATASAN TOPIK:
    - Tetap fokus pada pendaftaran kemitraan Algrow Capital, sekuritas saham IPO, skema modal Rp 0, dan bagi hasil. Tolak topik di luar investasi/pendaftaran (politik, resep masakan, cuaca, dll) dengan ramah.
 PROMPT;
     }
@@ -203,7 +207,17 @@ PROMPT;
                 'context_boost' => ['ipot', 'sekuritas', 'saham', 'broker', 'aplikasi', 'mirae'],
             ],
 
-            // TOPIC B — Daftar / Panduan Akun Sekuritas (Stockbit / Ajaib / RDN)
+            // TOPIC B — Bank Jago (Biasa/Kuning vs Syariah)
+            'jago' => [
+                'signals' => [
+                    'jago', 'bank jago', 'jago biasa', 'jago syariah', 'jago kuning', 'jago hijau',
+                    'buka jago', 'daftar jago', 'pakai jago', 'pake jago', 'bikin jago',
+                    'rdn jago', 'rekening jago', 'jago rdn',
+                ],
+                'context_boost' => ['jago', 'bank', 'rekening', 'rdn', 'syariah'],
+            ],
+
+            // TOPIC C — Daftar / Panduan Akun Sekuritas (Stockbit / Ajaib / RDN)
             'sekuritas' => [
                 'signals' => [
                     'stockbit', 'ajaib', 'sekuritas', 'rdn', 'rekening dana nasabah',
@@ -211,6 +225,7 @@ PROMPT;
                     'daftar sekuritas', 'bikin sekuritas', 'buat sekuritas',
                     'cara stockbit', 'cara ajaib', 'download stockbit', 'download ajaib',
                     'install stockbit', 'install ajaib',
+                    'jago', 'bank jago',
                 ],
                 'context_boost' => ['daftar', 'buat', 'bikin', 'cara', 'gimana', 'panduan', 'langkah', 'proses', 'syarat', 'buka'],
             ],
@@ -338,6 +353,14 @@ PROMPT;
             }
         }
 
+        // Jago topic: if question mentions jago, prioritize it over sekuritas
+        if (isset($scores['jago']) && $scores['jago'] >= 2) {
+            if (str_contains($q, 'jago')) {
+                $winner = 'jago';
+                $winnerScore = $scores['jago'];
+            }
+        }
+
         // Other sekuritas (IPOT, Mirae, Mandiri, etc.) must win if broker names or "kenapa" appear
         if (isset($scores['other_sekuritas']) && $scores['other_sekuritas'] >= 2) {
             if (str_contains($q, 'ipot') || str_contains($q, 'mirae') || str_contains($q, 'mandiri') || str_contains($q, 'bions') || str_contains($q, 'bca sekuritas') || str_contains($q, 'sekuritas lain') || str_contains($q, 'kenapa')) {
@@ -375,6 +398,8 @@ PROMPT;
         // ─── RESPONSES (Clean, natural paragraphs without stiff bullet points) ──────
         return match($winner) {
             'other_sekuritas' => "Pertanyaan yang sangat bagus! Sekuritas seperti IPOT (Indo Premier Sekuritas), Mirae Asset Sekuritas, Mandiri Sekuritas (MOST), BNI Sekuritas (BIONS), hingga BCA Sekuritas memang nama-nama besar dan sangat terpercaya di pasar modal Indonesia.\n\nNamun untuk program kemitraan IPO saham di Algrow Capital saat ini, kami secara khusus memfokuskan kerja sama pada platform **Stockbit** dan **Ajaib**. Hal ini dikarenakan proses pembukaan rekening di kedua platform tersebut 100% online tanpa berkas fisik, tanpa saldo minimal awal dan bebas biaya administrasi bulanan RDN, serta fitur antarmuka e-IPO di smartphone-nya sangat cepat dan terintegrasi mulus dengan sistem alokasi kolektif kami. Sekuritas lain seperti IPOT memiliki antarmuka dan alur verifikasi internal yang berbeda sehingga saat ini belum kami integrasikan. Jadi untuk saat ini, kamu tetap disarankan menggunakan akun Stockbit atau Ajaib ya agar bisa langsung berpartisipasi!",
+
+            'jago' => "Bank Jago memang bisa menjadi salah satu pilihan rekening bank pendamping, namun ada satu hal **sangat penting** yang perlu kamu perhatikan: Bank Jago punya **dua versi aplikasi** yang berbeda — yaitu **Jago Biasa (ikon kuning)** dan **Jago Syariah (ikon hijau)**.\n\nUntuk kemitraan di Algrow Capital, kamu **wajib menggunakan Jago Biasa (kuning)**, bukan Jago Syariah. Ini karena RDN dan mekanisme pemesanan saham IPO hanya kompatibel dengan Jago versi reguler. Jadi pastikan saat download atau daftar, kamu pilih aplikasi **Jago** yang berlogo kuning ya, bukan yang versi syariah/hijau. Kalau salah pilih, akun tidak bisa digunakan untuk program kemitraan IPO ini.",
 
             'modal' => "Kamu sama sekali **tidak perlu mengeluarkan modal sepeserpun alias 100% gratis (Rp 0)**! Seluruh kebutuhan dana untuk pemesanan dan pembelian saham IPO akan disediakan dan ditanggung sepenuhnya oleh pihak Algrow Capital.\n\nPeran kamu sebagai mitra cukup menyediakan akun sekuritas (Stockbit atau Ajaib) yang sudah aktif dan terverifikasi untuk menerima alokasi penjatahan saham IPO tersebut. Ketika saham yang dipesan sudah resmi melantai di bursa efek (listing) dan dijual pada momentum harga terbaik, seluruh keuntungan bersihnya langsung kita bagi hasil secara transparan tanpa ada risiko kerugian modal pribadi untuk kamu. Jadi kamu bisa ikut serta dengan aman, nyaman, dan tenang tanpa perlu khawatir boncos!",
 
