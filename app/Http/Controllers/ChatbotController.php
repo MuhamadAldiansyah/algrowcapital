@@ -46,7 +46,7 @@ class ChatbotController extends Controller
         }
 
         // 2. High-Precision Local Knowledge Base Guardrail Engine (Strict & Instant Fallback)
-        $localResponse = $this->strictKnowledgeEngine($userMessage);
+        $localResponse = $this->strictKnowledgeEngine($userMessage, $history);
 
         return response()->json([
             'success' => true,
@@ -193,19 +193,94 @@ FALLBACK;
      * Scores each topic by counting matching intent signals in the user's message.
      * Returns response for the highest-scoring topic. Far more robust than exact keyword matching.
      */
-    private function strictKnowledgeEngine(string $text): string
+    private function strictKnowledgeEngine(string $text, array $history = []): string
     {
         $q = strtolower(trim($text));
-        // Normalize common typos & slang
-        $q = str_replace(
-            ['gmn', 'gimn', 'bgmn', 'bgmna', 'yg', 'utk', 'tuk', 'tp', 'tapi',
-             'kalo', 'kalau', 'klu', 'kl ', 'udah', 'udh', 'sdh', 'bisa', 'bs ',
-             'bantu', 'tolong', 'tlng', 'jelaskan', 'jelasin', 'cerita', 'ceritain'],
-            ['gimana', 'gimana', 'gimana', 'gimana', 'yang', 'untuk', 'untuk', 'tapi', 'tapi',
-             'kalau', 'kalau', 'kalau', 'kalau ', 'sudah', 'sudah', 'sudah', 'bisa', 'bisa ',
-             'bantu', 'tolong', 'tolong', 'jelaskan', 'jelaskan', 'cerita', 'cerita'],
-            $q
-        );
+        // Normalize common typos & slang — gunakan word-boundary (\b) agar tidak
+        // mengganti substring (mis. 'udah' di dalam 'sudah')
+        $slangMap = [
+            '/\b(gmn|gimn|bgmn|bgmna)\b/i'   => 'gimana',
+            '/\b(yg)\b/i'                      => 'yang',
+            '/\b(utk|tuk)\b/i'                => 'untuk',
+            '/\b(tp|tapi)\b/i'                => 'tapi',
+            '/\b(kalo|klu)\b/i'               => 'kalau',
+            '/\b(udah|udh|sdh)\b/i'           => 'sudah',
+            '/\b(bs)\b/i'                      => 'bisa',
+            '/\b(tlng)\b/i'                    => 'tolong',
+            '/\b(jelasin)\b/i'                 => 'jelaskan',
+            '/\b(ceritain)\b/i'                => 'cerita',
+            '/\b(blm|lum)\b/i'                => 'belum',
+            '/\b(gk|ga|gak|engga|enggak)\b/i' => 'tidak',
+            '/\b(mau|pengen|ingin)\b/i'        => 'mau',
+        ];
+        $q = preg_replace(array_keys($slangMap), array_values($slangMap), $q);
+
+        // ─── CONVERSATIONAL QUICK-REPLIES (Option A / Option B / Sudah / Belum / Verifikasi) ──
+        $clean = trim(preg_replace('/[.,!?]/', '', $q));
+
+        if ($clean === 'sudah') {
+            return "Bagus sekali! 🎉 Berarti akun sekuritas dan RDN kamu sudah siap. Sekarang kamu bisa langsung melanjutkan ke proses pendaftaran kemitraan Algrow Capital:\n\n1️⃣ Klik tombol **Gabung Sekarang** di website ini\n2️⃣ Isi formulir data diri dan info akun sekuritas kamu\n3️⃣ Setelah kirim formulir, kamu otomatis diarahkan ke WhatsApp Admin (**087822421207**) untuk konfirmasi approval\n\nPendaftarannya 100% gratis dan seluruh modal pemesanan saham IPO disiapkan oleh Algrow Capital. Yuk langsung selesaikan pendaftarannya!";
+        }
+
+        // 1. Jawaban Opsi B (Daftar Bergabung sebagai Mitra Algrow Capital)
+        $optionBPats = [
+            'b', 'opsi b', 'pilih b', 'yang b', 'pilihan b', 'jawaban b', 'b aja', 'b dong',
+            'b min', 'b kak', 'b mas', 'b bro', 'saya pilih b', 'mau yang b', 'mau b', 'ikut b',
+            '2', 'nomor 2', 'no 2', 'opsi 2', 'pilih 2', 'yang 2',
+            'daftar mitra', 'daftar jadi mitra', 'gabung mitra', 'gabung algrow', 'daftar algrow',
+        ];
+        if (in_array($clean, $optionBPats) || preg_match('/^(saya\s+)?(pilih|mau|ikut|ambil)?\s*(opsi|yang|nomor)?\s*b$/i', $clean)) {
+            return "Mantap! Untuk mendaftar dan bergabung sebagai **Mitra Algrow Capital**, ikuti langkah-langkah berikut:\n\n1️⃣ **Klik Tombol Gabung Sekarang**: Tekan tombol **Gabung Sekarang / Daftar** di website ini.\n2️⃣ **Pilih Pendaftaran Mitra Baru**: Isi formulir pendaftaran kemitraan dengan data diri dan informasi akun sekuritas kamu (username, password, dan PIN sekuritas yang diperlukan untuk pemesanan IPO).\n3️⃣ **Konfirmasi ke WhatsApp Admin**: Setelah formulir terkirim, sistem akan otomatis mengarahkan kamu ke WhatsApp Admin resmi kami di nomor **087822421207** untuk verifikasi dan proses persetujuan (approval).\n\n*Program ini 100% tanpa modal pribadi (Rp 0) dan bebas biaya pendaftaran.* Pastikan akun sekuritasmu (Stockbit/Ajaib) sudah aktif ya!";
+        }
+
+        // 2. Jawaban Opsi A (Daftar / Buka Akun Sekuritas Stockbit atau Ajaib)
+        $optionAPats = [
+            'a', 'opsi a', 'pilih a', 'yang a', 'pilihan a', 'jawaban a', 'a aja', 'a dong',
+            'a min', 'a kak', 'a mas', 'a bro', 'saya pilih a', 'mau yang a', 'mau a', 'ikut a',
+            '1', 'nomor 1', 'no 1', 'opsi 1', 'pilih 1', 'yang 1',
+            'daftar sekuritas', 'buka sekuritas', 'buat sekuritas', 'buka akun sekuritas',
+        ];
+        if (in_array($clean, $optionAPats) || preg_match('/^(saya\s+)?(pilih|mau|ikut|ambil)?\s*(opsi|yang|nomor)?\s*a$/i', $clean)) {
+            return "Siap! Untuk membuat dan membuka **akun sekuritas (Stockbit atau Ajaib)**, prosesnya 100% online dan sangat mudah:\n\n1️⃣ **Download Aplikasi**: Unduh aplikasi **Stockbit** atau **Ajaib** di Google Play Store atau App Store.\n2️⃣ **Registrasi Akun**: Buka aplikasi, lalu daftar dengan nomor HP dan email aktif kamu.\n3️⃣ **Buka Rekening Efek & RDN**: Masuk ke menu pembukaan rekening saham, siapkan **e-KTP fisik**, ambil foto selfie verifikasi, dan isi data diri.\n4️⃣ **Pilih Bank RDN**: Pilih rekening dana nasabah. Di Stockbit, sangat disarankan terhubung dengan **Bank Jago reguler (warna kuning)**, bukan syariah.\n5️⃣ **Tunggu Verifikasi**: Verifikasi sekuritas biasanya selesai dalam **1–24 jam kerja**.\n\nSetelah rekening efek dan RDN kamu aktif, kamu bisa langsung mendaftarkan akunmu ke program kemitraan Algrow Capital!";
+        }
+
+        // 3. Jawaban Konfirmasi "Sudah / Selesai / Aktif"
+        $sudahPats = [
+            'sudah', 'udah', 'sdh', 'udh', 'sudah aktif', 'udah aktif', 'sudah selesai', 'udah selesai',
+            'sudah siap', 'udah siap', 'siap', 'sudah ada', 'udah ada', 'sudah punya', 'udah punya',
+            'sudah min', 'sudah kak', 'udah min', 'udah kak', 'sudah bro', 'udah bro',
+        ];
+        if (in_array($clean, $sudahPats)) {
+            return "Bagus sekali! 🎉 Berarti akun sekuritas dan RDN kamu sudah siap. Sekarang kamu bisa langsung melanjutkan ke proses pendaftaran kemitraan Algrow Capital:\n\n1️⃣ Klik tombol **Gabung Sekarang** di website ini\n2️⃣ Isi formulir data diri dan info akun sekuritas kamu\n3️⃣ Setelah kirim formulir, kamu otomatis diarahkan ke WhatsApp Admin (**087822421207**) untuk konfirmasi approval\n\nPendaftarannya 100% gratis dan seluruh modal pemesanan saham IPO disiapkan oleh Algrow Capital. Yuk langsung selesaikan pendaftarannya!";
+        }
+
+        // 4. Jawaban Konfirmasi "Belum / Belum Aktif / Belum Selesai"
+        $belumPats = [
+            'belum', 'blm', 'lum', 'belum aktif', 'blm aktif', 'belum selesai', 'blm selesai',
+            'belum min', 'belum kak', 'blm min', 'blm kak', 'belum bro', 'blm bro',
+        ];
+        if (in_array($clean, $belumPats)) {
+            return "Tidak masalah, santai aja! Berarti proses pembukaan rekening sekuritasnya perlu diselesaikan terlebih dahulu ya. 👍\n\nApakah saat ini kamu **masih dalam proses verifikasi** (sedang menunggu 1–24 jam kerja dari sekuritas), atau **belum mengajukan pembukaan rekening sama sekali**?";
+        }
+
+        // 5. Jawaban Status "Masih Verifikasi / Menunggu"
+        $verifPats = [
+            'masih verifikasi', 'lagi verifikasi', 'masih proses', 'lagi proses', 'menunggu',
+            'nunggu', 'pending', 'dalam proses', 'nunggu verifikasi', 'nunggu aktif',
+            'masih nunggu', 'lagi nunggu',
+        ];
+        if (in_array($clean, $verifPats) || str_contains($clean, 'masih verifikasi') || str_contains($clean, 'nunggu verifikasi')) {
+            return "Oke, berarti pengajuan rekening efek kamu sudah dikirim dan sedang dalam proses verifikasi pihak sekuritas. Biasanya proses ini memakan waktu **1–24 jam kerja**.\n\nSambil menunggu akun aktif, pastikan kamu juga sudah menyiapkan **Bank Jago reguler (kuning)** ya. Begitu akun sekuritasmu aktif, langsung kabarin di sini atau langsung daftar ke admin WhatsApp kami!";
+        }
+
+        // 6. Jawaban Status "Belum Mengajukan / Belum Daftar Sekuritas"
+        $belumAjukanPats = [
+            'belum mengajukan', 'belum ajukan', 'belum daftar', 'belum buka', 'belum punya',
+            'blm punya', 'blm daftar', 'blm buka', 'belum bikin', 'blm bikin',
+        ];
+        if (in_array($clean, $belumAjukanPats)) {
+            return "Kalau belum mengajukan pembukaan rekening saham, kamu bisa langsung download aplikasi **Stockbit** atau **Ajaib** di Play Store atau App Store.\n\nSiapkan e-KTP fisik dan rekening bank pribadi kamu, lalu ikuti langkah pembukaan rekening efek di aplikasinya — 100% online dan gratis. Nanti kalau akun sudah disetujui, langsung kabarin ya agar kita bantu daftarkan ke kemitraan Algrow Capital!";
+        }
 
         // ─── CONTEXT AWARENESS: Deteksi apakah user SUDAH PUNYA akun ─────────────
         // Sinyal "sudah punya / sudah ada / sudah buka" akun sekuritas
