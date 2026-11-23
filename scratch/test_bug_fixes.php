@@ -31,17 +31,19 @@ $tests = [
 
     // ── Regresi: A/B short replies masih harus jalan ─────────────────────────────
     'b'                                               => 'Mitra Algrow Capital',
-    'a'                                               => 'akun sekuritas (Stockbit atau Ajaib)',
+    'a'                                               => 'cukup pilih salah satu',
     'B'                                               => 'Mitra Algrow Capital',
-    'A'                                               => 'akun sekuritas (Stockbit atau Ajaib)',
+    'A'                                               => 'cukup pilih salah satu',
     'pilih b'                                         => 'Mitra Algrow Capital',
-    'opsi a'                                          => 'akun sekuritas (Stockbit atau Ajaib)',
+    'opsi a'                                          => 'cukup pilih salah satu',
 
     // ── Regresi: Preset questions chatbot ────────────────────────────────────────
     'Panduan buat akun gimana?'                       => 'Stockbit',
     'Pakai aplikasi sekuritas apa saja?'              => 'Stockbit',
     'Apakah butuh modal sendiri untuk daftar?'        => 'Rp 0',
-    'Cara daftar akun sekuritas Stockbit atau Ajaib gimana?' => 'Download Aplikasi',
+    'Cara daftar akun sekuritas Stockbit atau Ajaib gimana?' => 'Stockbit',
+    'cara daftar stockbit'                            => 'Bank Jago',
+    'cara daftar ajaib'                               => 'Ajaib',
 ];
 
 $pass = 0;
