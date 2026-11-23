@@ -215,8 +215,73 @@ FALLBACK;
         ];
         $q = preg_replace(array_keys($slangMap), array_values($slangMap), $q);
 
-        // ─── CONVERSATIONAL QUICK-REPLIES (Option A / Option B / Sudah / Belum / Verifikasi) ──
+        // ─── CONVERSATIONAL QUICK-REPLIES & GREETINGS / APPRECIATION ─────────────
         $clean = trim(preg_replace('/[.,!?]/', '', $q));
+
+        // ─── TERIMA KASIH (Thanks / Gratitude) ──────────────────────────────────
+        $thanksWords = [
+            'terima kasih', 'terimakasih', 'makasih', 'makasi', 'mksih', 'tq',
+            'thank you', 'thanks', 'thx', 'tengkyu', 'matur nuwun', 'nuhun', 'syukron'
+        ];
+        $isThanks = false;
+        foreach ($thanksWords as $tw) {
+            if (str_contains($clean, $tw)) {
+                $isThanks = true;
+                break;
+            }
+        }
+
+        // Kata kunci pertanyaan untuk membedakan salam murni vs pertanyaan dengan salam
+        $questionKeywords = [
+            'cara', 'gimana', 'bagaimana', 'apa', 'apakah', 'berapa', 'kenapa',
+            'bisa', 'syarat', 'modal', 'daftar', 'stockbit', 'ajaib', 'jago', 'biaya', 'bagi hasil'
+        ];
+        $hasQuestionSignal = false;
+        foreach ($questionKeywords as $qw) {
+            if (str_contains($clean, $qw)) {
+                $hasQuestionSignal = true;
+                break;
+            }
+        }
+
+        if ($isThanks && !$hasQuestionSignal) {
+            return "Sama-sama! Senang bisa membantu kamu. 😊\n\nJika masih ada hal lain yang ingin ditanyakan seputar pendaftaran mitra, akun sekuritas (Stockbit/Ajaib), atau mekanisme bagi hasil IPO Algrow Capital, langsung tanyakan saja ya. Kamu juga bisa menghubungi WhatsApp Admin resmi kami di **087822421207**.\n\nSemoga sukses selalu!";
+        }
+
+        // ─── SALAM & SAPAAN INTERAKTIF (Greetings) ──────────────────────────────
+        if (!$hasQuestionSignal) {
+            // 1. Salam Islami
+            if (preg_match('/\b(assalamu\s*alaikum|assalamualaikum|samlikum|aslm|assalam)\b/i', $clean)) {
+                return "Wa'alaikumussalam warahmatullahi wabarakatuh! 👋 Selamat datang di **Algrow Capital**.\n\nAda yang bisa saya bantu hari ini seputar program kemitraan saham IPO tanpa modal, panduan buka akun sekuritas (Stockbit / Ajaib), atau alur pendaftaran mitra?";
+            }
+
+            // 2. Salam Waktu (Pagi / Siang / Sore / Malam)
+            if (preg_match('/\b(selamat\s+(pagi|siang|sore|malam)|(pagi|siang|sore|malam)\s+(min|kak|mas|bro|admin))\b/i', $clean) || in_array($clean, ['pagi', 'siang', 'sore', 'malam'])) {
+                return "Halo, selamat datang di **Algrow Capital**! 👋\n\nAda yang bisa saya bantu hari ini seputar program kemitraan saham IPO tanpa modal, panduan registrasi akun sekuritas (Stockbit / Ajaib), atau syarat bergabung menjadi mitra?";
+            }
+
+            // 3. Sapaan Umum & Santai (Halo, Hai, Hey Bro, P, Min, Kak, Admin, dll.)
+            $greetingWords = [
+                'halo', 'hai', 'hi', 'hey', 'hei', 'hello', 'helo',
+                'p', 'ping', 'tes', 'test', 'permisi', 'bro', 'min', 'kak', 'admin', 'bang', 'mas',
+                'apa kabar', 'halo bro', 'hey bro', 'hai bro', 'halo min', 'hai min', 'hey min',
+                'halo kak', 'hai kak', 'halo admin', 'hai admin', 'spada'
+            ];
+            if (in_array($clean, $greetingWords) || preg_match('/^(halo|hai|hey|hei|hello)\s*(bro|min|kak|mas|admin|semua)?$/i', $clean)) {
+                return "Halo! 👋 Selamat datang di **Algrow Capital**!\n\nSaya asisten virtual resmi Algrow Capital. Ada yang bisa saya bantu hari ini? Misalnya:\n— Cara daftar mitra Algrow Capital\n— Panduan buka akun Stockbit (sepaket Bank Jago) atau Ajaib\n— Modal Rp 0 & sistem bagi hasil profit IPO\n— Syarat pendaftaran mitra\n\nSilakan tanyakan langsung ya!";
+            }
+
+            // 4. Acknowledgment Santai (Oke, Sip, Mantap, Siap, Noted)
+            $ackWords = [
+                'oke', 'ok', 'sip', 'mantap', 'oke sip', 'siap min', 'siap kak', 'siap bro',
+                'oke min', 'ok min', 'oke kak', 'ok kak', 'oke bro', 'ok bro',
+                'baik', 'baik min', 'baik kak', 'baik bro', 'noted', 'paham', 'paham min',
+                'ngerti', 'ngerti min', 'siap makasih', 'oke makasih'
+            ];
+            if (in_array($clean, $ackWords)) {
+                return "Siap, mantap! 👍 Jika ada langkah yang kurang jelas atau kamu sudah siap lanjut mendaftar, kabari langsung di sini ya. Kami siap memandu sampai akun kemitraanmu aktif!";
+            }
+        }
 
         if ($clean === 'sudah') {
             return "Bagus sekali! 🎉 Berarti akun sekuritas dan RDN kamu sudah siap. Sekarang kamu bisa langsung melanjutkan ke proses pendaftaran kemitraan Algrow Capital:\n\n1️⃣ Klik tombol **Gabung Sekarang** di website ini\n2️⃣ Isi formulir data diri dan info akun sekuritas kamu\n3️⃣ Setelah kirim formulir, kamu otomatis diarahkan ke WhatsApp Admin (**087822421207**) untuk konfirmasi approval\n\nPendaftarannya 100% gratis dan seluruh modal pemesanan saham IPO disiapkan oleh Algrow Capital. Yuk langsung selesaikan pendaftarannya!";
@@ -253,7 +318,7 @@ FALLBACK;
         // 3. Jawaban Konfirmasi "Sudah / Selesai / Aktif"
         $sudahPats = [
             'sudah', 'udah', 'sdh', 'udh', 'sudah aktif', 'udah aktif', 'sudah selesai', 'udah selesai',
-            'sudah siap', 'udah siap', 'siap', 'sudah ada', 'udah ada', 'sudah punya', 'udah punya',
+            'sudah siap', 'udah siap', 'sudah ada', 'udah ada', 'sudah punya', 'udah punya',
             'sudah min', 'sudah kak', 'udah min', 'udah kak', 'sudah bro', 'udah bro',
         ];
         if (in_array($clean, $sudahPats)) {
@@ -516,10 +581,20 @@ FALLBACK;
             // TOPIC I — Greeting (Exact/near-exact match only)
             'greeting' => [
                 'signals' => [
-                    'halo', 'hai', 'hi', 'hey', 'hei', 'selamat pagi', 'selamat siang',
-                    'selamat sore', 'selamat malam', 'assalamualaikum', 'permisi', 'tes', 'test',
+                    'halo', 'hai', 'hi', 'hey', 'hei', 'hello', 'selamat pagi', 'selamat siang',
+                    'selamat sore', 'selamat malam', 'assalamualaikum', 'assalamu alaikum',
+                    'permisi', 'tes', 'test', 'ping', 'apa kabar', 'hey bro', 'halo bro',
                 ],
-                'context_boost' => [],
+                'context_boost' => ['min', 'admin', 'kak', 'bro'],
+            ],
+
+            // TOPIC K — Terima Kasih / Gratitude
+            'terima_kasih' => [
+                'signals' => [
+                    'terima kasih', 'terimakasih', 'makasih', 'makasi', 'thank you', 'thanks',
+                    'thx', 'tengkyu', 'matur nuwun', 'nuhun', 'syukron', 'sukses selalu',
+                ],
+                'context_boost' => ['bantu', 'bantuan', 'info', 'infonya', 'admin', 'min', 'sangat membantu'],
             ],
         ];
 
@@ -753,7 +828,9 @@ FALLBACK;
 
             'belajar' => "Kabar baiknya — **kamu sama sekali tidak perlu pengalaman saham atau belajar dari nol!** 🎉\n\nAlgrow Capital sepenuhnya mengelola proses analisis, pemilihan saham IPO, dan pemesanan. Tugasmu hanya:\n\n✅ Menyediakan akun sekuritas aktif (Stockbit/Ajaib)\n✅ Memberikan akses untuk proses pemesanan IPO\n✅ Menerima hasil profit yang sudah dibagi sesuai kesepakatan\n\nTim Algrow Capital yang berpengalaman di bidang pasar modal yang mengurus semuanya — dari riset IPO, pemesanan, hingga penjualan saham di harga terbaik. Jadi meski kamu belum pernah beli saham sekalipun, **kamu tetap bisa ikut program ini!**",
 
-            'greeting' => "Halo! 👋 Selamat datang di **Algrow Capital**!\n\nAda yang bisa saya bantu hari ini? Misalnya:\n— Cara gabung / daftar mitra\n— Panduan buka akun sekuritas (Stockbit/Ajaib)\n— Sistem bagi hasil & modal\n— Syarat kemitraan\n\nSilakan tanyakan langsung ya!",
+            'terima_kasih' => "Sama-sama! Senang bisa membantu kamu. 😊\n\nJika masih ada yang ingin ditanyakan seputar pendaftaran mitra, akun sekuritas (Stockbit/Ajaib), atau mekanisme bagi hasil IPO Algrow Capital, jangan ragu tanyakan lagi ya. Kamu juga bisa chat WhatsApp Admin resmi kami di **087822421207**.\n\nSukses selalu untuk investasimu! 🚀",
+
+            'greeting' => "Halo! 👋 Selamat datang di **Algrow Capital**!\n\nAda yang bisa saya bantu hari ini? Misalnya:\n— Cara gabung / daftar mitra\n— Panduan buka akun sekuritas (Stockbit/Ajaib)\n— Sistem bagi hasil & modal Rp 0\n— Syarat kemitraan\n\nSilakan tanyakan langsung ya!",
 
             default => $this->outOfScopeResponse(),
         };
