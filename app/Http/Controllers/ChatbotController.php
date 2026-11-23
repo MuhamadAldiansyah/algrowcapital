@@ -757,6 +757,6 @@ FALLBACK;
      */
     private function ambiguousResponse(): string
     {
-        return "Hm, boleh saya tanyakan dulu nih biar bisa jawab yang tepat 😊\n\nMaksudnya **\"daftar\"** di sini yang mana:\n\n**A.** Daftar / buka **akun sekuritas** (Stockbit atau Ajaib) — untuk yang belum punya rekening saham\n**B.** Daftar **bergabung sebagai Mitra** ke program Algrow Capital\n\nTulis aja **A** atau **B**, atau ceritain lebih detail ya!";
+        return "Hm, boleh saya tanyakan dulu nih biar bisa bantu dengan tepat 😊\n\nMaksudnya **\"daftar\"** di sini yang mana:\n\n**A.** Daftar / buka **akun sekuritas** (Stockbit atau Ajaib) — untuk kamu yang belum punya rekening saham\n**B.** Daftar **bergabung sebagai Mitra** ke program Algrow Capital — untuk kamu yang akun sekuritasnya sudah aktif\n\n💡 *Catatan penting: Jika ingin mendaftar sebagai Mitra (opsi B), kamu memang wajib mendahulukan pembukaan akun sekuritas & RDN terlebih dahulu (opsi A) karena akun sekuritas aktif diperlukan saat pendaftaran kemitraan.*\n\nKira-kira kondisi kamu sekarang ada di **A** atau **B**? Tulis aja ya!";
     }
 }
