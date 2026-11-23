@@ -223,24 +223,30 @@ FALLBACK;
         }
 
         // 1. Jawaban Opsi B (Daftar Bergabung sebagai Mitra Algrow Capital)
+        // 'b' dan '2' tidak masuk array agar tidak false-match kalimat panjang
         $optionBPats = [
-            'b', 'opsi b', 'pilih b', 'yang b', 'pilihan b', 'jawaban b', 'b aja', 'b dong',
+            'opsi b', 'pilih b', 'yang b', 'pilihan b', 'jawaban b', 'b aja', 'b dong',
             'b min', 'b kak', 'b mas', 'b bro', 'saya pilih b', 'mau yang b', 'mau b', 'ikut b',
-            '2', 'nomor 2', 'no 2', 'opsi 2', 'pilih 2', 'yang 2',
+            'nomor 2', 'no 2', 'opsi 2', 'pilih 2', 'yang 2',
             'daftar mitra', 'daftar jadi mitra', 'gabung mitra', 'gabung algrow', 'daftar algrow',
         ];
-        if (in_array($clean, $optionBPats) || preg_match('/^(saya\s+)?(pilih|mau|ikut|ambil)?\s*(opsi|yang|nomor)?\s*b$/i', $clean)) {
+        // Single 'b' atau '2': hanya match jika query sangat pendek (<= 3 karakter)
+        $isSingleB = ($clean === 'b' || $clean === '2') && strlen($clean) <= 3;
+        if ($isSingleB || in_array($clean, $optionBPats) || preg_match('/^(saya\s+)?(pilih|mau|ikut|ambil)\s*(opsi|yang|nomor)?\s*b$/i', $clean)) {
             return "Mantap! Untuk mendaftar dan bergabung sebagai **Mitra Algrow Capital**, ikuti langkah-langkah berikut:\n\n1️⃣ **Klik Tombol Gabung Sekarang**: Tekan tombol **Gabung Sekarang / Daftar** di website ini.\n2️⃣ **Pilih Pendaftaran Mitra Baru**: Isi formulir pendaftaran kemitraan dengan data diri dan informasi akun sekuritas kamu (username, password, dan PIN sekuritas yang diperlukan untuk pemesanan IPO).\n3️⃣ **Konfirmasi ke WhatsApp Admin**: Setelah formulir terkirim, sistem akan otomatis mengarahkan kamu ke WhatsApp Admin resmi kami di nomor **087822421207** untuk verifikasi dan proses persetujuan (approval).\n\n*Program ini 100% tanpa modal pribadi (Rp 0) dan bebas biaya pendaftaran.* Pastikan akun sekuritasmu (Stockbit/Ajaib) sudah aktif ya!";
         }
 
         // 2. Jawaban Opsi A (Daftar / Buka Akun Sekuritas Stockbit atau Ajaib)
+        // Hanya match jika query BENAR-BENAR hanya "a" (dengan alias), bukan kalimat panjang yang kebetulan mulai huruf a
         $optionAPats = [
-            'a', 'opsi a', 'pilih a', 'yang a', 'pilihan a', 'jawaban a', 'a aja', 'a dong',
+            'opsi a', 'pilih a', 'yang a', 'pilihan a', 'jawaban a', 'a aja', 'a dong',
             'a min', 'a kak', 'a mas', 'a bro', 'saya pilih a', 'mau yang a', 'mau a', 'ikut a',
-            '1', 'nomor 1', 'no 1', 'opsi 1', 'pilih 1', 'yang 1',
+            'nomor 1', 'no 1', 'opsi 1', 'pilih 1', 'yang 1',
             'daftar sekuritas', 'buka sekuritas', 'buat sekuritas', 'buka akun sekuritas',
         ];
-        if (in_array($clean, $optionAPats) || preg_match('/^(saya\s+)?(pilih|mau|ikut|ambil)?\s*(opsi|yang|nomor)?\s*a$/i', $clean)) {
+        // Single char 'a' atau '1': hanya match jika panjang query <= 3 karakter
+        $isSingleA = ($clean === 'a' || $clean === '1') && strlen($clean) <= 3;
+        if ($isSingleA || in_array($clean, $optionAPats) || preg_match('/^(saya\s+)?(pilih|mau|ikut|ambil)\s*(opsi|yang|nomor)?\s*a$/i', $clean)) {
             return "Siap! Untuk membuat dan membuka **akun sekuritas (Stockbit atau Ajaib)**, prosesnya 100% online dan sangat mudah:\n\n1️⃣ **Download Aplikasi**: Unduh aplikasi **Stockbit** atau **Ajaib** di Google Play Store atau App Store.\n2️⃣ **Registrasi Akun**: Buka aplikasi, lalu daftar dengan nomor HP dan email aktif kamu.\n3️⃣ **Buka Rekening Efek & RDN**: Masuk ke menu pembukaan rekening saham, siapkan **e-KTP fisik**, ambil foto selfie verifikasi, dan isi data diri.\n4️⃣ **Pilih Bank RDN**: Pilih rekening dana nasabah. Di Stockbit, sangat disarankan terhubung dengan **Bank Jago reguler (warna kuning)**, bukan syariah.\n5️⃣ **Tunggu Verifikasi**: Verifikasi sekuritas biasanya selesai dalam **1–24 jam kerja**.\n\nSetelah rekening efek dan RDN kamu aktif, kamu bisa langsung mendaftarkan akunmu ke program kemitraan Algrow Capital!";
         }
 
@@ -480,6 +486,28 @@ FALLBACK;
                 'context_boost' => [],
             ],
 
+
+            // TOPIC J — Perlu Belajar Saham / Pengalaman / Pemula
+            'belajar' => [
+                'signals' => [
+                    'belajar', 'belajar saham', 'belajar dulu', 'perlu belajar', 'harus belajar',
+                    'dari nol', 'dari 0', 'dari awal', 'nol saham', 'nol pengalaman',
+                    'pemula', 'newbie', 'tidak tau saham', 'tidak tahu saham', 'gak tau saham',
+                    'ga tau saham', 'belum tau saham', 'belum tahu saham', 'belum pengalaman',
+                    'tidak pengalaman', 'gak pengalaman', 'ga pengalaman',
+                    'tidak mengerti saham', 'tidak paham saham', 'gak ngerti saham',
+                    'ga ngerti saham', 'belum ngerti', 'belum paham saham',
+                    'pengalaman', 'paham saham', 'ngerti saham', 'tau saham', 'tahu saham',
+                    'harus tau', 'harus tahu', 'perlu tau', 'perlu tahu',
+                    'wajib ngerti', 'wajib paham',
+                    // Frasa "belum pernah beli/main/pegang saham"
+                    'belum pernah beli saham', 'belum pernah main saham', 'belum pernah pegang saham',
+                    'belum pernah investasi', 'belum pernah trading', 'belum pernah saham',
+                    'tidak pernah beli saham', 'gak pernah beli saham', 'ga pernah beli saham',
+                    'tidak pernah trading', 'gak pernah trading',
+                ],
+                'context_boost' => ['saham', 'ipo', 'trading', 'investasi', 'modal'],
+            ],
             // TOPIC I — Greeting (Exact/near-exact match only)
             'greeting' => [
                 'signals' => [
@@ -625,6 +653,28 @@ FALLBACK;
             }
         }
 
+        // Syarat topic override: if question explicitly says syarat/persyaratan, force syarat
+        if (str_contains($q, 'syarat') || str_contains($q, 'persyaratan') || str_contains($q, 'ketentuan')) {
+            if (isset($scores['syarat']) && $scores['syarat'] >= 2) {
+                $winner = 'syarat';
+                $winnerScore = $scores['syarat'];
+            }
+        }
+
+        // Belajar topic override: pemula/belajar/belum pernah saham → prioritaskan belajar di atas join
+        $hasBelajarSignal = str_contains($q, 'belajar') || str_contains($q, 'pemula') ||
+                            str_contains($q, 'dari nol') || str_contains($q, 'dari 0') ||
+                            str_contains($q, 'pengalaman') || str_contains($q, 'ngerti') ||
+                            str_contains($q, 'paham saham') || str_contains($q, 'tau saham') ||
+                            str_contains($q, 'pernah beli saham') || str_contains($q, 'pernah saham') ||
+                            str_contains($q, 'pernah trading') || str_contains($q, 'pernah investasi');
+        if ($hasBelajarSignal && isset($scores['belajar']) && $scores['belajar'] >= 2) {
+            if ($winner === 'join' || $winner === 'syarat' || $winner === 'sekuritas' || $scores['belajar'] >= $winnerScore) {
+                $winner = 'belajar';
+                $winnerScore = $scores['belajar'];
+            }
+        }
+
         // No topic matched → guardrail
         if ($winnerScore < 2) {
             return $this->outOfScopeResponse();
@@ -684,6 +734,9 @@ FALLBACK;
             'bagi_hasil' => "Begini cara kerjanya:\n\nSetelah akun sekuritas kamu terdaftar dan disetujui, Algrow Capital menyiapkan **100% modal** untuk memesan saham IPO potensial melalui akun kamu. Ketika saham resmi listing di bursa dan mencapai harga optimal, saham dijual dan **profit bersihnya langsung ditransfer ke rekening bank kamu** sesuai rasio bagi hasil yang sudah disepakati — tanpa potongan tersembunyi, tanpa risiko modal pribadi.",
 
             'kontak' => "Butuh bantuan langsung? 👋\n\n📲 **WhatsApp Admin:** 087822421207\n\nTim kami siap memandu dari nol sampai akun kemitraan kamu aktif!",
+
+
+            'belajar' => "Kabar baiknya — **kamu sama sekali tidak perlu pengalaman saham atau belajar dari nol!** 🎉\n\nAlgrow Capital sepenuhnya mengelola proses analisis, pemilihan saham IPO, dan pemesanan. Tugasmu hanya:\n\n✅ Menyediakan akun sekuritas aktif (Stockbit/Ajaib)\n✅ Memberikan akses untuk proses pemesanan IPO\n✅ Menerima hasil profit yang sudah dibagi sesuai kesepakatan\n\nTim Algrow Capital yang berpengalaman di bidang pasar modal yang mengurus semuanya — dari riset IPO, pemesanan, hingga penjualan saham di harga terbaik. Jadi meski kamu belum pernah beli saham sekalipun, **kamu tetap bisa ikut program ini!**",
 
             'greeting' => "Halo! 👋 Selamat datang di **Algrow Capital**!\n\nAda yang bisa saya bantu hari ini? Misalnya:\n— Cara gabung / daftar mitra\n— Panduan buka akun sekuritas (Stockbit/Ajaib)\n— Sistem bagi hasil & modal\n— Syarat kemitraan\n\nSilakan tanyakan langsung ya!",
 
