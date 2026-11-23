@@ -595,11 +595,8 @@
                         </svg>
                     </button>
                 </form>
-                <div class="mt-2.5 flex justify-between items-center text-xs text-slate-400 px-1">
-                    <span>Sudah siap bergabung?</span>
-                    <a href="{{ route('register') }}" class="text-emerald-400 font-bold hover:underline flex items-center gap-1">
-                        <span>Daftar Akun Sekarang</span> &rarr;
-                    </a>
+                <div class="mt-2 text-center text-[11px] text-slate-400/70">
+                    Algrow AI Assistant • Siap menjawab seputar kemitraan & sekuritas
                 </div>
             </div>
         </div>
@@ -653,13 +650,8 @@
                     <div class="w-8 h-8 rounded-full bg-emerald-500/30 border border-emerald-400/50 flex items-center justify-center text-white text-xs font-black shrink-0 mt-1 shadow-sm" style="color: #ffffff !important;">
                         AI
                     </div>
-                    <div class="bg-[#042f22]/95 border border-emerald-500/25 text-white rounded-2xl rounded-tl-sm px-5 py-4 max-w-[90%] shadow-md text-[15px] sm:text-base leading-relaxed space-y-3" style="color: #ffffff !important;">
-                        <div class="space-y-2 text-white font-normal" style="color: #ffffff !important;">${formattedText}</div>
-                        <div class="pt-2 flex flex-wrap gap-2">
-                            <a href="{{ route('register') }}" class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 px-4 py-2 rounded-xl hover:from-emerald-300 hover:to-teal-300 transition-all shadow-md">
-                                <span>Daftar Akun Sekarang</span> &rarr;
-                            </a>
-                        </div>
+                    <div class="bg-[#042f22]/95 border border-emerald-500/25 text-white rounded-2xl rounded-tl-sm px-5 py-4 max-w-[90%] shadow-md text-[15px] sm:text-base leading-relaxed space-y-2" style="color: #ffffff !important;">
+                        <div class="text-white font-normal leading-relaxed" style="color: #ffffff !important;">${formattedText}</div>
                     </div>
                 `;
             }
@@ -712,12 +704,12 @@
                     appendMessage('model', data.reply);
                     chatHistory.push({ role: 'model', content: data.reply });
                 } else {
-                    appendMessage('model', 'Mohon maaf, terjadi kendala saat memproses pertanyaan. Silakan coba klik tombol [Daftar Sekarang] di atas.');
+                    appendMessage('model', 'Mohon maaf, terjadi kendala saat memproses pertanyaan. Silakan coba tanyakan kembali atau hubungi WhatsApp Admin kami.');
                 }
             } catch (err) {
                 console.error('Chatbot request failed:', err);
                 indicator.classList.add('hidden');
-                appendMessage('model', 'Mohon maaf, terjadi kendala jaringan saat menghubungkan ke asisten. Silakan coba ajukan kembali atau klik tombol [Daftar Sekarang] di bawah.');
+                appendMessage('model', 'Mohon maaf, terjadi kendala jaringan saat menghubungkan ke asisten. Silakan coba ajukan kembali pertanyaan Anda.');
             } finally {
                 document.getElementById('chatSendBtn').disabled = false;
                 input.focus();
