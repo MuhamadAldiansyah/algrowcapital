@@ -487,7 +487,7 @@ FALLBACK;
                 'signals' => [
                     'join', 'gabung', 'daftar', 'registrasi', 'register', 'masuk', 'ikut',
                     'cara masuk', 'cara bergabung', 'cara ikut', 'mau join', 'mau daftar',
-                    'algrow', 'mitra', 'pendaftaran', 'buat akun', 'bikin akun', 'buka akun',
+                    'daftar algrow', 'gabung algrow', 'ikut algrow', 'mitra algrow', 'mitra', 'pendaftaran', 'buat akun', 'bikin akun', 'buka akun',
                     'daftar akun', 'panduan akun', 'panduan daftar', 'panduan buat',
                     'cara buat', 'cara bikin', 'cara daftar', 'cara join', 'cara gabung',
                     'gimana join', 'gimana daftar', 'gimana buat', 'gimana bikin',
@@ -553,9 +553,9 @@ FALLBACK;
                 'signals' => [
                     'admin', 'cs', 'customer service', 'layanan', 'support', 'bantuan',
                     'whatsapp', 'wa', 'kontak', 'nomor', 'hubungi', 'tanya langsung',
-                    'chat langsung', 'minta tolong', 'ada orang',
+                    'chat langsung', 'minta tolong', 'ada orang', 'grup', 'komunitas', 'channel',
                 ],
-                'context_boost' => [],
+                'context_boost' => ['wa', 'whatsapp', 'admin', 'hubungi'],
             ],
 
 
@@ -635,6 +635,18 @@ FALLBACK;
                     'cair', 'kapan', 'pencairan', 'kapan dapat hasil',
                 ],
                 'context_boost' => ['profit', 'bagi hasil', 'cair', 'rekening', 'ipo', 'untung', 'lama'],
+            ],
+
+            // TOPIC O — Profil Perusahaan & Alamat Kantor Algrow Capital (No. 1)
+            'profil' => [
+                'signals' => [
+                    'apa itu algrow', 'siapa algrow', 'tentang algrow', 'profil algrow', 'mengenal algrow',
+                    'layanan algrow', 'algrow capital itu apa', 'siapa algrow capital', 'apa sih algrow',
+                    'kantor', 'alamat', 'lokasi', 'alamat kantor', 'lokasi kantor', 'kantornya', 'kantor pusat',
+                    'domisili', 'tempat kantor', 'kantor di mana', 'alamat di mana', 'kantornya di mana',
+                    'perusahaan apa', 'bidang apa', 'bisnis apa', 'usaha apa', 'kantor fisik', 'kantor cabang',
+                ],
+                'context_boost' => ['algrow', 'capital', 'kantor', 'alamat', 'perusahaan', 'lokasi', 'profil'],
             ],
         ];
 
@@ -726,6 +738,17 @@ FALLBACK;
         if ($hasDurasiSignal && isset($scores['durasi_hasil']) && $scores['durasi_hasil'] >= 2) {
             $winner = 'durasi_hasil';
             $winnerScore = $scores['durasi_hasil'];
+        }
+
+        // ─── PROFIL & KANTOR ALGROW OVERRIDE (No. 1) ───────────────────────────
+        $hasProfilSignal = str_contains($q, 'apa itu algrow') || str_contains($q, 'siapa algrow') ||
+                           str_contains($q, 'tentang algrow') || str_contains($q, 'profil') ||
+                           str_contains($q, 'kantor') || str_contains($q, 'alamat') ||
+                           str_contains($q, 'lokasi') || str_contains($q, 'perusahaan apa') ||
+                           str_contains($q, 'kantornya') || str_contains($q, 'apa sih algrow');
+        if ($hasProfilSignal && isset($scores['profil']) && $scores['profil'] >= 2) {
+            $winner = 'profil';
+            $winnerScore = $scores['profil'];
         }
 
         // ─── AMBIGUITY DETECTION ───────────────────────────────────────────────
@@ -827,6 +850,14 @@ FALLBACK;
             }
         }
 
+        // Profil & Kantor Algrow Capital check (No. 1)
+        if (isset($scores['profil']) && $scores['profil'] >= 2) {
+            if ($scores['profil'] >= $winnerScore || $winner === 'join' || str_contains($q, 'kantor') || str_contains($q, 'alamat') || str_contains($q, 'profil') || str_contains($q, 'apa itu')) {
+                $winner = 'profil';
+                $winnerScore = $scores['profil'];
+            }
+        }
+
         // Syarat topic override: if question explicitly says syarat/persyaratan, force syarat
         if (str_contains($q, 'syarat') || str_contains($q, 'persyaratan') || str_contains($q, 'ketentuan')) {
             if (isset($scores['syarat']) && $scores['syarat'] >= 2) {
@@ -924,6 +955,8 @@ FALLBACK;
             'durasi_hasil' => "Berikut detail mengenai **sistem bagi hasil dan durasi per project IPO** di Algrow Capital:\n\n⏱️ **1. Durasi Per Siklus IPO (3–7 Hari Kerja)**\nProses pemesanan saham perdana (IPO) berlangsung cepat dan dinamis:\n— **Masa Penawaran (Offering)**: 2–3 hari kerja\n— **Penjatahan (Allotment)**: 1–2 hari kerja\n— **Listing & Penjualan**: Saham langsung dieksekusi jual di harga optimal pada hari pertama resmi listing di Bursa Efek Indonesia (BEI).\n\n💰 **2. Pembagian Hasil & Pencairan Profit**\n— Setelah saham berhasil dijual dan menghasilkan profit bersih, keuntungan langsung dibagi sesuai rasio bagi hasil yang disepakati bersama secara transparan.\n— Uang profit bagian kamu langsung ditransfer ke rekening bank pribadi kamu pada **hari yang sama atau maksimal H+1** setelah transaksi penjualan selesai.\n\n🛡️ **3. 100% Tanpa Risiko Kerugian Modal Pribadi**\nSeluruh dana pemesanan disiapkan oleh Algrow Capital. Jika ada fluktuasi harga pasar saham, risiko modal ditanggung oleh Algrow — saldo dan uang pribadi kamu tidak akan pernah berkurang!",
 
             'kontak' => "Butuh bantuan langsung? 👋\n\n📲 **WhatsApp Admin:** 087822421207\n\nTim kami siap memandu dari nol sampai akun kemitraan kamu aktif!",
+
+            'profil' => "**Algrow Capital** adalah platform kemitraan investasi saham perdana (e-IPO) di Indonesia yang menghubungkan masyarakat pemilik akun sekuritas dengan tim analis pasar modal profesional:\n\n🏢 **Profil & Layanan Kami**\nAlgrow Capital membantu masyarakat meraih peluang profit dari momentum penawaran umum saham perdana (e-IPO) di Bursa Efek Indonesia (BEI) **tanpa perlu keluar modal uang pribadi (Rp 0)**. Seluruh dana pemesanan saham IPO disiapkan oleh Algrow Capital melalui akun sekuritas resmi milik Mitra (Stockbit / Ajaib).\n\n📍 **Lokasi & Operasional Kantor**\nOperasional Algrow Capital berbasis di Indonesia dan melayani mitra di seluruh wilayah Indonesia secara **100% online**. Seluruh interaksi, konsultasi, dan pendaftaran resmi dilakukan secara terpusat melalui website resmi kami (https://algrowcapital.vercel.app/) serta layanan WhatsApp Admin di **087822421207**.\n\n*Jika ingin berkonsultasi langsung atau bertanya seputar kemitraan, silakan hubungi WhatsApp Admin kami ya!*",
 
 
             'belajar' => "Kabar baiknya — **kamu sama sekali tidak perlu pengalaman saham atau belajar dari nol!** 🎉\n\nAlgrow Capital sepenuhnya mengelola proses analisis, pemilihan saham IPO, dan pemesanan. Tugasmu hanya:\n\n✅ Menyediakan akun sekuritas aktif (Stockbit/Ajaib)\n✅ Memberikan akses untuk proses pemesanan IPO\n✅ Menerima hasil profit yang sudah dibagi sesuai kesepakatan\n\nTim Algrow Capital yang berpengalaman di bidang pasar modal yang mengurus semuanya — dari riset IPO, pemesanan, hingga penjualan saham di harga terbaik. Jadi meski kamu belum pernah beli saham sekalipun, **kamu tetap bisa ikut program ini!**",

@@ -625,6 +625,15 @@
             handleChatSubmit(new Event('submit'));
         }
 
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         function appendMessage(sender, text) {
             const container = document.getElementById('chatMessages');
             const isUser = sender === 'user';
@@ -632,10 +641,13 @@
             const msgRow = document.createElement('div');
             msgRow.className = `flex items-start gap-2.5 ${isUser ? 'justify-end' : 'justify-start'}`;
 
+            // Sanitize input to prevent DOM XSS before formatting
+            let safeText = escapeHtml(text);
+
             // Format linebreaks, markdown bold, links & interactive WhatsApp button
-            let formattedText = text
+            let formattedText = safeText
                 // Parse markdown links [Label](url)
-                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline text-emerald-300 hover:text-emerald-200 font-semibold">$1</a>')
+                .replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/|mailto:|tel:)[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline text-emerald-300 hover:text-emerald-200 font-semibold">$1</a>')
                 // Parse WhatsApp Admin numbers into an attractive clickable button
                 .replace(/(?:\*\*|\*)?(?:\+?62|0)878[- ]?2242[- ]?1207(?:\*\*|\*)?/g, '<a href="https://wa.me/6287822421207?text=Halo%20Admin%20Algrow%20Capital,%20saya%20mau%20tanya%20seputar%20kemitraan" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 my-1 tracking-wide"><span>📲 Chat WA (087822421207)</span></a>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold tracking-wide">$1</strong>')
@@ -698,6 +710,9 @@
                 });
 
                 if (!response.ok) {
+                    if (response.status === 419) {
+                        throw new Error('CSRF_EXPIRED');
+                    }
                     throw new Error('HTTP ' + response.status);
                 }
 
@@ -713,7 +728,11 @@
             } catch (err) {
                 console.error('Chatbot request failed:', err);
                 indicator.classList.add('hidden');
-                appendMessage('model', 'Mohon maaf, terjadi kendala jaringan saat menghubungkan ke asisten. Silakan coba ajukan kembali pertanyaan Anda.');
+                if (err && err.message === 'CSRF_EXPIRED') {
+                    appendMessage('model', '⚠️ **Sesi obrolan telah berakhir demi keamanan.** Silakan muat ulang (refresh) halaman website ini untuk melanjutkan tanya-jawab.');
+                } else {
+                    appendMessage('model', 'Mohon maaf, terjadi kendala jaringan saat menghubungkan ke asisten. Silakan coba ajukan kembali pertanyaan Anda atau hubungi WhatsApp Admin kami.');
+                }
             } finally {
                 document.getElementById('chatSendBtn').disabled = false;
                 input.focus();
