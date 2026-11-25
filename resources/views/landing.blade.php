@@ -632,8 +632,12 @@
             const msgRow = document.createElement('div');
             msgRow.className = `flex items-start gap-2.5 ${isUser ? 'justify-end' : 'justify-start'}`;
 
-            // Format linebreaks and markdown bold (pure clean white text)
+            // Format linebreaks, markdown bold, links & interactive WhatsApp button
             let formattedText = text
+                // Parse markdown links [Label](url)
+                .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline text-emerald-300 hover:text-emerald-200 font-semibold">$1</a>')
+                // Parse WhatsApp Admin numbers into an attractive clickable button
+                .replace(/(?:\*\*|\*)?(?:\+?62|0)878[- ]?2242[- ]?1207(?:\*\*|\*)?/g, '<a href="https://wa.me/6287822421207?text=Halo%20Admin%20Algrow%20Capital,%20saya%20mau%20tanya%20seputar%20kemitraan" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20ba59] text-white font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm shadow-md transition-all hover:scale-105 active:scale-95 my-1 tracking-wide"><span>📲 Chat WA (087822421207)</span></a>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold tracking-wide">$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em class="text-slate-200 not-italic">$1</em>')
                 .replace(/`([^`]+)`/g, '<code class="bg-black/60 px-1.5 py-0.5 rounded text-emerald-300 font-mono text-xs sm:text-sm">$1</code>')

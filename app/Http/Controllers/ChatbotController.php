@@ -234,7 +234,9 @@ FALLBACK;
         // Kata kunci pertanyaan untuk membedakan salam murni vs pertanyaan dengan salam
         $questionKeywords = [
             'cara', 'gimana', 'bagaimana', 'apa', 'apakah', 'berapa', 'kenapa',
-            'bisa', 'syarat', 'modal', 'daftar', 'stockbit', 'ajaib', 'jago', 'biaya', 'bagi hasil'
+            'bisa', 'syarat', 'modal', 'daftar', 'stockbit', 'ajaib', 'jago', 'biaya', 'bagi hasil',
+            'aman', 'keamanan', 'legal', 'penipuan', 'nipu', 'kendala', 'gagal', 'ditolak', 'buram',
+            'persen', 'persentase', 'durasi', 'lama', 'kapan'
         ];
         $hasQuestionSignal = false;
         foreach ($questionKeywords as $qw) {
@@ -517,7 +519,7 @@ FALLBACK;
                     'butuh uang', 'perlu uang', 'pakai uang', 'pake uang', 'pake duit', 'keluar duit',
                     'uang sendiri', 'modal sendiri', 'keluar modal', 'ngeluarin modal', 'keluarin modal',
                     'butuh modal', 'ada biaya', 'dikenakan biaya', 'berapa biaya', 'berapa modal', 'berapaan',
-                    'rugi', 'resiko', 'risiko', 'rugi ga', 'rugi gak', 'aman ga', 'aman gak', 'penipuan', 'nipu',
+                    'rugi', 'resiko', 'risiko', 'rugi ga', 'rugi gak', 'tanggung rugi', 'kerugian',
                 ],
                 'context_boost' => ['uang', 'modal', 'dana', 'biaya', 'bayar', 'keluar'],
             ],
@@ -596,6 +598,44 @@ FALLBACK;
                 ],
                 'context_boost' => ['bantu', 'bantuan', 'info', 'infonya', 'admin', 'min', 'sangat membantu'],
             ],
+
+            // TOPIC L — Keamanan Akun, Dana RDN & Legalitas (No. 3)
+            'keamanan' => [
+                'signals' => [
+                    'aman', 'keamanan', 'apakah aman', 'jaminan', 'penipuan', 'nipu', 'bisa nipu',
+                    'legal', 'resmi', 'ojk', 'ksei', 'izin', 'bocor', 'curi', 'diambil',
+                    'data aman', 'pin aman', 'password aman', 'sandi aman', 'aman tidak', 'aman ga', 'aman gak',
+                    'titip akun', 'uang diambil', 'saldo diambil', 'bisa ditarik orang', 'dana hilang',
+                    'uang hilang', 'apakah aman akun', 'apakah aman data', 'keamanan rdn', 'rekening aman',
+                    'bisa dipercaya', 'terpercaya',
+                ],
+                'context_boost' => ['akun', 'rdn', 'uang', 'data', 'sekuritas', 'rekening', 'ojk'],
+            ],
+
+            // TOPIC M — Kendala Registrasi & Troubleshooting (No. 4)
+            'kendala' => [
+                'signals' => [
+                    'kendala', 'gagal', 'ditolak', 'masalah', 'error', 'ktp buram', 'ktp ditolak',
+                    'ktp rusak', 'foto ktp', 'belum aktif', 'lewat 24 jam', 'sudah 24 jam', 'lama verifikasi',
+                    'terlanjur', 'terlanjur syariah', 'terlanjur buat', 'salah bank', 'salah jago', 'jago syariah terlanjur',
+                    'gagal daftar', 'gagal registrasi', 'gagal verifikasi', 'verifikasi ditolak', 'nama beda',
+                    'rekening ditolak', 'bantuan teknis', 'kenapa ditolak', 'kenapa belum aktif',
+                ],
+                'context_boost' => ['ktp', 'verifikasi', 'jago', 'rekening', 'daftar', 'akun'],
+            ],
+
+            // TOPIC N — Persentase Bagi Hasil & Durasi Per Project IPO (No. 5)
+            'durasi_hasil' => [
+                'signals' => [
+                    'berapa persen', 'persentase', 'persen bagi hasil', 'berapa bagian', 'rasio',
+                    'skema bagi hasil', 'berapa lama', 'durasi', 'berapa hari', 'kapan cair',
+                    'kapan ditransfer', 'kapan dapat untung', 'jangka waktu', 'siklus ipo',
+                    'berapa minggu', 'kapan cairnya', 'kapan masuk rekening', 'berapa lama proses',
+                    'durasi investasi', 'lama proses', 'waktu pencairan', 'kapan terima hasil',
+                    'cair', 'kapan', 'pencairan', 'kapan dapat hasil',
+                ],
+                'context_boost' => ['profit', 'bagi hasil', 'cair', 'rekening', 'ipo', 'untung', 'lama'],
+            ],
         ];
 
         // ─── SCORE CALCULATION ────────────────────────────────────────────────────
@@ -651,11 +691,41 @@ FALLBACK;
                           str_contains($q, 'uang') || str_contains($q, 'duit') ||
                           str_contains($q, 'keluar') || str_contains($q, 'bayar') ||
                           str_contains($q, 'gratis') || str_contains($q, 'rugi') ||
-                          str_contains($q, 'risiko') || str_contains($q, 'resiko') ||
-                          str_contains($q, 'aman');
+                          str_contains($q, 'risiko') || str_contains($q, 'resiko');
         if ($hasModalSignal && isset($scores['modal']) && $scores['modal'] >= 2) {
             $winner = 'modal';
             $winnerScore = $scores['modal'];
+        }
+
+        // ─── KEAMANAN OVERRIDE ─────────────────────────────────────────────────
+        $hasKeamananSignal = str_contains($q, 'aman') || str_contains($q, 'keamanan') ||
+                             str_contains($q, 'penipuan') || str_contains($q, 'nipu') ||
+                             str_contains($q, 'legal') || str_contains($q, 'resmi') ||
+                             str_contains($q, 'ojk') || str_contains($q, 'bocor') ||
+                             str_contains($q, 'curi') || str_contains($q, 'diambil');
+        if ($hasKeamananSignal && isset($scores['keamanan']) && $scores['keamanan'] >= 2) {
+            $winner = 'keamanan';
+            $winnerScore = $scores['keamanan'];
+        }
+
+        // ─── KENDALA OVERRIDE ──────────────────────────────────────────────────
+        $hasKendalaSignal = str_contains($q, 'kendala') || str_contains($q, 'gagal') ||
+                            str_contains($q, 'ditolak') || str_contains($q, 'buram') ||
+                            str_contains($q, 'masalah') || str_contains($q, 'error') ||
+                            str_contains($q, 'terlanjur');
+        if ($hasKendalaSignal && isset($scores['kendala']) && $scores['kendala'] >= 2) {
+            $winner = 'kendala';
+            $winnerScore = $scores['kendala'];
+        }
+
+        // ─── DURASI & PERSENTASE HASIL OVERRIDE ────────────────────────────────
+        $hasDurasiSignal = str_contains($q, 'persen') || str_contains($q, 'persentase') ||
+                           str_contains($q, 'berapa lama') || str_contains($q, 'durasi') ||
+                           str_contains($q, 'kapan cair') || str_contains($q, 'kapan ditransfer') ||
+                           str_contains($q, 'berapa hari') || str_contains($q, 'berapa minggu');
+        if ($hasDurasiSignal && isset($scores['durasi_hasil']) && $scores['durasi_hasil'] >= 2) {
+            $winner = 'durasi_hasil';
+            $winnerScore = $scores['durasi_hasil'];
         }
 
         // ─── AMBIGUITY DETECTION ───────────────────────────────────────────────
@@ -723,13 +793,37 @@ FALLBACK;
             }
         }
 
-        // Modal topic check: if question asks about modal, uang, biaya, rugi, aman
+        // Modal topic check: if question asks about modal, uang, biaya, rugi
         if (isset($scores['modal']) && $scores['modal'] >= 2) {
-            if (str_contains($q, 'modal') || str_contains($q, 'uang') || str_contains($q, 'duit') || str_contains($q, 'biaya') || str_contains($q, 'rugi') || str_contains($q, 'resiko') || str_contains($q, 'risiko') || str_contains($q, 'aman')) {
+            if (str_contains($q, 'modal') || str_contains($q, 'uang') || str_contains($q, 'duit') || str_contains($q, 'biaya') || str_contains($q, 'rugi') || str_contains($q, 'resiko') || str_contains($q, 'risiko')) {
                 if ($scores['modal'] >= $winnerScore || $winner === 'join' || $winner === 'syarat') {
                     $winner = 'modal';
                     $winnerScore = $scores['modal'];
                 }
+            }
+        }
+
+        // Keamanan topic check (No. 3)
+        if (isset($scores['keamanan']) && $scores['keamanan'] >= 2) {
+            if ($scores['keamanan'] >= $winnerScore || $winner === 'modal' || $winner === 'join' || $winner === 'syarat') {
+                $winner = 'keamanan';
+                $winnerScore = $scores['keamanan'];
+            }
+        }
+
+        // Kendala & Troubleshooting check (No. 4)
+        if (isset($scores['kendala']) && $scores['kendala'] >= 2) {
+            if ($scores['kendala'] >= $winnerScore || $winner === 'sekuritas' || $winner === 'join' || $winner === 'jago' || str_contains($q, 'terlanjur') || str_contains($q, 'ditolak') || str_contains($q, 'buram')) {
+                $winner = 'kendala';
+                $winnerScore = $scores['kendala'];
+            }
+        }
+
+        // Durasi & Persentase Bagi Hasil check (No. 5)
+        if (isset($scores['durasi_hasil']) && $scores['durasi_hasil'] >= 2) {
+            if ($scores['durasi_hasil'] >= $winnerScore || $winner === 'bagi_hasil' || $winner === 'join' || str_contains($q, 'kapan') || str_contains($q, 'cair') || str_contains($q, 'persen')) {
+                $winner = 'durasi_hasil';
+                $winnerScore = $scores['durasi_hasil'];
             }
         }
 
@@ -822,6 +916,12 @@ FALLBACK;
             'syarat' => "Syarat jadi mitra Algrow Capital simpel banget:\n\n✅ WNI minimal **17 tahun** + punya e-KTP\n✅ Akun sekuritas aktif di **Stockbit atau Ajaib**\n✅ Rekening bank pribadi atas nama sendiri\n✅ WhatsApp & email aktif\n\nSudah punya semua? Langsung daftar aja sekarang!",
 
             'bagi_hasil' => "Begini cara kerjanya:\n\nSetelah akun sekuritas kamu terdaftar dan disetujui, Algrow Capital menyiapkan **100% modal** untuk memesan saham IPO potensial melalui akun kamu. Ketika saham resmi listing di bursa dan mencapai harga optimal, saham dijual dan **profit bersihnya langsung ditransfer ke rekening bank kamu** sesuai rasio bagi hasil yang sudah disepakati — tanpa potongan tersembunyi, tanpa risiko modal pribadi.",
+
+            'keamanan' => "Akun dan dana kamu **dijamin 100% aman** karena ekosistem pasar modal Indonesia diawasi ketat oleh regulasi resmi:\n\n🔒 **1. Dana RDN Tidak Bisa Ditarik Siapapun**\nRekening Dana Nasabah (RDN) dibuat atas nama e-KTP kamu sendiri. Sesuai regulasi OJK & KSEI, penarikan dana dari RDN **HANYA BISA dicairkan ke rekening bank pribadi milikmu sendiri**. Pihak manapun (termasuk Algrow Capital) tidak bisa mentransfer dana keluar ke rekening pihak lain.\n\n🔒 **2. Broker Resmi Berizin OJK & IDX**\nPlatform yang digunakan (**Stockbit & Ajaib**) adalah perusahaan sekuritas legal yang terdaftar dan diawasi langsung oleh **OJK (Otoritas Jasa Keuangan)** serta **IDX (Bursa Efek Indonesia)**.\n\n🔒 **3. Penggunaan Akun Khusus Transaksi IPO**\nAkses akun hanya digunakan tim profesional Algrow Capital untuk memesan saham e-IPO dan mengeksekusi penjualan saat saham listing di bursa.\n\n*Kamu memegang kendali penuh atas akun bank pribadimu, dan seluruh modal disiapkan 100% oleh Algrow Capital (Rp 0 modal pribadi).* 👍",
+
+            'kendala' => "Jika kamu mengalami kendala saat proses pendaftaran sekuritas, berikut panduan solusinya:\n\n📸 **1. Foto e-KTP Ditolak / Buram**\n— Gunakan fisik e-KTP asli (bukan fotokopi/scan/file PDF).\n— Foto di tempat dengan pencahayaan terang dan pastikan tidak ada pantulan cahaya (flash) yang menutupi NIK atau foto wajah.\n— Pastikan seluruh sudut e-KTP masuk penuh ke dalam frame kamera.\n\n⏳ **2. Verifikasi Belum Selesai (> 24 Jam Kerja)**\n— Verifikasi sekuritas diproses pada **hari & jam kerja bursa (Senin–Jumat)**. Pendaftaran di akhir pekan akan diproses hari kerja berikutnya.\n— Cek kotak masuk atau folder spam email kamu untuk melihat apakah ada notifikasi perbaikan data dari pihak sekuritas.\n\n🟡 **3. Terlanjur Buka Bank Jago Syariah**\n— Bank Jago Syariah tidak bisa digunakan sebagai RDN Stockbit.\n— Solusinya: Kamu bisa mendaftar akun **Bank Jago Reguler (ikon kuning)**, atau beralih mendaftar di **Ajaib** yang mendukung rekening bank umum lainnya.\n\n📲 Butuh panduan teknis langsung? Chat WhatsApp Admin kami di **087822421207** agar langsung dibantu tim kami!",
+
+            'durasi_hasil' => "Berikut detail mengenai **sistem bagi hasil dan durasi per project IPO** di Algrow Capital:\n\n⏱️ **1. Durasi Per Siklus IPO (3–7 Hari Kerja)**\nProses pemesanan saham perdana (IPO) berlangsung cepat dan dinamis:\n— **Masa Penawaran (Offering)**: 2–3 hari kerja\n— **Penjatahan (Allotment)**: 1–2 hari kerja\n— **Listing & Penjualan**: Saham langsung dieksekusi jual di harga optimal pada hari pertama resmi listing di Bursa Efek Indonesia (BEI).\n\n💰 **2. Pembagian Hasil & Pencairan Profit**\n— Setelah saham berhasil dijual dan menghasilkan profit bersih, keuntungan langsung dibagi sesuai rasio bagi hasil yang disepakati bersama secara transparan.\n— Uang profit bagian kamu langsung ditransfer ke rekening bank pribadi kamu pada **hari yang sama atau maksimal H+1** setelah transaksi penjualan selesai.\n\n🛡️ **3. 100% Tanpa Risiko Kerugian Modal Pribadi**\nSeluruh dana pemesanan disiapkan oleh Algrow Capital. Jika ada fluktuasi harga pasar saham, risiko modal ditanggung oleh Algrow — saldo dan uang pribadi kamu tidak akan pernah berkurang!",
 
             'kontak' => "Butuh bantuan langsung? 👋\n\n📲 **WhatsApp Admin:** 087822421207\n\nTim kami siap memandu dari nol sampai akun kemitraan kamu aktif!",
 
